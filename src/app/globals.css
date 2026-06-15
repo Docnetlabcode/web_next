@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #1e7b74;
+}
+
+* { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  @apply bg-ink-50 text-ink-900 font-sans antialiased;
+}
+
+::selection { background: rgba(30, 123, 116, 0.18); }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #cdd8d5; border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #9fb1ac; background-clip: content-box; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@layer components {
+  .container-x { @apply mx-auto w-full max-w-7xl px-5 sm:px-8; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none; }
+  .btn-primary { @apply btn bg-brand-600 text-white hover:bg-brand-700 active:scale-[.98] shadow-glow; }
+  .btn-ghost { @apply btn bg-brand-50 text-brand-700 hover:bg-brand-100; }
+  .btn-outline { @apply btn border border-ink-900/[.12] text-ink-900 hover:border-brand-300 hover:text-brand-700 bg-white; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold; }
+  .card { @apply rounded-2xl border border-ink-900/[.06] bg-white shadow-card; }
+  .input { @apply w-full rounded-xl border border-ink-900/[.12] bg-white px-4 py-3 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100; }
+}
+
+/* Scroll-reveal */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.21,.65,.36,1), transform .8s cubic-bezier(.21,.65,.36,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* Gradient text + mesh */
+.text-gradient { background: linear-gradient(100deg, #1e7b74, #2a9085 50%, #48ac9f); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mesh {
+  background:
+    radial-gradient(40% 50% at 15% 20%, rgba(30,123,116,.20), transparent 60%),
+    radial-gradient(45% 55% at 85% 15%, rgba(72,172,159,.18), transparent 60%),
+    radial-gradient(50% 60% at 70% 90%, rgba(30,123,116,.12), transparent 60%);
+}
+.grid-bg {
+  background-image: linear-gradient(rgba(30,123,116,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(30,123,116,.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 75%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 75%);
+}
+.glass { background: rgba(255,255,255,.72); backdrop-filter: blur(14px); }
+
+/* ---- Premium interaction animations ---- */
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes pop-in { 0% { opacity: 0; transform: translateY(8px) scale(.9); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes burst { 0% { transform: scale(0); opacity: .9; } 70% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes heart-fly { 0% { transform: translateY(0) scale(.4); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(-90px) scale(1.3); opacity: 0; } }
+@keyframes count-tick { 0% { transform: translateY(0); } 50% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
+.anim-sheet-up { animation: sheet-up .34s cubic-bezier(.21,.8,.3,1) both; }
+.anim-pop { animation: pop-in .22s cubic-bezier(.21,.8,.3,1) both; }
+.anim-burst { animation: burst .4s cubic-bezier(.2,.9,.3,1.4) both; }
+.anim-heart-fly { animation: heart-fly .9s ease-out forwards; }
+
+/* hover lift used widely */
+.lift { transition: transform .25s cubic-bezier(.21,.65,.36,1), box-shadow .25s; }
+.lift:hover { transform: translateY(-3px); }
+.press { transition: transform .12s; } .press:active { transform: scale(.95); }
+
+/* Toast entrance (bottom stack) */
+@keyframes toast-in { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.anim-toast-in { animation: toast-in .26s cubic-bezier(.21,.8,.3,1) both; }
+
+/* Feed-card removal: grid-rows collapse (height-safe, no fixed max-height) */
+.collapse-row { display: grid; grid-template-rows: 1fr; opacity: 1; transition: grid-template-rows .38s cubic-bezier(.2,0,0,1), opacity .26s ease, transform .3s cubic-bezier(.2,0,0,1); }
+.collapse-row > * { min-height: 0; overflow: hidden; }
+.collapse-row.collapsed { grid-template-rows: 0fr; opacity: 0; transform: scale(.98); }
+
+/* Deep-linked comment highlight (mention notifications auto-scroll here) */
+@keyframes comment-flash { 0%, 55% { background: rgba(30,123,116,.14); box-shadow: 0 0 0 2px rgba(30,123,116,.25); } 100% { background: transparent; box-shadow: none; } }
+.anim-comment-flash { animation: comment-flash 2.4s ease-out both; border-radius: 16px; }
+
+/* Filter chip count tick */
+.anim-count-tick { animation: count-tick .3s ease; }
+
+/* Reduced motion: collapse every animation to a fast crossfade / instant state */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

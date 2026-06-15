@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem src -Recurse -Directory | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace\\('C:\\\\Users\\\\ASUS\\\\Desktop\\\\DokLynk\\\\doklynk-next\\\\', ''\\) })",
+      "PowerShell(Get-ChildItem src\\\\app -Recurse -File | ForEach-Object { $_.FullName.Replace\\('C:\\\\Users\\\\ASUS\\\\Desktop\\\\DokLynk\\\\doklynk-next\\\\', ''\\) })",
+      "Skill(impeccable)",
+      "Skill(impeccable:*)",
+      "PowerShell(node .claude/skills/impeccable/scripts/context.mjs)",
+      "PowerShell(node \"C:\\\\Users\\\\ASUS\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\context.mjs\")",
+      "Read(//c/Users/ASUS/.claude/skills/impeccable/reference/**)",
+      "PowerShell(Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile\\(\"c:\\\\Users\\\\ASUS\\\\Desktop\\\\DokLynk\\\\doklynk-next\\\\image\\\\DokLynk.png\"\\); Write-Output \"$\\($img.Width\\) x $\\($img.Height\\)\"; $img.Dispose\\(\\))",
+      "Read(//c/Users/ASUS/AppData/Local/Temp/**)",
+      "PowerShell(Add-Type -AssemblyName System.Drawing; $src = [System.Drawing.Image]::FromFile\\(\"c:\\\\Users\\\\ASUS\\\\Desktop\\\\DokLynk\\\\doklynk-next\\\\image\\\\DokLynk.png\"\\); function Crop\\($x,$y,$w,$h,$name\\) { $bmp = New-Object System.Drawing.Bitmap\\($w, $h\\); $g = [System.Drawing.Graphics]::FromImage\\($bmp\\); $g.DrawImage\\($src, \\(New-Object System.Drawing.Rectangle\\(0,0,$w,$h\\)\\), \\(New-Object System.Drawing.Rectangle\\($x,$y,$w,$h\\)\\), [System.Drawing.GraphicsUnit]::Pixel\\); $bmp.Save\\(\"$env:TEMP\\\\$name.png\", [System.Drawing.Imaging.ImageFormat]::Png\\); $g.Dispose\\(\\); $bmp.Dispose\\(\\) }; Crop 1000 1150 1900 1000 \"dk-home-1\"; $src.Dispose\\(\\); Write-Output \"done\")",
+      "PowerShell(Add-Type -AssemblyName System.Drawing; $src = [System.Drawing.Image]::FromFile\\(\"c:\\\\Users\\\\ASUS\\\\Desktop\\\\DokLynk\\\\doklynk-next\\\\image\\\\DokLynk.png\"\\); function Crop\\($x,$y,$w,$h,$name\\) { $bmp = New-Object System.Drawing.Bitmap\\($w, $h\\); $g = [System.Drawing.Graphics]::FromImage\\($bmp\\); $g.DrawImage\\($src, \\(New-Object System.Drawing.Rectangle\\(0,0,$w,$h\\)\\), \\(New-Object System.Drawing.Rectangle\\($x,$y,$w,$h\\)\\), [System.Drawing.GraphicsUnit]::Pixel\\); $bmp.Save\\(\"$env:TEMP\\\\$name.png\", [System.Drawing.Imaging.ImageFormat]::Png\\); $g.Dispose\\(\\); $bmp.Dispose\\(\\) }; Crop 4300 4800 2000 2000 \"dk-home-a\"; Crop 6300 4800 2000 2000 \"dk-home-b\"; $src.Dispose\\(\\); Write-Output \"done\")",
+      "PowerShell(Add-Type -AssemblyName System.Drawing; $src = [System.Drawing.Image]::FromFile\\(\"c:\\\\Users\\\\ASUS\\\\Desktop\\\\DokLynk\\\\doklynk-next\\\\image\\\\DokLynk.png\"\\); function Crop\\($x,$y,$w,$h,$name\\) { $bmp = New-Object System.Drawing.Bitmap\\($w, $h\\); $g = [System.Drawing.Graphics]::FromImage\\($bmp\\); $g.DrawImage\\($src, \\(New-Object System.Drawing.Rectangle\\(0,0,$w,$h\\)\\), \\(New-Object System.Drawing.Rectangle\\($x,$y,$w,$h\\)\\), [System.Drawing.GraphicsUnit]::Pixel\\); $bmp.Save\\(\"$env:TEMP\\\\$name.png\", [System.Drawing.Imaging.ImageFormat]::Png\\); $g.Dispose\\(\\); $bmp.Dispose\\(\\) }; Crop 4540 5820 480 1000 \"dk-s1\"; Crop 5010 5820 480 1000 \"dk-s2\"; Crop 5450 5820 480 1000 \"dk-s3\"; Crop 5890 5820 480 1000 \"dk-s4\"; $src.Dispose\\(\\); Write-Output \"done\")",
+      "PowerShell(npm run build)",
+      "PowerShell(npm run dev)",
+      "PowerShell(npx next dev -p 5199)",
+      "Bash(curl -s http://localhost:5199/)",
+      "Bash(curl -s http://localhost:5199/login)",
+      "PowerShell(npx next start -p 5199)",
+      "Bash(curl -s -o /tmp/priv.html -w \"%{http_code}\" http://localhost:5199/privacy)",
+      "Read(//tmp/**)",
+      "PowerShell($conns = Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue; if \\($conns\\) { $conns | ForEach-Object { $p = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; Write-Output \"PID $\\($_.OwningProcess\\) - $\\($p.ProcessName\\)\" } } else { Write-Output \"port 5173 free\" })",
+      "Bash(npm run *)",
+      "Bash(cat .env.local)",
+      "Bash(cat .env.example)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} in %{time_total}s\\\\n\" --max-time 90 https://api-service-040x.onrender.com/api/auth/meta/specializations)"
+    ]
+  }
+}
