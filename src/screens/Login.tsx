@@ -134,8 +134,8 @@ export default function Login() {
           </ul>
         </div>
 
-        {/* pl clears the fixed bottom-left NavArrows pill so it never sits over this text */}
-        <p className="relative pl-24 text-xs text-white/55">© 2026 DokLynk · A trusted network for clinicians, students &amp; patients.</p>
+        {/* mb lifts the footer clear above the fixed bottom-left NavArrows pill (bottom-5, ~48px tall) */}
+        <p className="relative mb-16 text-xs text-white/55">© 2026 DokLynk · A trusted network for clinicians, students &amp; patients.</p>
       </aside>
 
       {/* Form panel */}

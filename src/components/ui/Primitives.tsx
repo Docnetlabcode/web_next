@@ -39,7 +39,7 @@ export function Logo({ size = 30, withText = true, light = false }) {
       </span>
       {withText && (
         <span className={cn("font-display text-[1.35rem] font-extrabold tracking-tight", light ? "text-white" : "text-ink-900")}>
-          Dok<span className={light ? "text-brand-200" : "text-brand-600"}>Lynk</span>
+          Dok<span className={light ? "text-white" : "text-brand-600"}>Lynk</span>
         </span>
       )}
     </span>
