@@ -181,7 +181,7 @@ function DoctorStatsStrip() {
   ];
 
   return (
-    <div className="lg:hidden">
+    <div>
       <div className="grid grid-cols-3 gap-3">
         {cards.map((c) => (
           <button

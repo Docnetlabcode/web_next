@@ -163,7 +163,9 @@ export default function ReelViewer({ reels, index, onClose, onRemoved, onReachEn
   const editable = canEditPost(reel);
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-ink-900/95 animate-fade-in">
+    // z-[60]: above app chrome (z-40) but BELOW the sheets it opens (z-[70]) so the
+    // 3-dot menu, share, comments and likes sheets are not covered by the reel card
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink-900/95 animate-fade-in">
       {/* header */}
       <div className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between p-4 text-white">
         <button onClick={onClose} className="press rounded-full bg-white/10 p-2 backdrop-blur hover:bg-white/20"><X size={20} /></button>
@@ -181,7 +183,7 @@ export default function ReelViewer({ reels, index, onClose, onRemoved, onReachEn
       <div key={id} className="relative h-[88vh] w-[min(94vw,420px)] overflow-hidden rounded-3xl bg-ink-900 shadow-2xl anim-pop">
         <ReelVideo
           src={reel.hlsUrl || reel.videoUrl}
-          poster={reel.thumbnailUrl}
+          poster={reel.thumbnailUrl || (reel.videoUrl ? reel.videoUrl.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined)}
           muted={muted}
           status={reel.processingStatus}
           onDoubleClick={dblTap}

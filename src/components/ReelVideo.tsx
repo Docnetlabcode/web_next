@@ -15,13 +15,19 @@ export default function ReelVideo({ src, poster, muted = true, status, onDoubleC
   // Keep muted in sync without re-loading the stream (React's `muted` prop is unreliable).
   useEffect(() => { if (ref.current) ref.current.muted = muted; }, [muted]);
 
+  // HLS only for real .m3u8 manifests; progressive files (mp4/webm) play natively.
+  const isHls = Boolean(src) && /\.m3u8(\?|#|$)/i.test(src);
+
   useEffect(() => {
     const video = ref.current;
     if (!video || !src) return;
     let hls;
     let cancelled = false;
 
-    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    if (!isHls) {
+      video.src = src; // progressive mp4/webm — direct playback
+      video.play?.().catch(() => {});
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src; // native HLS (Safari / iOS)
       video.play?.().catch(() => {});
     } else {
@@ -40,11 +46,13 @@ export default function ReelVideo({ src, poster, muted = true, status, onDoubleC
         .catch(() => {});
     }
     return () => { cancelled = true; try { hls?.destroy(); } catch {} };
-  }, [src]);
+  }, [src, isHls]);
 
-  const notReady = !src || (status && status !== "COMPLETED");
+  // Status is optional; compare case-insensitively (backend sends "completed").
+  const state = status ? String(status).toUpperCase() : "COMPLETED";
+  const notReady = !src || state !== "COMPLETED";
   if (notReady) {
-    const failed = status === "FAILED";
+    const failed = state === "FAILED";
     return (
       <div className="relative h-full w-full" onDoubleClick={onDoubleClick}>
         {poster && <img src={poster} alt="" className="h-full w-full object-cover opacity-60" />}

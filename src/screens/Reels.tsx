@@ -9,6 +9,11 @@ import { compact } from "@/lib/utils";
 
 const rid = (r) => r?._id || r?.id;
 
+// The discovery feed returns `videoUrl` (a Cloudinary mp4) but no `thumbnailUrl`,
+// so derive a poster frame from the video (Cloudinary serves a .jpg frame).
+const reelPoster = (r) =>
+  r?.thumbnailUrl || (r?.videoUrl ? r.videoUrl.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined);
+
 export default function Reels() {
   const { demo } = useAuth();
   const [reels, setReels] = useState(null);
@@ -80,7 +85,7 @@ export default function Reels() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {list.map((r, idx) => (
           <button key={r._id || r.id} onClick={() => setOpen(idx)} className="lift group relative block aspect-[9/16] overflow-hidden rounded-2xl bg-ink-900 text-left shadow-card">
-            <img src={r.thumbnailUrl} alt="" className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-110 group-hover:opacity-100" loading="lazy" />
+            <img src={reelPoster(r)} alt="" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-110 group-hover:opacity-100" loading="lazy" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10" />
             <div className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-white/15 backdrop-blur transition group-hover:scale-110 group-hover:bg-brand-600"><Play size={15} className="fill-white text-white" /></div>
             <div className="absolute inset-x-0 bottom-0 p-3 text-white">
