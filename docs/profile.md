@@ -289,6 +289,62 @@ Errors: `400` invalid path / failed validation / missing required upload.
 
 ---
 
+## 9. Viewing another user's profile (third-party view)
+
+Three read endpoints render someone else's profile. All accept `optionalAuth`
+(a viewer token unlocks relationship state + private profiles the viewer follows):
+
+| Method | Path | Lookup by |
+|---|---|---|
+| GET | `/api/profile/:userId` 🔓 | user id |
+| GET | `/api/profile/public/:slug` 🔓 | `publicProfileSlug` |
+| GET | `/api/profile/u/:username` 🔓 | `uniqueUsername` (leading `@` optional) |
+
+**Viewable response** (`data`):
+
+```jsonc
+{
+  "user": { "id", "fullName", "uniqueUsername", "profilePhoto", "coverPhoto",
+            "role", "isVerified", "professionalHeadline", "bio", "city",
+            "languages", "workEmail", "workPhone",
+            "followersCount", "followingCount", "connectionsCount", "postsCount",
+            "interests": [ … ], "createdAt" /* = "Joined" month/year */ },
+  "doctorProfile":  { /* public professional fields only — see below */ } | null,
+  "studentProfile": { /* public academic fields only */ } | null,
+  "roleDetails": {
+    // doctor:
+    "specialties": [ … ], "patientVerificationCount": 0,
+    "yearsOfClinicalExperience": 7,
+    "education": [ … ], "workplace": [ … ], "certificates": [ … ]
+    // student:  { "academics": [ … ], "experiences": [ … ] }
+    // general:  { "interests": [ … ] }
+  },
+  "isFollowing": false,        // viewer → target
+  "isFollowedBy": false,       // target → viewer
+  "isRequested": false,        // viewer's follow request is pending (private target)
+  "connectionStatus": "none"   // none | pending_outgoing | pending_incoming | connected
+}
+```
+
+The button matrix is driven by these flags:
+`isFollowing=false` → **Follow** (or **Requested** when `isRequested`); once following,
+`connectionStatus` selects **Connect** (`none`) / **Connecting** (`pending_outgoing`) /
+**Accept** (`pending_incoming`) / **Message** (`connected`).
+
+**Privacy & sanitization:**
+- A **private** target the viewer doesn't follow returns only a stripped card
+  (`{ user: { …, isPrivate: true }, isFollowing, isFollowedBy?, isRequested?, connectionStatus: "none" }`).
+- `doctorProfile` / `studentProfile` are projected through a **public whitelist** —
+  KYC state (`kycStatus`, `kycRejectionReason`, …) and verification document URLs
+  (`medical_licenseUrl`, `verificationDocUrl`, …) are **never** returned to a third
+  party. The owner's own view (`GET /me`) still returns the full blob.
+- A block (either direction) returns `404`.
+
+`roleDetails` is cached in Redis (`profile:roledetails:{userId}`, 120 s TTL) and
+invalidated whenever the underlying lists or specialties change.
+
+---
+
 ## Onboarding fields (Phase 3 increment, already wired)
 
 `POST /api/users/onboard` and `/onboard/firebase` now also accept the

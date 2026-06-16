@@ -87,6 +87,17 @@ describe("dok — existing post + network contracts still hold", () => {
   });
 });
 
+describe("create endpoints (multipart)", () => {
+  it("reels.create and posts.create post to the collection roots", async () => {
+    const fd = new FormData();
+    await dok.reels.create(fd);
+    expect(last()).toMatchObject({ method: "post", url: "/reels" });
+
+    await dok.posts.create(fd);
+    expect(last()).toMatchObject({ method: "post", url: "/posts" });
+  });
+});
+
 describe("envelope unwrap", () => {
   it("returns data.data from the { data: { data } } envelope", async () => {
     const res = await dok.reels.remove("r1");

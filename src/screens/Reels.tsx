@@ -1,21 +1,64 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Play, Heart, Eye } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Play, Heart, Eye, Loader2 } from "lucide-react";
 import { Avatar, Verified } from "@/components/ui/Primitives";
 import ReelViewer from "@/components/ReelViewer";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { compact } from "@/lib/utils";
 
+const rid = (r) => r?._id || r?.id;
+
 export default function Reels() {
   const { demo } = useAuth();
   const [reels, setReels] = useState(null);
   const [open, setOpen] = useState(null); // index
-  useEffect(() => {
-    dok.reels.feed("?limit=12").then((d) => setReels(d.reels || [])).catch(() => setReels([]));
+  const [exhausted, setExhausted] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const sessionId = useRef(null); // discovery session — reused while scrolling, fresh per tab entry
+  const sentinel = useRef(null);
+
+  // One page of the discovery feed (docs/modules/reels.md). `fresh` starts a new session.
+  const fetchPage = useCallback(async (fresh) => {
+    const params = new URLSearchParams({ limit: "12" });
+    if (!fresh && sessionId.current) params.set("sessionId", sessionId.current);
+    const d = await dok.reels.feed(`?${params.toString()}`);
+    sessionId.current = d.sessionId || sessionId.current;
+    setExhausted(Boolean(d.exhausted));
+    return d.reels || [];
   }, []);
+
+  // fresh session on every entry into the tab
+  useEffect(() => {
+    let alive = true;
+    sessionId.current = null;
+    fetchPage(true).then((r) => alive && setReels(r)).catch(() => alive && setReels([]));
+    return () => { alive = false; };
+  }, [fetchPage]);
+
+  const loadMore = useCallback(async () => {
+    if (loadingMore || exhausted) return;
+    setLoadingMore(true);
+    try {
+      const more = await fetchPage(false);
+      setReels((rs) => {
+        const seen = new Set((rs || []).map(rid));
+        return [...(rs || []), ...more.filter((m) => !seen.has(rid(m)))];
+      });
+    } catch { /* keep what we have */ }
+    finally { setLoadingMore(false); }
+  }, [fetchPage, loadingMore, exhausted]);
+
+  // infinite scroll on the grid
+  useEffect(() => {
+    if (!sentinel.current || exhausted || reels === null) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) loadMore(); }, { rootMargin: "800px" });
+    io.observe(sentinel.current);
+    return () => io.disconnect();
+  }, [loadMore, exhausted, reels]);
+
   const list = reels || [];
-  const removeReel = (rid) => setReels((rs) => (rs || []).filter((r) => (r._id || r.id) !== rid));
+  const removeReel = (id) => setReels((rs) => (rs || []).filter((r) => rid(r) !== id));
 
   return (
     <div className="pb-24">
@@ -56,7 +99,23 @@ export default function Reels() {
         ))}
       </div>
       )}
-      {open != null && <ReelViewer reels={list} index={open} onClose={() => setOpen(null)} onRemoved={removeReel} />}
+
+      {/* infinite-scroll sentinel + spinner */}
+      {reels !== null && list.length > 0 && !exhausted && (
+        <div ref={sentinel} className="grid place-items-center py-8">
+          {loadingMore && <Loader2 size={22} className="animate-spin text-brand-600" />}
+        </div>
+      )}
+
+      {open != null && (
+        <ReelViewer
+          reels={list}
+          index={open}
+          onClose={() => setOpen(null)}
+          onRemoved={removeReel}
+          onReachEnd={loadMore}
+        />
+      )}
     </div>
   );
 }

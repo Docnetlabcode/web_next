@@ -13,6 +13,7 @@ import ShareSheet from "@/components/ShareSheet";
 import LikesSheet from "@/components/LikesSheet";
 import CommentsSheet from "@/components/CommentsSheet";
 import EditPostModal, { canEditPost } from "@/components/EditPostModal";
+import ReelVideo from "@/components/ReelVideo";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/Toast";
 import { cn, compact, timeAgoLong } from "@/lib/utils";
@@ -29,7 +30,7 @@ const rid = (r) => r?._id || r?.id;
  * Per-reel engagement lives in a keyed override map so state survives
  * up/down navigation within the session.
  */
-export default function ReelViewer({ reels, index, onClose, onRemoved }) {
+export default function ReelViewer({ reels, index, onClose, onRemoved, onReachEnd }) {
   const { user: me, demo } = useAuth();
   const toast = useToast();
   const nav = useNavigate();
@@ -88,6 +89,11 @@ export default function ReelViewer({ reels, index, onClose, onRemoved }) {
     const t = setTimeout(() => dok.reels.watched(id).catch(() => {}), 8000);
     return () => clearTimeout(t);
   }, [id, demo]);
+
+  // prefetch the next page of the discovery feed as the viewer nears the end
+  useEffect(() => {
+    if (i >= reels.length - 2) onReachEnd?.();
+  }, [i, reels.length, onReachEnd]);
 
   if (!reel) return null;
 
@@ -173,17 +179,13 @@ export default function ReelViewer({ reels, index, onClose, onRemoved }) {
 
       {/* phone frame */}
       <div key={id} className="relative h-[88vh] w-[min(94vw,420px)] overflow-hidden rounded-3xl bg-ink-900 shadow-2xl anim-pop">
-        {reel.videoUrl ? (
-          <video
-            src={reel.videoUrl}
-            poster={reel.thumbnailUrl}
-            className="h-full w-full object-cover"
-            autoPlay loop playsInline muted={muted}
-            onDoubleClick={dblTap}
-          />
-        ) : (
-          <img src={reel.thumbnailUrl} alt="" className="h-full w-full object-cover opacity-80" onDoubleClick={dblTap} />
-        )}
+        <ReelVideo
+          src={reel.hlsUrl || reel.videoUrl}
+          poster={reel.thumbnailUrl}
+          muted={muted}
+          status={reel.processingStatus}
+          onDoubleClick={dblTap}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30" />
 
         <button onClick={() => setMuted((m) => !m)} aria-label={muted ? "Unmute" : "Mute"} className="press absolute right-3 top-16 grid place-items-center rounded-full bg-white/10 p-2 text-white backdrop-blur hover:bg-white/20">

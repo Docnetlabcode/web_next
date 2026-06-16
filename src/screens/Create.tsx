@@ -9,6 +9,8 @@ import { Avatar } from "@/components/ui/Primitives";
 import { EmojiPicker } from "@/components/ui/Overlays";
 import MediaEditor from "@/components/MediaEditor";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/components/ui/Toast";
+import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const TYPES = [
@@ -33,6 +35,7 @@ const presetCss = (m) => {
 export default function Create() {
   const { user } = useAuth();
   const nav = useNavigate();
+  const toast = useToast();
   const fileRef = useRef(null);
   const [type, setType] = useState("post");
   const [text, setText] = useState("");
@@ -41,16 +44,51 @@ export default function Create() {
   const [editing, setEditing] = useState(null);
   const [vis, setVis] = useState("public");
   const [visOpen, setVisOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
 
   const onFiles = (e) => {
     const files = Array.from(e.target.files || []);
-    const next = files.map((f) => ({ url: URL.createObjectURL(f), kind: f.type.startsWith("video") ? "video" : "image", filter: "Original", name: f.name }));
+    const next = files.map((f) => ({ file: f, url: URL.createObjectURL(f), kind: f.type.startsWith("video") ? "video" : "image", filter: "Original", name: f.name }));
     setMedia((m) => [...m, ...next].slice(0, 10));
     if (next.length) setEditing(media.length);
   };
 
   const curVis = VIS.find((v) => v.key === vis);
   const isReel = type === "reel";
+
+  const publish = async () => {
+    if (busy) return;
+    setErr("");
+    const content = text.trim();
+    const videoItem = media.find((m) => m.kind === "video");
+
+    if (isReel && !videoItem?.file) { setErr("Add a video to publish a Pulse."); return; }
+    if (!isReel && !content && media.length === 0) { setErr("Write something or add media first."); return; }
+
+    setBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append("visibility", vis);
+      if (isReel) {
+        fd.append("video", videoItem.file);
+        fd.append("caption", content);
+        await dok.reels.create(fd);
+        toast?.success("Pulse uploaded — it'll appear once processing finishes");
+        nav("/app/reels");
+      } else {
+        fd.append("content", content);
+        fd.append("postType", type);
+        media.forEach((m) => m.file && fd.append("media", m.file));
+        await dok.posts.create(fd);
+        toast?.success("Published");
+        nav("/app");
+      }
+    } catch (e) {
+      setErr(e?.response?.data?.message || "Couldn't publish — please try again.");
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-xl pb-24">
@@ -128,7 +166,12 @@ export default function Create() {
             <button className="press rounded-full p-2 text-brand-600 hover:bg-brand-50" title="Hashtag"><Hash size={20} /></button>
             {emoji && <div className="absolute bottom-14 left-2 z-10"><EmojiPicker onPick={(e) => setText((t) => t + e)} /></div>}
           </div>
-          <button disabled={!text.trim() && !media.length} onClick={() => nav("/app")} className="btn-primary px-6 py-2 text-sm">Publish</button>
+          <div className="flex items-center gap-3">
+            {err && <span className="text-xs text-rose-600">{err}</span>}
+            <button disabled={busy || (!text.trim() && !media.length)} onClick={publish} className="btn-primary px-6 py-2 text-sm">
+              {busy ? "Publishing…" : "Publish"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -137,7 +180,7 @@ export default function Create() {
           item={media[editing]}
           isReel={isReel}
           onClose={() => setEditing(null)}
-          onSave={(edited) => { setMedia((m) => m.map((x, i) => (i === editing ? edited : x))); setEditing(null); }}
+          onSave={(edited) => { setMedia((m) => m.map((x, i) => (i === editing ? { ...edited, file: x.file } : x))); setEditing(null); }}
         />
       )}
     </div>

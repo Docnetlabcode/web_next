@@ -169,10 +169,11 @@ export const dok = {
     shareLink: (id) => unwrap(api.get(`/posts/${id}/share/link`)), // { deepLink, webFallback }
     byUser: (userId, q = "") => unwrap(api.get(`/posts/user/${userId}${q}`)),
     trendingTags: () => unwrap(api.get("/posts/trending/hashtags?limit=8")),
-    create: (form) => unwrap(api.post("/posts", form)),
+    create: (form) => postForm("/posts", form), // multipart: media (×10) + JSON fields
   },
   reels: {
     feed: (q = "") => unwrap(api.get(`/reels/feed${q}`)),
+    create: (form) => postForm("/reels", form), // multipart: video + caption/visibility/specialties/hashtags/mentions
     get: (id) => unwrap(api.get(`/reels/${id}`)),
     update: (id, b) => unwrap(api.put(`/reels/${id}`, b)), // caption/tags ≤24h (403 after)
     remove: (id) => unwrap(api.delete(`/reels/${id}`)),

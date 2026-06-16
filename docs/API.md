@@ -169,7 +169,7 @@ Returns a fresh `accessToken` (and rotated refresh token).
 | GET | `/trending/hashtags` | — | Top hashtags (Redis cached) |
 | GET | `/hashtags/suggest?q=` | — | Hashtag autocomplete |
 | GET | `/hashtag/:tag` | 🔓 | Posts by hashtag |
-| GET | `/user/:userId` | 🔓 | User's posts |
+| GET | `/user/:userId` | 🔓 | User's posts (profile content grid; `?postType=` filters a tab). Returns only `PUBLIC` posts to non-owners; a **private** account's grid is gated to the owner + accepted followers (`{ posts: [], isPrivate: true }` otherwise); blocks/inactive → `404` |
 | POST | `/` | 🔒 | Create post `multipart: media (×10)` |
 | GET | `/:id` | 🔓 | Post detail |
 | PUT | `/:id` | 🔒 | Edit post (blocked after 24 h) |
