@@ -1,12 +1,14 @@
 "use client";
+import { useEffect, useState } from "react";
 import { Link } from "@/lib/router";
 import {
   ShieldCheck, Stethoscope, Clapperboard, Users, MessageSquare, FileText,
   ArrowRight, Heart, MessageCircle, BadgeCheck, Activity, Search, Sparkles,
+  Linkedin, Twitter, Instagram, Mail, MapPin, Phone,
 } from "lucide-react";
 import { Logo, Avatar, Verified } from "@/components/ui/Primitives";
 import NavArrows from "@/components/ui/NavArrows";
-import { useScrollReveal, useCountUp, compact } from "@/lib/utils";
+import { useScrollReveal, useCountUp, compact, cn } from "@/lib/utils";
 
 // Illustrative people for the marketing page only (pre-login showcase — not live data).
 const SAMPLE = [
@@ -28,6 +30,7 @@ export default function Landing() {
       <Features />
       <Roles />
       <Showcase />
+      <Team />
       <CTA />
       <Footer />
     </div>
@@ -35,17 +38,30 @@ export default function Landing() {
 }
 
 function Nav() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="absolute inset-x-0 top-0 z-50">
+    <header
+      className={cn(
+        "sticky top-0 z-50 transition-all duration-300",
+        scrolled ? "glass border-b border-ink-900/[.06] shadow-2" : "border-b border-transparent bg-transparent"
+      )}
+    >
       <div className="container-x flex h-20 items-center justify-between">
         <Logo />
         <nav className="hidden items-center gap-8 text-sm font-medium text-ink-700 md:flex">
-          <a href="#features" className="hover:text-brand-700">Features</a>
-          <a href="#roles" className="hover:text-brand-700">For clinicians</a>
-          <a href="#showcase" className="hover:text-brand-700">Showcase</a>
+          <a href="#features" className="transition hover:text-brand-700">Features</a>
+          <a href="#roles" className="transition hover:text-brand-700">For clinicians</a>
+          <a href="#showcase" className="transition hover:text-brand-700">Showcase</a>
+          <a href="#team" className="transition hover:text-brand-700">Team</a>
         </nav>
         <div className="flex items-center gap-3">
-          <Link to="/login" className="hidden text-sm font-semibold text-ink-700 hover:text-brand-700 sm:block">Sign in</Link>
           <Link to="/login" className="btn-primary px-5 py-2.5 text-sm">Get started</Link>
         </div>
       </div>
@@ -55,10 +71,10 @@ function Nav() {
 
 function Hero() {
   return (
-    <section className="relative pt-20">
+    <section className="relative">
       <div className="absolute inset-0 mesh" />
       <div className="absolute inset-x-0 top-0 h-[600px] grid-bg" />
-      <div className="container-x relative grid items-center gap-12 pb-20 pt-24 lg:grid-cols-2 lg:pb-28">
+      <div className="container-x relative grid items-center gap-12 pb-20 pt-16 lg:grid-cols-2 lg:pb-28 lg:pt-20">
         <div>
           <span className="inline-flex animate-fade-in items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3.5 py-1.5 text-xs font-semibold text-brand-700">
             <span className="relative flex h-2 w-2">
@@ -67,7 +83,7 @@ function Hero() {
             </span>
             Verified by license. Always private.
           </span>
-          <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.05] tracking-tight text-ink-900 sm:text-6xl lg:text-7xl">
+          <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.05] tracking-tight text-ink-900 text-balance sm:text-6xl lg:text-7xl">
             A trusted network <br /> of <span className="text-gradient">clinicians.</span>
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink-500">
@@ -76,7 +92,7 @@ function Hero() {
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link to="/login" className="btn-primary group px-6 py-3.5 text-base">
-              Join DokLynk <ArrowRight size={18} className="transition group-hover:translate-x-1" />
+              Join the DokLynk <ArrowRight size={18} className="transition group-hover:translate-x-1" />
             </Link>
             <Link to="/app" className="btn-outline px-6 py-3.5 text-base">Explore as guest</Link>
           </div>
@@ -109,7 +125,7 @@ function HeroVisual() {
         <span className="text-xs font-bold">34</span>
       </div>
 
-      {/* main card */}
+      {/* main card — image-free, fully on-brand (no external media) */}
       <div className="relative z-10 rounded-3xl border border-ink-900/[.06] bg-white p-5 shadow-card">
         <div className="flex items-center gap-3">
           <Avatar user={SAMPLE[1]} size={46} />
@@ -124,9 +140,9 @@ function HeroVisual() {
           How are you managing antiplatelet duration?
         </p>
         <div className="mt-3 grid grid-cols-3 gap-2">
-          {["1576091160550-2173dba999ef", "1559757148-5c350d0d3c56", "1581595220892-b0739db3ba8c"].map((id, i) => (
-            <div key={i} className="aspect-square overflow-hidden rounded-xl bg-brand-50">
-              <img src={`https://images.unsplash.com/photo-${id}?w=200&q=60`} alt="" className="h-full w-full object-cover" />
+          {[Activity, Stethoscope, FileText].map((Icon, i) => (
+            <div key={i} className="grid aspect-square place-items-center rounded-xl bg-gradient-to-br from-brand-50 to-brand-100 text-brand-600">
+              <Icon size={22} />
             </div>
           ))}
         </div>
@@ -200,7 +216,7 @@ function Features() {
       <div className="container-x">
         <div className="reveal mx-auto max-w-2xl text-center">
           <span className="chip bg-brand-50 text-brand-700"><Sparkles size={14} /> Everything in one place</span>
-          <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 sm:text-5xl">
+          <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">
             Built for how clinicians actually work
           </h2>
           <p className="mt-4 text-lg text-ink-500">From the first case discussion to your next consultation — one platform, zero noise.</p>
@@ -231,7 +247,7 @@ function Roles() {
   return (
     <section id="roles" className="container-x py-24">
       <div className="reveal mx-auto max-w-2xl text-center">
-        <h2 className="font-display text-4xl font-extrabold tracking-tight text-ink-900 sm:text-5xl">One network, three journeys</h2>
+        <h2 className="font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">One network, three journeys</h2>
         <p className="mt-4 text-lg text-ink-500">Whether you treat, study or seek care — DokLynk meets you where you are.</p>
       </div>
       <div className="mt-14 grid gap-6 lg:grid-cols-3">
@@ -262,7 +278,7 @@ function Showcase() {
       <div className="container-x grid items-center gap-14 lg:grid-cols-2">
         <div className="reveal">
           <span className="chip bg-brand-50 text-brand-700"><Activity size={14} /> Real-time everything</span>
-          <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 sm:text-5xl">Search, discover, and connect — instantly</h2>
+          <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Search, discover, and connect — instantly</h2>
           <p className="mt-4 text-lg text-ink-500">Find specialists by name or specialty, follow trending discussions, and start a consult in two taps. Powered by a real-time engine with live presence and read receipts.</p>
           <div className="mt-7 space-y-3">
             {["Live trending in your specialty", "Smart search across people, posts & hashtags", "Online presence & typing indicators"].map((t) => (
@@ -296,16 +312,46 @@ function Showcase() {
   );
 }
 
+// TODO: replace these placeholders with the real founding team (names, roles, bios, photos).
+const TEAM = [
+  { name: "Aarav Mehta", role: "Founder & CEO", bio: "Built DokLynk to give clinicians a trusted, license-verified home for clinical knowledge." },
+  { name: "Dr. Riya Sharma", role: "Co-founder & Chief Medical Officer", bio: "Practising physician shaping the clinical safety, verification and consult experience." },
+  { name: "Karan Patel", role: "Co-founder & CTO", bio: "Leads the real-time platform — feed, chat and consults built for speed and privacy." },
+];
+
+function Team() {
+  useScrollReveal();
+  return (
+    <section id="team" className="container-x py-24">
+      <div className="reveal mx-auto max-w-2xl text-center">
+        <span className="chip bg-brand-50 text-brand-700"><Users size={14} /> The people behind DokLynk</span>
+        <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Meet the team</h2>
+        <p className="mt-4 text-lg text-ink-500">Clinicians and engineers building a network the medical community can trust.</p>
+      </div>
+      <div className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {TEAM.map((m, i) => (
+          <div key={m.name} className="reveal card flex flex-col items-center p-7 text-center transition hover:-translate-y-1 hover:shadow-glow" style={{ transitionDelay: `${i * 80}ms` }}>
+            <Avatar user={{ fullName: m.name }} size={84} className="ring-4 ring-brand-50" />
+            <h3 className="mt-4 text-base font-bold text-ink-900">{m.name}</h3>
+            <span className="chip mt-2 bg-brand-50 text-brand-700">{m.role}</span>
+            <p className="mt-3 text-sm leading-relaxed text-ink-500">{m.bio}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function CTA() {
   return (
     <section className="container-x py-24">
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-8 py-16 text-center shadow-glow sm:px-16">
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="relative">
-          <h2 className="font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl">Join the network built on trust</h2>
+          <h2 className="font-display text-4xl font-extrabold tracking-tight text-white text-balance sm:text-5xl">Join the network built on trust</h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/85">Create your verified profile in minutes. Free for students and general users.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/login" className="btn px-7 py-3.5 text-base bg-white text-brand-700 hover:bg-white/90">Create an account</Link>
+            <Link to="/login" className="btn px-7 py-3.5 text-base bg-white text-brand-700 hover:bg-white/90">Join the DokLynk</Link>
             <Link to="/app" className="btn px-7 py-3.5 text-base border border-white/40 text-white hover:bg-white/10">Continue browsing</Link>
           </div>
         </div>
@@ -314,16 +360,86 @@ function CTA() {
   );
 }
 
+// TODO: swap "#" social hrefs and the contact details for the real handles.
+const SOCIALS = [
+  { icon: Twitter, label: "X (Twitter)", href: "#" },
+  { icon: Linkedin, label: "LinkedIn", href: "#" },
+  { icon: Instagram, label: "Instagram", href: "#" },
+];
+
+function FooterCol({ title, links }) {
+  return (
+    <div>
+      <h4 className="text-sm font-bold uppercase tracking-wide text-white/90">{title}</h4>
+      <ul className="mt-4 space-y-3 text-sm">
+        {links.map((l) => (
+          <li key={l.label}>
+            {l.to
+              ? <Link to={l.to} className="text-white/70 transition hover:text-white">{l.label}</Link>
+              : <a href={l.href} className="text-white/70 transition hover:text-white">{l.label}</a>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function Footer() {
   return (
-    <footer className="border-t border-ink-900/[.06] py-12">
-      <div className="container-x flex flex-col items-center justify-between gap-6 sm:flex-row">
-        <Logo />
-        <p className="text-sm text-ink-400">© 2026 DokLynk. A trusted network for clinicians, students & patients.</p>
-        <div className="flex gap-6 text-sm text-ink-500">
-          <a href="/privacy" className="hover:text-brand-700">Privacy</a>
-          <a href="/terms" className="hover:text-brand-700">Terms</a>
-          <a href="/help" className="hover:text-brand-700">Help center</a>
+    <footer className="relative overflow-hidden bg-brand-900 text-white">
+      <div className="absolute inset-0 grid-bg opacity-[.12]" />
+      <div className="container-x relative">
+        <div className="grid gap-10 py-16 md:grid-cols-2 lg:grid-cols-5">
+          {/* brand + socials */}
+          <div className="lg:col-span-2">
+            <Logo light />
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/70">
+              A license-verified network for clinicians, medical students and patients — cases,
+              research, reels and real-time consults in one trusted home.
+            </p>
+            <div className="mt-6 flex gap-2.5">
+              {SOCIALS.map((s) => (
+                <a key={s.label} href={s.href} aria-label={s.label}
+                  className="press grid h-10 w-10 place-items-center rounded-full bg-white/10 ring-1 ring-white/15 transition hover:bg-white/20">
+                  <s.icon size={17} />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <FooterCol title="Product" links={[
+            { label: "Features", href: "#features" },
+            { label: "For clinicians", href: "#roles" },
+            { label: "Showcase", href: "#showcase" },
+            { label: "Explore", to: "/app" },
+          ]} />
+
+          <FooterCol title="Company" links={[
+            { label: "About", href: "#showcase" },
+            { label: "Meet the team", href: "#team" },
+            { label: "Careers", href: "#" },
+            { label: "Blog", href: "#" },
+          ]} />
+
+          {/* contact */}
+          <div>
+            <h4 className="text-sm font-bold uppercase tracking-wide text-white/90">Contact</h4>
+            <ul className="mt-4 space-y-3 text-sm text-white/70">
+              <li className="flex items-center gap-2.5"><Mail size={15} className="shrink-0 text-white/50" /> hello@doklynk.com</li>
+              <li className="flex items-center gap-2.5"><Phone size={15} className="shrink-0 text-white/50" /> +91 80 4718 2200</li>
+              <li className="flex items-start gap-2.5"><MapPin size={15} className="mt-0.5 shrink-0 text-white/50" /> Bengaluru, Karnataka, India</li>
+            </ul>
+            <div className="mt-5 flex flex-wrap gap-4 text-sm">
+              <Link to="/privacy" className="text-white/70 transition hover:text-white">Privacy</Link>
+              <Link to="/terms" className="text-white/70 transition hover:text-white">Terms</Link>
+              <Link to="/help" className="text-white/70 transition hover:text-white">Help</Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 py-6 text-sm text-white/55 sm:flex-row">
+          <p>© 2026 DokLynk. All rights reserved.</p>
+          <p>Built for clinicians, students &amp; patients.</p>
         </div>
       </div>
     </footer>

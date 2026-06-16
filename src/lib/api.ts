@@ -120,8 +120,8 @@ export const dok = {
     shareLink: () => unwrap(api.get("/profile/me/share/link")),
     updateBasic: (b) => unwrap(api.put("/profile/me/basic", b)),
     verifyEmail: (b) => unwrap(api.post("/profile/me/email/verify", b)),
-    uploadAvatar: (file) => { const f = new FormData(); f.append("avatar", file); return postForm("/profile/me/avatar", f); },
-    uploadCover: (file) => { const f = new FormData(); f.append("cover", file); return postForm("/profile/me/cover", f); },
+    uploadAvatar: (file) => { const f = new FormData(); f.append("photo", file); return postForm("/profile/me/photo", f); }, // docs/profile.md §2: POST /me/photo (field "photo") → { profilePhoto }
+    uploadCover: (file) => { const f = new FormData(); f.append("cover", file); return postForm("/profile/me/cover", f); }, // POST /me/cover (field "cover") → { coverPhoto }
     // Doctor sections
     doctorContact: (b) => unwrap(api.put("/profile/doctor/contact", b)),
     doctorEducation: (b) => unwrap(api.put("/profile/doctor/education", b)),
