@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { MapPin, Briefcase, GraduationCap, Building2, Share2, MoreHorizontal, ArrowLeft, Settings as SettingsIcon, Stethoscope, Activity, CalendarDays } from "lucide-react";
+import { MapPin, Briefcase, GraduationCap, Building2, Share2, ArrowLeft, Settings as SettingsIcon, Stethoscope, Activity, CalendarDays } from "lucide-react";
 import { useNavigate } from "@/lib/router";
 import { Avatar, Verified, RoleBadge, Spinner } from "@/components/ui/Primitives";
 import PostCard from "@/components/PostCard";
@@ -55,9 +55,9 @@ export default function Profile() {
   const yearsExp = full?.doctor?.yearsOfClinicalExperience ?? rp.yearsOfClinicalExperience;
 
   const metrics = [
-    { n: user.followingCount, label: "Following", onClick: () => nav("/app/network") },
-    { n: user.followersCount, label: "Followers", onClick: () => nav("/app/network") },
-    { n: user.connectionsCount, label: "Connections", onClick: () => nav("/app/network") },
+    { n: user.followingCount, label: "Following", onClick: () => nav("/app/connections?tab=following") },
+    { n: user.followersCount, label: "Followers", onClick: () => nav("/app/connections?tab=followers") },
+    { n: user.connectionsCount, label: "Connections", onClick: () => nav("/app/connections?tab=connections") },
     { n: user.postsCount, label: "Posts", onClick: () => setTab("Posts") },
   ];
 
@@ -69,7 +69,6 @@ export default function Profile() {
           {user.coverPhoto && <img src={user.coverPhoto} alt="" className="absolute inset-0 h-full w-full object-cover" />}
           <div className="absolute inset-0 grid-bg opacity-30" />
           <button onClick={() => nav(-1)} className="press absolute left-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"><ArrowLeft size={18} /></button>
-          <button onClick={() => nav("/app/settings")} className="press absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"><MoreHorizontal size={18} /></button>
         </div>
 
         <div className="px-5 pb-5">

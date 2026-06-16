@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   User, Bell, Lock, Smartphone, Palette, ChevronRight,
-  LogOut, Globe, Eye, Trash2, ArrowUpRight, ShieldOff,
+  LogOut, Globe, Eye, Trash2, ArrowUpRight, ShieldOff, Loader2, Check, X,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Avatar, Spinner } from "@/components/ui/Primitives";
@@ -142,13 +142,94 @@ function Account() {
           <button onClick={save} disabled={saving || demo} className="btn-primary px-5 py-2.5 text-sm">{saving ? "Saving…" : "Save changes"}</button>
         </div>
       </Card>
+      <UsernameCard />
       <Card title="Login & contact">
         <Field label="Phone" value={pd ? `${pd.countryCode || ""} ${pd.phoneNumber || ""}`.trim() : "—"} readOnly hint="Used for login & OTP" />
         <Field label="Email" value={pd?.email || "Not set"} readOnly hint={pd?.emailVerified ? "Verified" : "Set & verify from your profile"} />
-        <Field label="Member since" value={pd?.registeredAt ? new Date(pd.registeredAt).toLocaleDateString() : "—"} readOnly />
+        <Field label="Member since" value={pd?.registeredAt ? new Date(pd.registeredAt).toLocaleDateString(undefined, { month: "long", year: "numeric" }) : "—"} readOnly />
       </Card>
       <DangerZone />
     </>
+  );
+}
+
+/* ───────────────────────── Username (real-time availability) ───────────────────────── */
+function UsernameCard() {
+  const { user, demo, updateUser } = useAuth();
+  const current = user?.uniqueUsername || "";
+  const [value, setValue] = useState(current);
+  const [status, setStatus] = useState(null); // { ok, msg }
+  const [checking, setChecking] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const debounce = useRef(null);
+
+  // Allowed set: a-z 0-9 . _  (lower-cased, ≤30) — mirrors the server rule.
+  const norm = (v) => v.replace(/[^a-zA-Z0-9_.]/g, "").slice(0, 30).toLowerCase();
+  const changed = value !== current && value.length > 0;
+
+  const formatError = (v) => {
+    if (v.length < 3) return "Must be at least 3 characters";
+    if (!/^[a-z0-9](?:[a-z0-9._]*[a-z0-9])?$/.test(v)) return "Must start and end with a letter or number";
+    if (/\.\./.test(v)) return "No consecutive dots";
+    return null;
+  };
+
+  useEffect(() => {
+    clearTimeout(debounce.current);
+    setSaved(false);
+    if (!changed) { setStatus(null); return undefined; }
+    const fmt = formatError(value);
+    if (fmt) { setStatus({ ok: false, msg: fmt }); setChecking(false); return undefined; }
+    if (demo) { setStatus({ ok: true, msg: "Username available" }); return undefined; }
+    setChecking(true); setStatus(null);
+    debounce.current = setTimeout(async () => {
+      try {
+        const d = await dok.profile.usernameCheck(value);
+        setStatus(d.available ? { ok: true, msg: "Username available" } : { ok: false, msg: d.reason || "Username already taken" });
+      } catch {
+        setStatus({ ok: false, msg: "Couldn't check right now — try again" });
+      } finally { setChecking(false); }
+    }, 400);
+    return () => clearTimeout(debounce.current);
+  }, [value, changed, demo]);
+
+  const canSave = changed && status?.ok && !checking && !saving && !demo;
+
+  const save = async () => {
+    if (!canSave) return;
+    setSaving(true);
+    try {
+      const d = await dok.profile.updateUsername(value);
+      const next = d.uniqueUsername || value;
+      updateUser({ uniqueUsername: next });
+      setValue(next);
+      setStatus(null);
+      setSaved(true);
+    } catch (e) {
+      setStatus({ ok: false, msg: e?.response?.data?.message || "This username has just been taken. Please choose another." });
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <Card title="Username">
+      <span className="block text-sm font-semibold text-ink-700">Unique username</span>
+      <div className="flex items-center rounded-xl border border-ink-900/[.12] bg-white px-3 transition focus-within:border-brand-400 focus-within:ring-4 focus-within:ring-brand-100">
+        <span className="text-sm font-semibold text-ink-400">@</span>
+        <input value={value} onChange={(e) => setValue(norm(e.target.value))} placeholder="username" className="flex-1 bg-transparent px-1.5 py-3 text-sm outline-none" />
+        {checking && <Loader2 size={15} className="animate-spin text-ink-400" />}
+      </div>
+      {status && (
+        <p className={cn("flex items-center gap-1.5 text-sm", status.ok ? "text-emerald-600" : "text-rose-600")}>
+          {status.ok ? <Check size={14} /> : <X size={14} />} {status.msg}
+        </p>
+      )}
+      {saved && <p className="text-sm text-emerald-600">Username updated ✓ — mentions and your profile link now use @{value}</p>}
+      <p className="text-xs text-ink-400">3–30 characters · lowercase letters, numbers, periods and underscores.</p>
+      <div className="flex justify-end">
+        <button onClick={save} disabled={!canSave} className="btn-primary px-5 py-2.5 text-sm">{saving ? "Saving…" : "Save username"}</button>
+      </div>
+    </Card>
   );
 }
 

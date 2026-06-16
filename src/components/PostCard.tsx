@@ -186,7 +186,6 @@ export default function PostCard({ post, demo, onRemoved }) {
                 <button onClick={openProfile} className="truncate font-semibold text-ink-900 hover:underline">{a.fullName}</button>
                 {a.isVerified && <Verified />}
                 <PostTypeBadge type={post.postType} />
-                {!isOwn && <FollowButton user={a} demo={demo} variant="ghost" className="ml-0.5" />}
               </div>
               <p className="truncate text-[13px] text-ink-500">
                 {a.professionalHeadline || a.specialization || roleLabel(a.role)}
@@ -200,9 +199,12 @@ export default function PostCard({ post, demo, onRemoved }) {
                 {edited && <span className="text-ink-400"> · Edited</span>}
               </p>
             </div>
-            <button onClick={() => setMoreOpen(true)} aria-label="Post options" className="press rounded-full p-1.5 text-ink-400 hover:bg-ink-900/5">
-              <MoreHorizontal size={18} />
-            </button>
+            <div className="flex shrink-0 items-center gap-1.5">
+              {!isOwn && <FollowButton user={a} demo={demo} />}
+              <button onClick={() => setMoreOpen(true)} aria-label="Post options" className="press rounded-full p-1.5 text-ink-400 hover:bg-ink-900/5">
+                <MoreHorizontal size={18} />
+              </button>
+            </div>
           </div>
 
           {/* ---------- body ---------- */}

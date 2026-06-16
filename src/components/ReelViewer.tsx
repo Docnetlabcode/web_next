@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "@/lib/router";
 import {
@@ -65,6 +65,24 @@ export default function ReelViewer({ reels, index, onClose, onRemoved, onReachEn
   const [caption, setCaption] = useState(reel?.caption);
 
   const go = (d) => setI((v) => Math.max(0, Math.min(reels.length - 1, v + d)));
+  const isLast = i >= reels.length - 1;
+
+  // Scroll (wheel) + swipe navigation between reels, throttled so one gesture = one reel.
+  const navLock = useRef(false);
+  const touchY = useRef(null);
+  const onWheel = (e) => {
+    if (navLock.current || Math.abs(e.deltaY) < 24) return;
+    navLock.current = true;
+    go(e.deltaY > 0 ? 1 : -1);
+    setTimeout(() => { navLock.current = false; }, 420);
+  };
+  const onTouchStart = (e) => { touchY.current = e.touches?.[0]?.clientY ?? null; };
+  const onTouchEnd = (e) => {
+    if (touchY.current == null) return;
+    const dy = (e.changedTouches?.[0]?.clientY ?? touchY.current) - touchY.current;
+    if (Math.abs(dy) > 60) go(dy < 0 ? 1 : -1); // swipe up → next, down → previous
+    touchY.current = null;
+  };
 
   // keyboard nav
   useEffect(() => {
@@ -165,7 +183,7 @@ export default function ReelViewer({ reels, index, onClose, onRemoved, onReachEn
   return createPortal(
     // z-[60]: above app chrome (z-40) but BELOW the sheets it opens (z-[70]) so the
     // 3-dot menu, share, comments and likes sheets are not covered by the reel card
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink-900/95 animate-fade-in">
+    <div onWheel={onWheel} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="fixed inset-0 z-[60] flex items-center justify-center bg-ink-900/95 animate-fade-in">
       {/* header */}
       <div className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between p-4 text-white">
         <button onClick={onClose} className="press rounded-full bg-white/10 p-2 backdrop-blur hover:bg-white/20"><X size={20} /></button>
@@ -186,6 +204,8 @@ export default function ReelViewer({ reels, index, onClose, onRemoved, onReachEn
           poster={reel.thumbnailUrl || (reel.videoUrl ? reel.videoUrl.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined)}
           muted={muted}
           status={reel.processingStatus}
+          loop={isLast}
+          onEnded={() => go(1)}
           onDoubleClick={dblTap}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30" />

@@ -199,6 +199,8 @@ export const dok = {
     follow: (id) => unwrap(api.post(`/follows/${id}`)), // public → { status:"following" } · private → { status:"requested" }
     unfollow: (id) => unwrap(api.delete(`/follows/${id}`)),
     check: (id) => unwrap(api.get(`/follows/check/${id}`)), // { status, isFollowing, isFollowedBy, isRequested }
+    followers: (userId, q = "") => unwrap(api.get(`/follows/${userId}/followers${q}`)), // { followers: [...] }
+    following: (userId, q = "") => unwrap(api.get(`/follows/${userId}/following${q}`)), // { following: [...] }
     withdraw: (id) => unwrap(api.delete(`/follows/requests/${id}`)), // silent request withdrawal
     requests: (q = "") => unwrap(api.get(`/follows/requests${q}`)), // incoming (private accounts)
     acceptRequest: (requesterId) => unwrap(api.post(`/follows/requests/${requesterId}/accept`)),

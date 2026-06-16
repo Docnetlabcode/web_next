@@ -1,7 +1,7 @@
 "use client";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "@/lib/router";
-import { FileText, Stethoscope, Clapperboard, PenLine, ChevronLeft, ChevronRight, Loader2, Sparkles } from "lucide-react";
+import { FileText, Stethoscope, Clapperboard, PenLine, ChevronLeft, ChevronRight, Loader2, Sparkles, RefreshCw } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import RightRail from "@/components/layout/RightRail";
 import { Avatar, Skeleton } from "@/components/ui/Primitives";
@@ -35,8 +35,14 @@ export default function Feed() {
   const [hasMore, setHasMore] = useState(false);
   const [cursor, setCursor] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // bumped to re-pull the feed from page 1
   const sentinel = useRef(null);
   const reqSeq = useRef(0);
+
+  const refresh = () => {
+    setRefreshKey((k) => k + 1);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   /* dynamic specialty chips from backend meta */
   useEffect(() => {
@@ -81,7 +87,7 @@ export default function Feed() {
       })
       .finally(() => seq === reqSeq.current && setRefreshing(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, demo]);
+  }, [filter, demo, refreshKey]);
 
   /* cursor-paginated infinite scroll */
   useEffect(() => {
@@ -119,6 +125,9 @@ export default function Feed() {
           <Avatar user={user} size={42} />
           <button onClick={() => nav("/app/create")} className="flex-1 rounded-full bg-ink-900/[.04] px-4 py-3 text-left text-sm text-ink-400 transition hover:bg-ink-900/[.07]">
             Share a case, paper or update…
+          </button>
+          <button onClick={refresh} disabled={refreshing} aria-label="Refresh feed" title="Refresh feed" className="press grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink-500 transition hover:bg-brand-50 hover:text-brand-700 disabled:opacity-50">
+            <RefreshCw size={18} className={cn(refreshing && "animate-spin")} />
           </button>
         </div>
         <div className="card flex items-center justify-around p-1.5">

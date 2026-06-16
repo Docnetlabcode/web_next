@@ -32,7 +32,7 @@ export default function Cases() {
               <div className="flex items-center gap-3">
                 <Avatar user={c.author} size={40} />
                 <div className="flex-1">
-                  <p className="flex items-center gap-1 text-sm font-semibold">{c.author?.fullName} <Verified size={12} /></p>
+                  <p className="flex items-center gap-1 text-sm font-semibold">{c.author?.fullName} {c.author?.isVerified && <Verified size={12} />}</p>
                   <p className="text-xs text-ink-400">{c.specialty} · {timeAgo(c.createdAt) || "4h"}</p>
                 </div>
                 <span className={cn("chip uppercase text-[10px]", URGENCY[c.clinicalSnapshot?.urgency] || URGENCY.low)}>{c.clinicalSnapshot?.urgency || "open"}</span>

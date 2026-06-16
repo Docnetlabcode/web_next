@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Navigate } from "@/lib/router";
-import { ArrowLeft, MapPin, Share2, Lock, MoreHorizontal, ShieldOff, UserMinus, Mail, Phone, Languages as LangIcon, Briefcase, GraduationCap, Stethoscope, Activity, CalendarDays, Award } from "lucide-react";
+import { ArrowLeft, MapPin, Share2, Lock, MoreHorizontal, ShieldOff, UserMinus, Mail, Phone, Languages as LangIcon, Briefcase, GraduationCap, Stethoscope, Activity, CalendarDays, Award, UserPlus, UserCheck, Clock, Link2, Loader2, MessageSquare } from "lucide-react";
 import { Avatar, Verified, RoleBadge, Skeleton } from "@/components/ui/Primitives";
-import FollowButton from "@/components/ui/FollowButton";
 import PostCard from "@/components/PostCard";
 import ShareSheet from "@/components/ShareSheet";
 import { useToast } from "@/components/ui/Toast";
@@ -42,13 +41,18 @@ export default function UserProfile() {
         const profile = p.value || {};
         const u = profile.user || profile;
         const rel = f.status === "fulfilled" ? f.value : {};
+        // Relationship flags live at the TOP LEVEL of the byId payload (docs/profile.md §9),
+        // not inside `user`; follows.check is a fallback (it lacks connectionStatus).
         setData({
           ...profile,
           user: {
             ...u,
-            isFollowing: rel.isFollowing ?? u.isFollowing,
-            isRequested: rel.isRequested ?? u.isRequested,
-            connectionStatus: u.connectionStatus ?? rel.connectionStatus,
+            isSelf: u.isSelf ?? profile.isSelf,
+            isFollowing: profile.isFollowing ?? rel.isFollowing ?? u.isFollowing,
+            isFollowedBy: profile.isFollowedBy ?? rel.isFollowedBy ?? u.isFollowedBy,
+            isRequested: profile.isRequested ?? rel.isRequested ?? u.isRequested,
+            connectionStatus: profile.connectionStatus ?? u.connectionStatus ?? rel.connectionStatus,
+            connectionRequestId: profile.connectionRequestId ?? u.connectionRequestId,
           },
         });
       });
@@ -83,10 +87,14 @@ export default function UserProfile() {
   const canViewLists = !isPrivate; // public, or a private account the viewer already follows (then byId returns full data)
   const patients = rd.patientVerificationCount;
 
+  const uid = u.id || u._id;
+  const listLink = (t) => `/app/connections?user=${uid}&tab=${t}&name=${encodeURIComponent(u.fullName || "")}`;
   const metrics = [
     { n: u.postsCount, label: "Posts" },
-    { n: u.followersCount, label: "Followers" },
-    { n: u.followingCount, label: "Following" },
+    // Followers/Following open for any user when the privacy wall allows (§3B).
+    { n: u.followersCount, label: "Followers", to: canViewLists ? listLink("followers") : null },
+    { n: u.followingCount, label: "Following", to: canViewLists ? listLink("following") : null },
+    // No backend endpoint for a third party's connections list — display-only.
     { n: u.connectionsCount, label: "Connections" },
   ];
 
@@ -104,9 +112,9 @@ export default function UserProfile() {
         </div>
 
         <div className="px-5 pb-5">
-          <div className="-mt-14 flex items-end justify-between">
-            <span className="rounded-full ring-4 ring-white"><Avatar user={u} size={104} /></span>
-            <div className="mb-1"><FollowButton user={u} demo={demo} className="px-5 py-2 text-sm" /></div>
+          {/* relative z-10 lifts the DP + action above the absolutely-positioned cover image */}
+          <div className="relative z-10 -mt-14">
+            <span className="inline-block rounded-full ring-4 ring-white"><Avatar user={u} size={104} /></span>
           </div>
 
           <div className="mt-3">
@@ -127,18 +135,28 @@ export default function UserProfile() {
             <div className="mt-2"><RoleBadge role={u.role} /></div>
           </div>
 
+          {/* Follow + Connect — two distinct buttons on the profile (vs. one morphing button on cards) */}
+          {!u.isSelf && <ProfileActions user={u} demo={demo} />}
+
           {/* interactive metrics with the private-account visibility gate (§3B) */}
           <div className="mt-4 border-t border-ink-900/[.06] pt-4">
             {!canViewLists && (
               <p className="mb-2 flex items-center gap-1.5 text-xs text-ink-400"><Lock size={12} /> Followers, following and connections are hidden on this private account.</p>
             )}
             <div className={cn("flex", !canViewLists && "opacity-60")}>
-              {metrics.map((m) => (
-                <div key={m.label} className="flex flex-1 flex-col items-start px-2">
-                  <b className="font-display text-lg font-extrabold tabular-nums text-ink-900">{compact(m.n || 0)}</b>
-                  <span className="text-xs text-ink-500">{m.label}</span>
-                </div>
-              ))}
+              {metrics.map((m) =>
+                m.to ? (
+                  <button key={m.label} onClick={() => nav(m.to)} className="press flex flex-1 flex-col items-start rounded-xl px-2 py-1.5 text-left transition hover:bg-ink-900/[.03]">
+                    <b className="font-display text-lg font-extrabold tabular-nums text-ink-900">{compact(m.n || 0)}</b>
+                    <span className="text-xs text-ink-500">{m.label}</span>
+                  </button>
+                ) : (
+                  <div key={m.label} className="flex flex-1 flex-col items-start px-2 py-1.5">
+                    <b className="font-display text-lg font-extrabold tabular-nums text-ink-900">{compact(m.n || 0)}</b>
+                    <span className="text-xs text-ink-500">{m.label}</span>
+                  </div>
+                )
+              )}
             </div>
           </div>
         </div>
@@ -230,6 +248,94 @@ function ProfileMenu({ user, demo, onChanged }) {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/* Two independent profile actions (PRD State A/B): a Follow button and a Connect button,
+   both visible on the profile (unlike the single morphing button used on feed/reel cards). */
+function ProfileActions({ user, demo }) {
+  const nav = useNavigate();
+  const toast = useToast();
+  const id = user.id || user._id;
+
+  const initFollow = user.isFollowing ? "following" : user.isRequested ? "requested" : "follow";
+  const cs = user.connectionStatus;
+  const initConnect = cs === "connected" ? "message" : cs === "pending_outgoing" ? "connecting" : cs === "pending_incoming" ? "accept" : "connect";
+
+  const [fState, setF] = useState(initFollow);
+  const [cState, setC] = useState(initConnect);
+  const [busyMsg, setBusyMsg] = useState(false);
+
+  // re-sync if the viewed user changes (block/unfollow from the 3-dot menu, navigation, etc.)
+  useEffect(() => { setF(initFollow); setC(initConnect); /* eslint-disable-next-line */ }, [id, user.isFollowing, user.isRequested, cs]);
+
+  if (!id) return null;
+
+  /* follow side */
+  const doFollow = async () => {
+    setF("following");
+    if (demo) return;
+    try { const d = await dok.follows.follow(id); if (d?.status === "requested") setF("requested"); }
+    catch { setF("follow"); toast?.error("Couldn't follow — try again"); }
+  };
+  const doUnfollow = async () => {
+    setF("follow");
+    if (demo) return;
+    try { await dok.follows.unfollow(id); } catch { setF("following"); toast?.error("Couldn't unfollow"); }
+  };
+  const doWithdraw = async () => {
+    setF("follow");
+    if (demo) return;
+    try { await dok.follows.withdraw(id); } catch { setF("requested"); toast?.error("Couldn't withdraw the request"); }
+  };
+
+  /* connect side */
+  const doConnect = async () => {
+    setC("connecting");
+    if (demo) return;
+    try { await dok.network.request(id); } catch (e) { setC("connect"); toast?.error(e?.response?.data?.message || "Couldn't send the connection request"); }
+  };
+  const doAccept = async () => {
+    setC("message");
+    if (demo) return;
+    try { await dok.network.accept(user.connectionRequestId || id); } catch { setC("accept"); toast?.error("Couldn't accept the request"); }
+  };
+  const doMessage = async () => {
+    if (demo) { nav("/app/messages"); return; }
+    setBusyMsg(true);
+    try {
+      const d = await dok.chat.start({ recipientId: id });
+      const cid = d?.conversation?.id || d?.conversation?._id || d?.conversationId;
+      nav(cid ? `/app/messages?c=${cid}` : "/app/messages");
+    } catch { toast?.error("Couldn't open the conversation"); }
+    finally { setBusyMsg(false); }
+  };
+
+  const FOLLOW = {
+    follow: { label: "Follow", icon: UserPlus, onClick: doFollow, cls: "btn-primary" },
+    following: { label: "Following", icon: UserCheck, onClick: doUnfollow, cls: "btn-outline" },
+    requested: { label: "Requested", icon: Clock, onClick: doWithdraw, cls: "btn-outline" },
+  }[fState];
+
+  const CONNECT = {
+    connect: { label: "Connect", icon: Link2, onClick: doConnect, cls: "btn-outline" },
+    connecting: { label: "Connecting", icon: Loader2, onClick: undefined, cls: "btn-outline", spin: true },
+    accept: { label: "Accept", icon: UserCheck, onClick: doAccept, cls: "btn-primary" },
+    message: { label: "Message", icon: MessageSquare, onClick: doMessage, cls: "btn-ghost", busy: busyMsg },
+  }[cState];
+
+  const FIcon = FOLLOW.icon;
+  const CIcon = CONNECT.icon;
+
+  return (
+    <div className="mt-4 flex gap-2">
+      <button onClick={FOLLOW.onClick} className={cn(FOLLOW.cls, "flex-1 py-2.5 text-sm")}>
+        <FIcon size={16} /> {FOLLOW.label}
+      </button>
+      <button onClick={CONNECT.onClick} disabled={!CONNECT.onClick || CONNECT.busy} className={cn(CONNECT.cls, "flex-1 py-2.5 text-sm")}>
+        {CONNECT.busy || CONNECT.spin ? <Loader2 size={16} className="animate-spin" /> : <CIcon size={16} />} {CONNECT.label}
+      </button>
     </div>
   );
 }
