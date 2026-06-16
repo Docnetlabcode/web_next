@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "@/lib/router";
 import { FileText, Stethoscope, Clapperboard, PenLine, ChevronLeft, ChevronRight, Loader2, Sparkles } from "lucide-react";
 import PostCard from "@/components/PostCard";
@@ -7,7 +7,7 @@ import RightRail from "@/components/layout/RightRail";
 import { Avatar, Skeleton } from "@/components/ui/Primitives";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, roleLabel } from "@/lib/utils";
 
 /**
  * Home feed with the global specialty filter bar (docs/feed.md §1).
@@ -111,6 +111,9 @@ export default function Feed() {
   return (
     <div className="flex gap-6">
       <div className="mx-auto w-full max-w-xl space-y-5 pb-24">
+        {/* Health-professional stats strip (app parity, mobile only) */}
+        {user?.role === "doctor" && <DoctorStatsStrip />}
+
         {/* Composer */}
         <div className="card flex items-center gap-3 p-4">
           <Avatar user={user} size={42} />
@@ -136,8 +139,11 @@ export default function Feed() {
           <Empty filter={filter} onReset={() => setFilter({ kind: "all", key: "all", label: "All" })} />
         ) : (
           <div className={cn("space-y-5 transition-opacity duration-200", refreshing && "pointer-events-none opacity-50")}>
-            {posts.map((p) => (
-              <PostCard key={p._id || p.id} post={p} demo={demo} onRemoved={removePost} />
+            {posts.map((p, i) => (
+              <Fragment key={p._id || p.id}>
+                <PostCard post={p} demo={demo} onRemoved={removePost} />
+                {i === 1 && <PeopleYouMayKnow />}
+              </Fragment>
             ))}
             {hasMore && (
               <div ref={sentinel} className="grid place-items-center py-6">
@@ -148,6 +154,114 @@ export default function Feed() {
         )}
       </div>
       <RightRail />
+    </div>
+  );
+}
+
+/* ---------------- doctor stats strip (app parity, mobile only) ----------------
+   "Unread" is live (notifications). Priority / Paid Priority have no backend yet,
+   so they show a neutral placeholder — never a fake number (see CLAUDE.md). */
+
+function DoctorStatsStrip() {
+  const nav = useNavigate();
+  const [unread, setUnread] = useState(null);
+  const [soon, setSoon] = useState(false);
+
+  useEffect(() => {
+    dok.notifications
+      .unread()
+      .then((d) => setUnread(typeof d === "number" ? d : d?.count ?? d?.unread ?? 0))
+      .catch(() => setUnread(null));
+  }, []);
+
+  const cards = [
+    { key: "unread", label: "Unread", value: unread ?? "—", tint: "brand", onClick: () => nav("/app/notifications") },
+    { key: "priority", label: "Priority", value: "—", tint: "ink", onClick: () => setSoon(true) },
+    { key: "paid", label: "Paid Priority", value: "—", tint: "rose", onClick: () => setSoon(true) },
+  ];
+
+  return (
+    <div className="lg:hidden">
+      <div className="grid grid-cols-3 gap-3">
+        {cards.map((c) => (
+          <button
+            key={c.key}
+            onClick={c.onClick}
+            className={cn(
+              "card press flex flex-col items-start gap-1 p-3 text-left",
+              c.tint === "rose" && "bg-rose-50 ring-1 ring-rose-100"
+            )}
+          >
+            <span
+              className={cn(
+                "font-display text-2xl font-extrabold leading-none",
+                c.tint === "rose" ? "text-rose-600" : c.tint === "brand" ? "text-brand-700" : "text-ink-900"
+              )}
+            >
+              {c.value}
+            </span>
+            <span className="text-xs font-medium text-ink-500">{c.label}</span>
+          </button>
+        ))}
+      </div>
+      {soon && (
+        <p className="mt-2 px-1 text-xs text-ink-400">Priority &amp; paid queues arrive with consultations.</p>
+      )}
+    </div>
+  );
+}
+
+/* ---------------- people you may know (app parity, mobile only) ---------------- */
+
+function PeopleYouMayKnow() {
+  const nav = useNavigate();
+  const { demo } = useAuth();
+  const [people, setPeople] = useState(null);
+
+  useEffect(() => {
+    dok.follows
+      .suggestions()
+      .then((d) => setPeople(d.suggestions || []))
+      .catch(() => setPeople([]));
+  }, []);
+
+  if (!people || people.length === 0) return null;
+
+  return (
+    <div className="card p-4 lg:hidden">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-bold text-ink-900">People you may know</h3>
+        <button onClick={() => nav("/app/network")} className="text-xs font-semibold text-brand-700">See all</button>
+      </div>
+      <div className="no-scrollbar -mx-1 flex gap-3 overflow-x-auto px-1">
+        {people.map((u) => (
+          <SuggestionCard key={u._id || u.id} user={u} demo={demo} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SuggestionCard({ user, demo }) {
+  const [done, setDone] = useState(false);
+  const connect = async () => {
+    setDone(true);
+    if (!demo) {
+      try { await dok.network.request(user._id || user.id); } catch {}
+    }
+  };
+  return (
+    <div className="w-36 shrink-0 rounded-2xl border border-ink-900/[.06] p-3 text-center">
+      <Avatar user={user} size={56} className="mx-auto" />
+      <p className="mt-2 truncate text-sm font-semibold text-ink-900">{user.fullName}</p>
+      <p className="truncate text-xs text-ink-500">{user.professionalHeadline || roleLabel(user.role)}</p>
+      <button
+        onClick={connect}
+        disabled={done}
+        className={cn("mt-2 w-full rounded-full py-1.5 text-xs font-semibold transition", done ? "btn-outline" : "bg-brand-600 text-white hover:bg-brand-700")}
+      >
+        {done ? "Requested" : "+ Connect"}
+      </button>
     </div>
   );
 }

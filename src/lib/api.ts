@@ -108,8 +108,13 @@ export const dok = {
   },
   profile: {
     me: () => unwrap(api.get("/profile/me")),
+    full: () => unwrap(api.get("/profile/me/full")), // hydrate: { user, locks, memberSince, accountAge, doctor|student|general, completion, verification }
+    completion: () => unwrap(api.get("/profile/me/completion")), // { completion: { sections, percent }, verification: { status } }
     status: () => unwrap(api.get("/profile/me/status")),
     counts: () => unwrap(api.get("/profile/me/counts")),
+    usernameCheck: (username) => unwrap(api.get(`/profile/username/check?username=${encodeURIComponent(username)}`)), // { available, username, reason }
+    updateUsername: (username) => unwrap(api.put("/profile/me/username", { username })), // { uniqueUsername } · 400 format · 409 taken
+    byUsername: (handle) => unwrap(api.get(`/profile/u/${encodeURIComponent(String(handle).replace(/^@/, ""))}`)),
     byId: (id) => unwrap(api.get(`/profile/${id}`)),
     publicBySlug: (slug) => unwrap(api.get(`/profile/public/${slug}`)),
     shareLink: () => unwrap(api.get("/profile/me/share/link")),

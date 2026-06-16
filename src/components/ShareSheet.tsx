@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
  *  3. External deep links — WhatsApp / Telegram / native share, built client-side
  *     from the copy-link URL.
  */
-export default function ShareSheet({ open, onClose, post, demo, kind = "post" }) {
+export default function ShareSheet({ open, onClose, post, demo, kind = "post", shareUrl }) {
   const toast = useToast();
   const postId = post?._id || post?.id;
   const [picked, setPicked] = useState([]);
@@ -58,14 +58,16 @@ export default function ShareSheet({ open, onClose, post, demo, kind = "post" })
       }
     })();
     // Secured public link (read-only preview endpoint; no tokens leak).
-    // Reels have no dedicated share-link endpoint — build the public URL client-side.
-    if (kind === "reel") {
+    // A caller-supplied URL (e.g. a profile's /u/username link) wins.
+    if (shareUrl) {
+      setLink({ webFallback: shareUrl });
+    } else if (kind === "reel") {
       setLink({ webFallback: `${typeof window !== "undefined" ? window.location.origin : "https://doklynk.app"}/reel/${postId || ""}` });
     } else if (postId) {
       dok.posts.shareLink(postId).then(setLink).catch(() => setLink(null));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, demo, postId, kind]);
+  }, [open, demo, postId, kind, shareUrl]);
 
   // low-latency contact search
   useEffect(() => {
