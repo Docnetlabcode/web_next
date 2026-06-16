@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { Logo, Avatar, Verified } from "@/components/ui/Primitives";
 import NavArrows from "@/components/ui/NavArrows";
-import { useScrollReveal, useCountUp, compact, cn } from "@/lib/utils";
+import { useScrollReveal, cn } from "@/lib/utils";
 
 // Illustrative people for the marketing page only (pre-login showcase — not live data).
 const SAMPLE = [
@@ -21,12 +21,10 @@ const SAMPLE = [
 export default function Landing() {
   useScrollReveal();
   return (
-    <div className="overflow-hidden bg-white">
+    <div className="overflow-x-clip bg-white">
       <NavArrows variant="floating" />
       <Nav />
       <Hero />
-      <LogoMarquee />
-      <Stats />
       <Features />
       <Roles />
       <Showcase />
@@ -153,49 +151,6 @@ function HeroVisual() {
 
       {/* back card */}
       <div className="absolute -bottom-6 left-8 right-8 -z-0 h-40 rounded-3xl bg-gradient-to-br from-brand-600 to-brand-800 opacity-90 shadow-glow" />
-    </div>
-  );
-}
-
-function LogoMarquee() {
-  const items = ["AIIMS", "Charité", "MGH", "Apollo", "AKH Vienna", "UCSF", "Mayo Clinic", "NHS"];
-  return (
-    <div className="border-y border-ink-900/[.06] bg-[#f4f6f6] py-6">
-      <div className="container-x">
-        <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-ink-400">Clinicians from leading institutions</p>
-        <div className="relative overflow-hidden">
-          <div className="flex w-max animate-marquee gap-12">
-            {[...items, ...items].map((x, i) => (
-              <span key={i} className="font-display text-lg font-bold text-ink-400/70">{x}</span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Stats() {
-  const data = [
-    { n: 12400, suffix: "+", label: "Verified clinicians" },
-    { n: 340, suffix: "k", label: "Cases & reels shared" },
-    { n: 96, suffix: "%", label: "Profiles license-checked" },
-    { n: 48, suffix: "+", label: "Specialties covered" },
-  ];
-  return (
-    <section className="container-x py-16">
-      <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
-        {data.map((d) => <Stat key={d.label} {...d} />)}
-      </div>
-    </section>
-  );
-}
-function Stat({ n, suffix, label }) {
-  const [val, ref] = useCountUp(n);
-  return (
-    <div ref={ref} className="text-center">
-      <p className="font-display text-4xl font-extrabold text-brand-600 sm:text-5xl">{compact(val)}{suffix}</p>
-      <p className="mt-1 text-sm text-ink-500">{label}</p>
     </div>
   );
 }
