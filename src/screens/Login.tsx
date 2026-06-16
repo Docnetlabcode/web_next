@@ -134,7 +134,8 @@ export default function Login() {
           </ul>
         </div>
 
-        <p className="relative text-xs text-white/55">© 2026 DokLynk · A trusted network for clinicians, students &amp; patients.</p>
+        {/* pl clears the fixed bottom-left NavArrows pill so it never sits over this text */}
+        <p className="relative pl-24 text-xs text-white/55">© 2026 DokLynk · A trusted network for clinicians, students &amp; patients.</p>
       </aside>
 
       {/* Form panel */}
