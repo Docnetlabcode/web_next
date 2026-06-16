@@ -5,6 +5,7 @@ import {
   ShieldCheck, Stethoscope, Clapperboard, Users, MessageSquare, FileText,
   ArrowRight, Heart, MessageCircle, BadgeCheck, Activity, Search, Sparkles,
   Linkedin, Twitter, Instagram, Mail, MapPin, Phone,
+  ChevronDown, LifeBuoy, Menu, X,
 } from "lucide-react";
 import { Logo, Avatar, Verified } from "@/components/ui/Primitives";
 import NavArrows from "@/components/ui/NavArrows";
@@ -35,8 +36,22 @@ export default function Landing() {
   );
 }
 
+const NAV_SECTIONS = [
+  { label: "Features", href: "#features" },
+  { label: "For clinicians", href: "#roles" },
+  { label: "Showcase", href: "#showcase" },
+  { label: "Team", href: "#team" },
+];
+const NAV_RESOURCES = [
+  { label: "Help Center", to: "/help", icon: LifeBuoy, desc: "Answers, guides & support" },
+  { label: "Privacy Policy", to: "/privacy", icon: ShieldCheck, desc: "How we protect your data" },
+  { label: "Terms & Conditions", to: "/terms", icon: FileText, desc: "The rules of the platform" },
+];
+
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
@@ -48,21 +63,75 @@ function Nav() {
     <header
       className={cn(
         "sticky top-0 z-50 transition-all duration-300",
-        scrolled ? "glass border-b border-ink-900/[.06] shadow-2" : "border-b border-transparent bg-transparent"
+        scrolled || open ? "glass border-b border-ink-900/[.06] shadow-2" : "border-b border-transparent bg-transparent"
       )}
     >
       <div className="container-x flex h-20 items-center justify-between">
         <Logo />
-        <nav className="hidden items-center gap-8 text-sm font-medium text-ink-700 md:flex">
-          <a href="#features" className="transition hover:text-brand-700">Features</a>
-          <a href="#roles" className="transition hover:text-brand-700">For clinicians</a>
-          <a href="#showcase" className="transition hover:text-brand-700">Showcase</a>
-          <a href="#team" className="transition hover:text-brand-700">Team</a>
+
+        {/* desktop links */}
+        <nav className="hidden items-center gap-7 text-sm font-medium text-ink-700 lg:flex">
+          {NAV_SECTIONS.map((s) => (
+            <a key={s.href} href={s.href} className="group relative py-1 transition hover:text-brand-700">
+              {s.label}
+              <span className="absolute inset-x-0 -bottom-0.5 h-0.5 origin-left scale-x-0 rounded-full bg-brand-600 transition-transform duration-300 group-hover:scale-x-100" />
+            </a>
+          ))}
+
+          {/* Resources dropdown (hover) */}
+          <div className="group relative">
+            <button className="flex items-center gap-1 py-1 transition hover:text-brand-700">
+              Resources <ChevronDown size={15} className="transition-transform duration-300 group-hover:rotate-180" />
+            </button>
+            {/* pt bridges the gap so the menu stays open while moving the cursor down */}
+            <div className="invisible absolute right-0 top-full z-50 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
+              <div className="w-72 overflow-hidden rounded-2xl border border-ink-900/[.06] bg-white p-2 shadow-card">
+                {NAV_RESOURCES.map((r) => (
+                  <Link key={r.to} to={r.to} className="flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-brand-50">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600"><r.icon size={17} /></span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-ink-900">{r.label}</span>
+                      <span className="block text-xs text-ink-400">{r.desc}</span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
         </nav>
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="btn-primary px-5 py-2.5 text-sm">Get started</Link>
+
+        <div className="flex items-center gap-2">
+          <Link to="/login" className="btn-primary group hidden px-5 py-2.5 text-sm sm:inline-flex">
+            Get started <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
+          </Link>
+          <button
+            onClick={() => setOpen((o) => !o)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            className="press grid h-10 w-10 place-items-center rounded-xl text-ink-700 transition hover:bg-ink-900/[.05] lg:hidden"
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
       </div>
+
+      {/* mobile menu */}
+      {open && (
+        <div className="border-t border-ink-900/[.06] glass lg:hidden">
+          <div className="container-x flex flex-col py-3">
+            {NAV_SECTIONS.map((s) => (
+              <a key={s.href} href={s.href} onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink-700 transition hover:bg-brand-50 hover:text-brand-700">{s.label}</a>
+            ))}
+            <div className="my-1.5 h-px bg-ink-900/[.06]" />
+            {NAV_RESOURCES.map((r) => (
+              <Link key={r.to} to={r.to} onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-ink-700 transition hover:bg-brand-50 hover:text-brand-700">
+                <r.icon size={17} className="text-brand-600" /> {r.label}
+              </Link>
+            ))}
+            <Link to="/login" onClick={() => setOpen(false)} className="btn-primary mt-2 py-3 text-sm">Get started <ArrowRight size={16} /></Link>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -93,12 +162,6 @@ function Hero() {
               Join the DokLynk <ArrowRight size={18} className="transition group-hover:translate-x-1" />
             </Link>
             <Link to="/app" className="btn-outline px-6 py-3.5 text-base">Explore as guest</Link>
-          </div>
-          <div className="mt-9 flex items-center gap-4">
-            <div className="flex -space-x-3">
-              {SAMPLE.slice(0, 4).map((u) => <Avatar key={u._id} user={u} size={38} className="ring-2 ring-white" />)}
-            </div>
-            <p className="text-sm text-ink-500"><b className="text-ink-900">12,400+</b> verified clinicians already onboard</p>
           </div>
         </div>
         <HeroVisual />
@@ -267,12 +330,23 @@ function Showcase() {
   );
 }
 
-// TODO: replace these placeholders with the real founding team (names, roles, bios, photos).
+// TODO: replace these placeholders with the real founding team (names, roles, bios).
 const TEAM = [
-  { name: "Aarav Mehta", role: "Founder & CEO", bio: "Built DokLynk to give clinicians a trusted, license-verified home for clinical knowledge." },
-  { name: "Dr. Riya Sharma", role: "Co-founder & Chief Medical Officer", bio: "Practising physician shaping the clinical safety, verification and consult experience." },
-  { name: "Karan Patel", role: "Co-founder & CTO", bio: "Leads the real-time platform — feed, chat and consults built for speed and privacy." },
+  { name: "Aarav Mehta", role: "Founder & CEO", bio: "Built DokLynk to give clinicians a trusted, license-verified home for clinical knowledge.", color: "from-brand-600 to-brand-800", photo: "/team/member-1.png" },
+  { name: "Dr. Riya Sharma", role: "Co-founder & Chief Medical Officer", bio: "Practising physician shaping the clinical safety, verification and consult experience.", color: "from-amber-500 to-amber-700", photo: "/team/member-2.png" },
+  { name: "Karan Patel", role: "Co-founder & CTO", bio: "Leads the real-time platform — feed, chat and consults built for speed and privacy.", color: "from-teal-600 to-emerald-700", photo: "/team/member-3.png" },
 ];
+
+// Profile image with a graceful fallback to initials when the file is empty/broken.
+function TeamAvatar({ member }) {
+  const [broken, setBroken] = useState(false);
+  const initials = member.name.replace(/^Dr\.?\s*/i, "").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const frame = "h-20 w-20 rounded-full ring-4 ring-white shadow-card";
+  if (member.photo && !broken) {
+    return <img src={member.photo} alt={member.name} onError={() => setBroken(true)} className={`${frame} object-cover`} />;
+  }
+  return <span className={`grid place-items-center bg-brand-100 text-xl font-extrabold text-brand-700 ${frame}`}>{initials}</span>;
+}
 
 function Team() {
   useScrollReveal();
@@ -283,13 +357,17 @@ function Team() {
         <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Meet the team</h2>
         <p className="mt-4 text-lg text-ink-500">Clinicians and engineers building a network the medical community can trust.</p>
       </div>
-      <div className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-14 grid gap-6 lg:grid-cols-3">
         {TEAM.map((m, i) => (
-          <div key={m.name} className="reveal card flex flex-col items-center p-7 text-center transition hover:-translate-y-1 hover:shadow-glow" style={{ transitionDelay: `${i * 80}ms` }}>
-            <Avatar user={{ fullName: m.name }} size={84} className="ring-4 ring-brand-50" />
-            <h3 className="mt-4 text-base font-bold text-ink-900">{m.name}</h3>
-            <span className="chip mt-2 bg-brand-50 text-brand-700">{m.role}</span>
-            <p className="mt-3 text-sm leading-relaxed text-ink-500">{m.bio}</p>
+          <div key={m.name} className="reveal overflow-hidden rounded-3xl border border-ink-900/[.06] bg-white shadow-card transition hover:-translate-y-1 hover:shadow-glow" style={{ transitionDelay: `${i * 80}ms` }}>
+            <div className={`bg-gradient-to-br ${m.color} p-6 text-white`}>
+              <p className="text-sm font-semibold uppercase tracking-wide text-white/80">{m.role}</p>
+              <h3 className="mt-1 font-display text-2xl font-bold">{m.name}</h3>
+            </div>
+            <div className="px-6 pb-6">
+              <div className="-mt-10"><TeamAvatar member={m} /></div>
+              <p className="mt-3 text-sm leading-relaxed text-ink-600">{m.bio}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -305,9 +383,8 @@ function CTA() {
         <div className="relative">
           <h2 className="font-display text-4xl font-extrabold tracking-tight text-white text-balance sm:text-5xl">Join the network built on trust</h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/85">Create your verified profile in minutes. Free for students and general users.</p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="mt-8 flex justify-center">
             <Link to="/login" className="btn px-7 py-3.5 text-base bg-white text-brand-700 hover:bg-white/90">Join the DokLynk</Link>
-            <Link to="/app" className="btn px-7 py-3.5 text-base border border-white/40 text-white hover:bg-white/10">Continue browsing</Link>
           </div>
         </div>
       </div>
@@ -384,10 +461,10 @@ function Footer() {
               <li className="flex items-center gap-2.5"><Phone size={15} className="shrink-0 text-white/50" /> +91 80 4718 2200</li>
               <li className="flex items-start gap-2.5"><MapPin size={15} className="mt-0.5 shrink-0 text-white/50" /> Bengaluru, Karnataka, India</li>
             </ul>
-            <div className="mt-5 flex flex-wrap gap-4 text-sm">
-              <Link to="/privacy" className="text-white/70 transition hover:text-white">Privacy</Link>
-              <Link to="/terms" className="text-white/70 transition hover:text-white">Terms</Link>
-              <Link to="/help" className="text-white/70 transition hover:text-white">Help</Link>
+            <div className="mt-5 flex flex-col gap-2 text-sm">
+              <Link to="/privacy" className="text-white/70 transition hover:text-white">Privacy Policy</Link>
+              <Link to="/terms" className="text-white/70 transition hover:text-white">Terms &amp; Conditions</Link>
+              <Link to="/help" className="text-white/70 transition hover:text-white">Help Center</Link>
             </div>
           </div>
         </div>
