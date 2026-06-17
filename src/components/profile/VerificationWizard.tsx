@@ -43,6 +43,7 @@ export default function VerificationWizard({ onChanged }) {
   const [livenessBlob, setLivenessBlob] = useState(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [livenessView, setLivenessView] = useState(false);
+  const [livenessUrl, setLivenessUrl] = useState("");
   const setBk = (k) => (v) => setB((s) => ({ ...s, [k]: v }));
 
   useEffect(() => {
@@ -50,6 +51,13 @@ export default function VerificationWizard({ onChanged }) {
       .then((d) => { setStatus(d?.status || "not_submitted"); setRejection(d?.rejectionReason || ""); })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!livenessBlob) { setLivenessUrl(""); return; }
+    const url = URL.createObjectURL(livenessBlob);
+    setLivenessUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [livenessBlob]);
 
   const submitA = async () => {
     setErr("");
@@ -131,7 +139,7 @@ export default function VerificationWizard({ onChanged }) {
             </div>
           ) : (
             <div className="space-y-3">
-              <button onClick={() => setStep(1)} className="flex items-center gap-1 text-sm text-ink-500 hover:text-brand-700"><ArrowLeft size={15} /> Back to Path A</button>
+              <button onClick={() => { setErr(""); setStep(1); }} className="flex items-center gap-1 text-sm text-ink-500 hover:text-brand-700"><ArrowLeft size={15} /> Back to Path A</button>
               <Field label="Aadhaar / Government ID *"><FileUpload value={aadhaarDoc} onChange={setAadhaar} label="Aadhaar / Gov-ID" /></Field>
               <Field label="PAN card *"><FileUpload value={panDoc} onChange={setPan} label="PAN card" /></Field>
               <Field label="Work ID card *"><FileUpload value={workIdCard} onChange={setWorkId} label="Work ID card" /></Field>
@@ -167,8 +175,8 @@ export default function VerificationWizard({ onChanged }) {
           onComplete={(dataUrl) => { setLivenessBlob(dataUrlToBlob(dataUrl)); setScanOpen(false); }}
         />
       )}
-      {livenessView && livenessBlob && (
-        <MediaViewer src={URL.createObjectURL(livenessBlob)} kind="image" onClose={() => setLivenessView(false)} />
+      {livenessView && livenessUrl && (
+        <MediaViewer src={livenessUrl} kind="image" onClose={() => setLivenessView(false)} />
       )}
     </div>
   );
