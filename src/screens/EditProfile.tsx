@@ -41,9 +41,13 @@ export default function EditProfile() {
   const [loading, setLoading] = useState(!demo);
 
   const load = async () => {
-    const full = await dok.profile.full();
-    setData(full);
-    if (full?.user) updateUser(full.user);
+    try {
+      const full = await dok.profile.full();
+      setData(full);
+      if (full?.user) updateUser(full.user);
+    } catch (e) {
+      console.warn("Failed to load profile", e);
+    }
   };
 
   useEffect(() => {
