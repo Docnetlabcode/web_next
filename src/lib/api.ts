@@ -106,7 +106,10 @@ export const dok = {
     sendOtp: (b) => unwrap(api.post("/auth/send-otp", b)),
     verifyOtp: (b) => unwrap(api.post("/auth/verify-otp", b)),
     // Web: no body — refresh token comes from the httpOnly cookie; CSRF header added by interceptor.
-    refresh: () => unwrap(api.post("/auth/refresh-token")),
+    refresh: () => unwrap(api.post("/auth/refresh-token")).then((payload) => {
+      TOKENS.set(payload);
+      return payload;
+    }),
     logout: () => unwrap(api.post("/auth/logout")),
     logoutAll: () => unwrap(api.post("/auth/logout-all")),
     sessions: () => unwrap(api.get("/auth/sessions")),

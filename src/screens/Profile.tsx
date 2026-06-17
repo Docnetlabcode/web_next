@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { MapPin, Briefcase, GraduationCap, Building2, Share2, ArrowLeft, Settings as SettingsIcon, Stethoscope, Activity, CalendarDays } from "lucide-react";
+import { MapPin, Briefcase, GraduationCap, Building2, Share2, ArrowLeft, Settings as SettingsIcon, Stethoscope, Activity, CalendarDays, Mail, Phone, Languages as LangIcon, Award } from "lucide-react";
 import { useNavigate } from "@/lib/router";
 import { Avatar, Verified, RoleBadge, Spinner } from "@/components/ui/Primitives";
 import PostCard from "@/components/PostCard";
@@ -9,14 +9,14 @@ import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { cn, compact } from "@/lib/utils";
 
-const TABS = ["Posts", "Pulse", "Cases", "About"];
+const TABS = ["About", "Posts", "Pulse", "Cases"];
 const yr = (d) => (d ? new Date(d).getFullYear() : "Now");
 const monthYear = (d) => (d ? new Date(d).toLocaleDateString(undefined, { month: "long", year: "numeric" }) : null);
 
 export default function Profile() {
   const { user: authUser } = useAuth();
   const nav = useNavigate();
-  const [tab, setTab] = useState("Posts");
+  const [tab, setTab] = useState("About");
   const [share, setShare] = useState(false);
 
   // Live profile: { user, roleProfile }.
@@ -27,26 +27,30 @@ export default function Profile() {
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    dok.profile
-      .me()
-      .then((d) => alive && setData(d))
-      .catch(() => {})
-      .finally(() => alive && setLoading(false));
-    dok.profile
-      .full()
-      .then((d) => alive && setFull(d))
-      .catch(() => {});
+    Promise.allSettled([
+      dok.profile.me(),
+      dok.profile.full()
+    ]).then(([meRes, fullRes]) => {
+      if (!alive) return;
+      if (meRes.status === "fulfilled") setData(meRes.value);
+      if (fullRes.status === "fulfilled") setFull(fullRes.value);
+      setLoading(false);
+    });
     return () => {
       alive = false;
     };
   }, []);
 
-  const user = data?.user || authUser || {};
+  const user = full?.user || data?.user || authUser || {};
+  const doctor = full?.doctor || {};
+  const student = full?.student || {};
+  const general = full?.general || {};
   const rp = data?.roleProfile || {};
-  const headline = user.professionalHeadline || user.headline || rp.mainSpecialization || rp.course || "";
-  const primaryPlace = rp.hospitals?.[0]?.name || rp.institution || "";
+
+  const headline = user.professionalHeadline || user.headline || doctor.specialties?.[0] || rp.mainSpecialization || rp.course || "";
+  const primaryPlace = doctor.workplace?.[0]?.organizationName || student.academics?.[0]?.collegeName || rp.hospitals?.[0]?.name || rp.institution || "";
   const subtitle = [primaryPlace, user.city].filter(Boolean).join(" · ");
-  const verified = user.isVerified || rp.kyc?.status === "verified";
+  const verified = user.isVerified || full?.verification?.status === "verified" || rp.kyc?.status === "verified";
   const since = monthYear(full?.memberSince || user.createdAt);
   const ageLabel = full?.accountAge?.label;
 
@@ -92,7 +96,6 @@ export default function Profile() {
           <div className={cn("flex items-center gap-1.5", user.uniqueUsername ? "mt-0.5" : "mt-3")}>
             <h1 className="font-display text-2xl font-extrabold tracking-tight text-ink-900 text-balance">{user.titlePrefix ? `${user.titlePrefix} ` : ""}{user.fullName || "Your name"}</h1>
           </div>
-          {headline && <p className="mt-1 text-sm leading-snug text-ink-600">{headline}</p>}
           {subtitle && <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-500"><Building2 size={14} /> {subtitle}</p>}
           {since && (
             <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink-400">
@@ -139,7 +142,7 @@ export default function Profile() {
             {tab === "Posts" && <Empty icon={Briefcase} text="Posts you publish will appear here." />}
             {tab === "Pulse" && <Empty icon={Stethoscope} text="Your reels (Pulse) will appear here." />}
             {tab === "Cases" && <Empty icon={Stethoscope} text="Clinical cases you publish will appear here." />}
-            {tab === "About" && <About user={user} rp={rp} />}
+            {tab === "About" && <About user={user} doctor={doctor} student={student} general={general} />}
           </>
         )}
       </div>
@@ -158,44 +161,130 @@ function Empty({ icon: Icon, text }) {
   );
 }
 
-function About({ user, rp }) {
+function About({ user, doctor, student, general }) {
   const role = user.role;
-  const education = rp.education || [];
-  const hospitals = rp.hospitals || rp.workplace || [];
-  const bio = user.bio;
+  const education = doctor.education || [];
+  const workplace = doctor.workplace || [];
+  const academics = student.academics || [];
+  const experiences = student.experiences || [];
+  const certificates = doctor.certificates || [];
+  const specialties = doctor.specialties || [];
+  const interests = general.interests || [];
 
-  const hasAny = bio || education.length || hospitals.length || rp.specializations?.length || rp.course || rp.skills?.length;
-  if (!hasAny) return <Empty icon={MapPin} text="Add your bio, education and experience from Settings → Edit profile." />;
+  const hasContact = user.bio || user.city || user.languages?.length || user.workEmail || user.workPhone || user.age != null;
+  const hasRoleDetails =
+    role === "doctor" ? (education.length > 0 || workplace.length > 0 || certificates.length > 0 || specialties.length > 0) :
+    role === "student" ? (academics.length > 0 || experiences.length > 0) :
+    role === "general_user" ? (interests.length > 0) : false;
+
+  const hasAny = hasContact || hasRoleDetails;
+  if (!hasAny) return <Empty icon={MapPin} text="Add your bio, education and experience from Edit profile." />;
 
   return (
-    <div className="card space-y-2 p-5">
-      {bio && <p className="mb-3 text-sm leading-relaxed text-ink-700">{bio}</p>}
-
-      {role === "doctor" && rp.specializations?.length > 0 && (
-        <Row icon={Stethoscope} tint="bg-brand-50 text-brand-600" title="Specializations" text={rp.specializations.join(" · ")} />
+    <div className="space-y-5">
+      {hasContact && (
+        <Section title="About">
+          {user.bio && (
+            <p className="text-sm leading-relaxed text-ink-700 whitespace-pre-wrap">{user.bio}</p>
+          )}
+          {user.bio && (user.city || user.age != null || user.languages?.length > 0 || user.workEmail || user.workPhone) && (
+            <hr className="my-4 border-ink-900/[.06]" />
+          )}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {user.city && <Line icon={MapPin} text={user.city} />}
+            {user.age != null && <Line icon={CalendarDays} text={`${user.age} years`} />}
+            {user.languages?.length > 0 && <Line icon={LangIcon} text={user.languages.join(", ")} />}
+            {user.workEmail && <Line icon={Mail} text={user.workEmail} />}
+            {user.workPhone && <Line icon={Phone} text={user.workPhone} />}
+          </div>
+        </Section>
       )}
 
-      {hospitals.map((h, i) => (
-        <Row key={`w${i}`} icon={Briefcase} tint="bg-brand-50 text-brand-600"
-          title={[h.designation, h.name].filter(Boolean).join(" · ") || h.name}
-          text={[h.address, `${yr(h.startDate)} — ${yr(h.endDate)}`].filter(Boolean).join(" · ")} />
-      ))}
-
-      {education.map((e, i) => (
-        <Row key={`e${i}`} icon={GraduationCap} tint="bg-amber-50 text-amber-600"
-          title={[e.degreeName, e.organizationName].filter(Boolean).join(" · ") || e.organizationName}
-          text={[e.departmentName, `${yr(e.startDate)} — ${yr(e.endDate)}`].filter(Boolean).join(" · ")} />
-      ))}
-
-      {role === "student" && (rp.course || rp.institution) && (
-        <Row icon={GraduationCap} tint="bg-amber-50 text-amber-600"
-          title={[rp.course, rp.institution].filter(Boolean).join(" · ")}
-          text={[rp.yearOfStudy, rp.graduationYear && `Grad ${rp.graduationYear}`].filter(Boolean).join(" · ")} />
+      {role === "doctor" && specialties.length > 0 && (
+        <Section title="Specialties">
+          <div className="flex flex-wrap gap-2">
+            {specialties.map((s) => <span key={s} className="chip bg-brand-50 text-brand-700">{s}</span>)}
+          </div>
+        </Section>
       )}
 
-      {rp.skills?.length > 0 && (
-        <Row icon={Stethoscope} tint="bg-ink-900/[.04] text-ink-600" title="Skills" text={rp.skills.join(" · ")} />
+      {role === "doctor" && workplace.length > 0 && (
+        <Section title="Experience">
+          {workplace.map((h, i) => (
+            <Row key={`w${i}`} icon={Briefcase} tint="bg-brand-50 text-brand-600"
+              title={[h.role || h.designation, h.organizationName || h.name].filter(Boolean).join(" · ") || h.organizationName || h.name}
+              text={[h.department || h.address, `${yr(h.startDate)} — ${h.endDate ? yr(h.endDate) : "Present"}`].filter(Boolean).join(" · ")} />
+          ))}
+        </Section>
       )}
+
+      {role === "doctor" && education.length > 0 && (
+        <Section title="Education">
+          {education.map((e, i) => (
+            <Row key={`e${i}`} icon={GraduationCap} tint="bg-amber-50 text-amber-600"
+              title={[e.organizationName, e.departmentName].filter(Boolean).join(" · ") || e.organizationName}
+              text={`${yr(e.startDate)} — ${e.endDate ? yr(e.endDate) : "Present"}`} />
+          ))}
+        </Section>
+      )}
+
+      {role === "student" && academics.length > 0 && (
+        <Section title="Academics">
+          {academics.map((a, i) => (
+            <Row key={`a${i}`} icon={GraduationCap} tint="bg-amber-50 text-amber-600"
+              title={[a.program, a.collegeName].filter(Boolean).join(" · ") || a.collegeName}
+              text={[a.city, a.currentYear, a.expectedGraduationDate && `Grad ${yr(a.expectedGraduationDate)}`].filter(Boolean).join(" · ")} />
+          ))}
+        </Section>
+      )}
+
+      {role === "student" && experiences.length > 0 && (
+        <Section title="Experience & interests">
+          {experiences.map((e, i) => (
+            <Row key={`x${i}`} icon={Briefcase} tint="bg-brand-50 text-brand-600"
+              title={[e.program, e.institution].filter(Boolean).join(" · ") || e.institution}
+              text={[e.city, `${yr(e.startDate)} — ${e.endDate ? yr(e.endDate) : "Present"}`, e.interests?.join(", ")].filter(Boolean).join(" · ")} />
+          ))}
+        </Section>
+      )}
+
+      {role === "doctor" && certificates.length > 0 && (
+        <Section title="Certificates">
+          {certificates.map((c, i) => (
+            <Row key={`c${i}`} icon={Award} tint="bg-ink-900/[.04] text-ink-600"
+              title={c.name}
+              text={[c.validationDate && `Valid ${monthYear(c.validationDate)}`, c.fileUrl && "Document attached"].filter(Boolean).join(" · ")} />
+          ))}
+        </Section>
+      )}
+
+      {role === "general_user" && interests.length > 0 && (
+        <Section title="Clinical interests">
+          <div className="flex flex-wrap gap-2">
+            {interests.map((t, i) => <span key={i} className="chip bg-brand-50 text-brand-700">{typeof t === "string" ? t : t.topic}</span>)}
+          </div>
+        </Section>
+      )}
+    </div>
+  );
+}
+
+function Section({ title, children }) {
+  return (
+    <section className="card p-5">
+      <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-400">{title}</h2>
+      <div className="space-y-2">{children}</div>
+    </section>
+  );
+}
+
+function Line({ icon: Icon, text }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-ink-900/[.04] bg-ink-900/[.01] p-3 transition hover:bg-ink-900/[.03]">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600">
+        <Icon size={16} />
+      </span>
+      <span className="text-sm font-medium text-ink-700 break-all">{text}</span>
     </div>
   );
 }

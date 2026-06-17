@@ -352,15 +352,25 @@ function Details({ user, rd }) {
   const interests = rd.interests || user.interests || [];
 
   const hasContact = user.bio || user.city || user.languages?.length || user.workEmail || user.workPhone || user.age != null;
-  const hasAny = hasContact || education.length || workplace.length || academics.length || experiences.length || certificates.length || specialties.length || interests.length;
+  const hasRoleDetails =
+    role === "doctor" ? (education.length > 0 || workplace.length > 0 || certificates.length > 0 || specialties.length > 0) :
+    role === "student" ? (academics.length > 0 || experiences.length > 0) :
+    role === "general_user" ? (interests.length > 0) : false;
+
+  const hasAny = hasContact || hasRoleDetails;
   if (!hasAny) return null;
 
   return (
     <div className="mt-5 space-y-5">
       {hasContact && (
         <Section title="About">
-          {user.bio && <p className="text-sm leading-relaxed text-ink-700">{user.bio}</p>}
-          <div className="flex flex-col gap-2">
+          {user.bio && (
+            <p className="text-sm leading-relaxed text-ink-700 whitespace-pre-wrap">{user.bio}</p>
+          )}
+          {user.bio && (user.city || user.age != null || user.languages?.length > 0 || user.workEmail || user.workPhone) && (
+            <hr className="my-4 border-ink-900/[.06]" />
+          )}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {user.city && <Line icon={MapPin} text={user.city} />}
             {user.age != null && <Line icon={CalendarDays} text={`${user.age} years`} />}
             {user.languages?.length > 0 && <Line icon={LangIcon} text={user.languages.join(", ")} />}
@@ -370,7 +380,7 @@ function Details({ user, rd }) {
         </Section>
       )}
 
-      {specialties.length > 0 && (
+      {role === "doctor" && specialties.length > 0 && (
         <Section title="Specialties">
           <div className="flex flex-wrap gap-2">
             {specialties.map((s) => <span key={s} className="chip bg-brand-50 text-brand-700">{s}</span>)}
@@ -378,7 +388,7 @@ function Details({ user, rd }) {
         </Section>
       )}
 
-      {workplace.length > 0 && (
+      {role === "doctor" && workplace.length > 0 && (
         <Section title="Experience">
           {workplace.map((h, i) => (
             <Row key={`w${i}`} icon={Briefcase} tint="bg-brand-50 text-brand-600"
@@ -388,7 +398,7 @@ function Details({ user, rd }) {
         </Section>
       )}
 
-      {education.length > 0 && (
+      {role === "doctor" && education.length > 0 && (
         <Section title="Education">
           {education.map((e, i) => (
             <Row key={`e${i}`} icon={GraduationCap} tint="bg-amber-50 text-amber-600"
@@ -398,7 +408,7 @@ function Details({ user, rd }) {
         </Section>
       )}
 
-      {academics.length > 0 && (
+      {role === "student" && academics.length > 0 && (
         <Section title="Academics">
           {academics.map((a, i) => (
             <Row key={`a${i}`} icon={GraduationCap} tint="bg-amber-50 text-amber-600"
@@ -408,7 +418,7 @@ function Details({ user, rd }) {
         </Section>
       )}
 
-      {experiences.length > 0 && (
+      {role === "student" && experiences.length > 0 && (
         <Section title="Experience & interests">
           {experiences.map((e, i) => (
             <Row key={`x${i}`} icon={Briefcase} tint="bg-brand-50 text-brand-600"
@@ -418,7 +428,7 @@ function Details({ user, rd }) {
         </Section>
       )}
 
-      {certificates.length > 0 && (
+      {role === "doctor" && certificates.length > 0 && (
         <Section title="Certificates">
           {certificates.map((c, i) => (
             <Row key={`c${i}`} icon={Award} tint="bg-ink-900/[.04] text-ink-600"
@@ -450,7 +460,12 @@ function Section({ title, children }) {
 
 function Line({ icon: Icon, text }) {
   return (
-    <p className="flex items-center gap-2.5 text-sm text-ink-700"><Icon size={15} className="shrink-0 text-ink-400" /> {text}</p>
+    <div className="flex items-center gap-3 rounded-xl border border-ink-900/[.04] bg-ink-900/[.01] p-3 transition hover:bg-ink-900/[.03]">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600">
+        <Icon size={16} />
+      </span>
+      <span className="text-sm font-medium text-ink-700 break-all">{text}</span>
+    </div>
   );
 }
 

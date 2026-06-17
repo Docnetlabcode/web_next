@@ -14,7 +14,7 @@ function RowField({ f, value, onChange }) {
   if (f.type === "area") return <Area value={value} onChange={onChange} placeholder={f.placeholder} />;
   if (f.type === "tags") return <Tags value={value || []} onChange={onChange} placeholder={f.placeholder || "Type and press Enter"} />;
   if (f.type === "file") return <FileUpload value={value} onChange={onChange} label={f.label} />;
-  if (f.type === "date") return <Text type="date" value={value} onChange={onChange} />;
+  if (f.type === "date") return <Text type="date" value={value ? String(value).slice(0, 10) : ""} onChange={onChange} />;
   return <Text value={value} onChange={onChange} placeholder={f.placeholder} />;
 }
 
