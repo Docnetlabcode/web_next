@@ -7,7 +7,7 @@ export default function MediaViewer({ src, kind = "image", onClose }) {
   return createPortal(
     <div className="fixed inset-0 z-[96] flex flex-col bg-ink-900/95 backdrop-blur animate-fade-in" onClick={onClose}>
       <div className="flex justify-end p-4">
-        <button onClick={onClose} className="press rounded-full p-2 text-white hover:bg-white/10"><X size={24} /></button>
+        <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="press rounded-full p-2 text-white hover:bg-white/10"><X size={24} /></button>
       </div>
       <div className="flex flex-1 items-center justify-center overflow-auto p-4" onClick={(e) => e.stopPropagation()}>
         {kind === "pdf" ? (

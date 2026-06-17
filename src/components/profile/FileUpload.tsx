@@ -57,7 +57,9 @@ export default function FileUpload({ value, onChange, label, accept = "image/*,a
         {!disabled && (
           <div className="flex shrink-0 items-center gap-1">
             <button type="button" onClick={() => ref.current?.click()} title="Replace" className="press grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-white"><RefreshCw size={15} /></button>
-            <button type="button" onClick={() => onChange(null)} title="Remove" className="press grid h-8 w-8 place-items-center rounded-lg text-rose-500 hover:bg-white"><Trash2 size={15} /></button>
+            {value instanceof Blob && (
+              <button type="button" onClick={() => onChange(null)} title="Remove" className="press grid h-8 w-8 place-items-center rounded-lg text-rose-500 hover:bg-white"><Trash2 size={15} /></button>
+            )}
           </div>
         )}
       </div>

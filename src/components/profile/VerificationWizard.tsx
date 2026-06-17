@@ -135,7 +135,7 @@ export default function VerificationWizard({ onChanged }) {
               <Field label="Highest qualification *"><Text value={a.highestQualification} onChange={setAk("highestQualification")} placeholder="DM Cardiology" /></Field>
               <Field label="License document" hint="Image or PDF (optional)"><FileUpload value={licenseDoc} onChange={setLicenseDoc} label="License document" /></Field>
               {err && <p className="text-sm text-rose-600">{err}</p>}
-              <button onClick={submitA} disabled={busy} className="btn-primary w-full py-3 text-sm">{busy ? "Submitting…" : "Complete Path A →"}</button>
+              <button type="button" onClick={submitA} disabled={busy} className="btn-primary w-full py-3 text-sm">{busy ? "Submitting…" : "Complete Path A →"}</button>
             </div>
           ) : (
             <div className="space-y-3">
@@ -163,7 +163,7 @@ export default function VerificationWizard({ onChanged }) {
               </div>
 
               {err && <p className="text-sm text-rose-600">{err}</p>}
-              <button onClick={submitB} disabled={busy} className="btn-primary w-full py-3 text-sm">{busy ? "Submitting…" : "Submit for verification"}</button>
+              <button type="button" onClick={submitB} disabled={busy} className="btn-primary w-full py-3 text-sm">{busy ? "Submitting…" : "Submit for verification"}</button>
             </div>
           )}
         </>

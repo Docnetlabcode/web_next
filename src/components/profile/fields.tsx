@@ -50,7 +50,7 @@ export function Toggle({ label, desc, value, onChange }) {
 
 export function Tags({ value = [], onChange, placeholder = "Type and press Enter" }) {
   const [draft, setDraft] = useState("");
-  const add = () => { const v = draft.trim(); if (v && !value.includes(v)) onChange([...value, v]); setDraft(""); };
+  const add = () => { const v = draft.trim(); if (v && !value.includes(v)) { onChange([...value, v]); setDraft(""); } };
   return (
     <div>
       {value.length > 0 && (
@@ -75,7 +75,7 @@ export function SaveBar({ onSave, saving, err, ok, label = "Save section" }) {
     <div className="pt-1">
       {err && <p className="mb-2 text-sm text-rose-600">{err}</p>}
       {ok && <p className="mb-2 text-sm text-emerald-600">Saved ✓</p>}
-      <button onClick={onSave} disabled={saving} className="btn-primary w-full py-3 text-sm">{saving ? "Saving…" : label}</button>
+      <button type="button" onClick={onSave} disabled={saving} className="btn-primary w-full py-3 text-sm">{saving ? "Saving…" : label}</button>
     </div>
   );
 }

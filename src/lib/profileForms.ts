@@ -18,7 +18,7 @@ export const ROLE_SECTION_KEYS = {
   general_user: ["basic", "interests"],
 };
 
-// Backend completion.sections keys → internal section keys (others map to themselves).
+// Maps internal section key → backend key used in completion.sections (others map to themselves).
 const SECTION_KEY_MAP = { basic: "basicContact", professional: "professionalDetails" };
 
 export function completionForRole(role, completion) {
