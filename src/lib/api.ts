@@ -87,6 +87,18 @@ const unwrap = (p) => p.then((r) => r.data?.data ?? r.data);
 const postForm = (url, formData) =>
   unwrap(api.post(url, formData, { headers: { "Content-Type": undefined } }));
 
+// PATCH multipart/form-data (let the browser set the multipart boundary).
+const patchForm = (url, formData) =>
+  unwrap(api.patch(url, formData, { headers: { "Content-Type": undefined } }));
+
+// Generic per-row list CRUD (JSON) for the role-based profile lists.
+const profileList = (base) => ({
+  list: () => unwrap(api.get(base)),                          // { items: [...] }
+  add: (b) => unwrap(api.post(base, b)),                      // { item }
+  update: (id, b) => unwrap(api.patch(`${base}/${id}`, b)),   // { item }
+  remove: (id) => unwrap(api.delete(`${base}/${id}`)),        // "Entry deleted."
+});
+
 /** Thin endpoint map mirroring the DokLynk backend. */
 export const dok = {
   auth: {
@@ -122,17 +134,38 @@ export const dok = {
     verifyEmail: (b) => unwrap(api.post("/profile/me/email/verify", b)),
     uploadAvatar: (file) => { const f = new FormData(); f.append("photo", file); return postForm("/profile/me/photo", f); }, // docs/profile.md §2: POST /me/photo (field "photo") → { profilePhoto }
     uploadCover: (file) => { const f = new FormData(); f.append("cover", file); return postForm("/profile/me/cover", f); }, // POST /me/cover (field "cover") → { coverPhoto }
-    // Doctor sections
-    doctorContact: (b) => unwrap(api.put("/profile/doctor/contact", b)),
-    doctorEducation: (b) => unwrap(api.put("/profile/doctor/education", b)),
-    doctorWorkplace: (b) => unwrap(api.put("/profile/doctor/workplace", b)),
-    doctorProfessional: (b) => unwrap(api.put("/profile/doctor/professional", b)),
-    doctorDocument: (file, documentType) => { const f = new FormData(); f.append("document", file); f.append("documentType", documentType); return postForm("/profile/doctor/document", f); },
-    doctorCertificates: (files, certMeta) => { const f = new FormData(); [...files].forEach((file) => f.append("certificates", file)); if (certMeta) f.append("certMeta", JSON.stringify(certMeta)); return postForm("/profile/doctor/certificates", f); },
-    doctorSubmitVerification: (b) => unwrap(api.post("/profile/doctor/verification/submit", b)),
-    // Student sections
-    studentAcademic: (b) => unwrap(api.put("/profile/student/academic", b)),
-    studentSubmitVerification: (b) => unwrap(api.post("/profile/student/verification/submit", b)),
+    // --- Role-based profile lists (docs/profile.md §3–5) ---
+    education: profileList("/profile/me/doctor/education"),       // { organizationName*, departmentName?, startDate?, endDate? }
+    workplace: profileList("/profile/me/doctor/workplace"),       // { role?, organizationName*, department?, startDate?, endDate? }
+    academics: profileList("/profile/me/student/academics"),      // { collegeName*, program?, city?, currentYear?, expectedGraduationDate? }
+    experiences: profileList("/profile/me/student/experiences"),  // { institution*, program?, city?, startDate?, endDate?, interests?[] }
+    certificates: {
+      list: () => unwrap(api.get("/profile/me/doctor/certificates")),
+      add: ({ name, validationDate, file }) => {
+        const f = new FormData();
+        f.append("name", name);
+        if (validationDate) f.append("validationDate", validationDate);
+        if (file instanceof Blob) f.append("file", file); // only a freshly-picked file, never an existing URL
+        return postForm("/profile/me/doctor/certificates", f);
+      },
+      update: (id, { name, validationDate, file }) => {
+        const f = new FormData();
+        if (name != null) f.append("name", name);
+        if (validationDate != null) f.append("validationDate", validationDate);
+        if (file instanceof Blob) f.append("file", file); // skip when file is an unchanged URL string
+        return patchForm(`/profile/me/doctor/certificates/${id}`, f);
+      },
+      remove: (id) => unwrap(api.delete(`/profile/me/doctor/certificates/${id}`)),
+    },
+    interests: {
+      list: () => unwrap(api.get("/profile/me/general/interests")),
+      add: (topic) => unwrap(api.post("/profile/me/general/interests", { topic })), // 409 on duplicate
+      remove: (id) => unwrap(api.delete(`/profile/me/general/interests/${id}`)),
+    },
+    doctorSpecialties: (specialties) => unwrap(api.put("/profile/me/doctor/specialties", { specialties })), // { specialties }
+    // --- Doctor verification (dual-path, multipart, docs/profile.md §8) ---
+    verificationGet: () => unwrap(api.get("/profile/me/doctor/verification")),       // { status, rejectionReason?, submission? }
+    verificationSubmit: (formData) => postForm("/profile/me/doctor/verification", formData), // pathType=credential|document
     // Blocking
     blockList: (q = "") => unwrap(api.get(`/profile/block/list${q}`)),
     block: (userId) => unwrap(api.post(`/profile/block/${userId}`)),
