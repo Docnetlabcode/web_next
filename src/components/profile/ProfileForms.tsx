@@ -38,11 +38,12 @@ export function BasicContactForm({ user, role, locks = {}, onSaved }) {
 
   const save = () => run(() => {
     const payload = prune({
-      fullName: f.fullName, professionalHeadline: f.professionalHeadline, gender: f.gender,
+      fullName: f.fullName, professionalHeadline: f.professionalHeadline,
       dateOfBirth: f.dateOfBirth, city: f.city, languages: f.languages, bio: f.bio,
       workEmail: f.workEmail,
       ...(role === "doctor" ? { specialization: f.specialization, workPhone: f.workPhone } : {}),
       ...(role === "student" ? { degree: f.degree } : {}),
+      ...(role !== "general_user" ? { gender: f.gender } : {}),
       ...(role === "general_user" ? { age: f.age } : {}),
       ...(emailLocked ? {} : { email: f.email }), // omit personal email when locked (Google)
     });
