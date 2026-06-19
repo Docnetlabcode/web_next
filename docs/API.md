@@ -242,6 +242,24 @@ Use `hlsUrl` (master.m3u8) for playback once status is `COMPLETED`.
 
 ---
 
+## Likes — `/api/likes`
+
+Universal like engine for any entity, keyed by `targetType` + `targetId`. The
+per-entity toggles above (`/api/posts/:id/like`, `/api/reels/:id/like`) are aliases
+over this same engine. Full guide: [modules/likes.md](modules/likes.md).
+
+`targetType` (case-insensitive): `POST` · `COMMENT` · `REEL` · `REEL_COMMENT`. An
+unknown type returns 400.
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/:targetType/:targetId` | 🔒 | Toggle like → `{ liked, isLiked, likeCount, likesCount }` |
+| GET | `/:targetType/:targetId/count` | — | `{ likeCount, likesCount }` |
+| GET | `/:targetType/:targetId/status` | 🔓 | `{ liked, isLiked }` (false when anonymous) |
+| GET | `/:targetType/:targetId/likers` | 🔓 | `{ users[], hasMore, nextCursor }` (rows carry `isFollowing`/`connectionStatus`/`isSelf`) |
+
+---
+
 ## Feed — `/api/feed`
 
 | Method | Path | Auth | Description |
@@ -395,6 +413,27 @@ All routes are proxied to chat-service after auth. See **chat-service docs** for
 | POST | `/restore` | 🔒 | Restore account |
 | GET/PUT | `/call-settings` | 🔒 DOCTOR | Call / consultation settings |
 
+> `/email-preferences` returns `{ preferences: { accountSecurity, messagesConnections,
+> consultationUpdates, productUpdates } }` (all booleans). The same data is also exposed
+> standalone at `/api/email` — see below.
+
+---
+
+## Email — `/api/email`
+
+Per-category **email** opt-ins (the email channel; in-app/push prefs live under
+`/api/notifications`). Same `email_preferences` data as `/api/account/email-preferences`.
+Full guide: [modules/email.md](modules/email.md).
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/preferences` | 🔒 | Fetch email opt-ins |
+| PUT | `/preferences` | 🔒 | Update opt-ins (partial; boolean fields only) |
+
+Categories (all booleans): `accountSecurity` (default `true`) · `messagesConnections`
+(`true`) · `consultationUpdates` (`false`) · `productUpdates` (`true`).
+Response: `{ preferences: { accountSecurity, messagesConnections, consultationUpdates, productUpdates } }`.
+
 ---
 
 ## Admin — `/api/admin`
@@ -447,6 +486,16 @@ All routes require admin authentication (internal use only).
 | PUT | `/version` | Admin | Update version metadata |
 | POST | `/upload-apk` | Admin | Upload new APK (max 200 MB) |
 | POST | `/notify-update` | Admin | Send FCM push for update |
+
+---
+
+## Pulse (proxy) — `/api/v1/pulse`
+
+`/api/v1/pulse/*` is a transparent pass-through to **media-service** (the "pulse"
+social feature). api-service only attaches the caller (optional auth) and forwards the
+request unchanged — it does not own this contract. Request/response shapes are defined
+by media-service; refer to its docs. Reels (`/api/reels/*`) and follows/network are
+proxied to media-service the same way (those keep their api-service-side docs above).
 
 ---
 

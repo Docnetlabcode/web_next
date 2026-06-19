@@ -24,6 +24,12 @@ require auth. See [index.md](index.md).
 { "profileVisibility": "private" }         // public | private
 // (PRIVATE makes new followers go through the request flow — see follows.md)
 
+// GET /email-preferences
+// → data: { preferences: { accountSecurity, messagesConnections,
+//                          consultationUpdates, productUpdates } }   // all booleans
+// PUT /email-preferences   (partial; same data as /api/email — see email.md)
+{ "productUpdates": false }
+
 // POST /feedback      { "category": "bug", "message": "Reels feed stutters." }
 // POST /support       { "subject": "Cannot upload license", "description": "...", "category": "verification" }
 

@@ -12,6 +12,7 @@ module call depends on (base URL, auth, the response envelope, pagination, error
 | Users | [users.md](users.md) | Onboarding, public profile, user search |
 | Profile | [profile.md](profile.md) | Edit profile, lists, **username**, verification, photos |
 | Posts | [posts.md](posts.md) | Create/edit, like, comment, save, report, share |
+| Likes | [likes.md](likes.md) | Universal like engine (posts / comments / reels / reel-comments) |
 | Feed | [feed.md](feed.md) | Home / explore / saved, specialty filter, not-interested, mute |
 | Recommendation | [recommendation.md](recommendation.md) | Home-feed & reel ranking: sessions, seen/watch de-dup, exhaustion |
 | Follows | [follows.md](follows.md) | Follow state machine + private follow requests |
@@ -22,6 +23,7 @@ module call depends on (base URL, auth, the response envelope, pagination, error
 | Cases | [cases.md](cases.md) | Case-study CRUD, helpful, follow |
 | Consultations | [consultations.md](consultations.md) | Booking, pay, approve/decline, refund |
 | Account | [account.md](account.md) | Settings, privacy, deactivate/delete/restore |
+| Email | [email.md](email.md) | Per-category email opt-ins |
 | Admin | [admin.md](admin.md) | Verification queue, **reports moderation** |
 | App | [app.md](app.md) | Version check + APK distribution |
 | Chat | [chat.md](chat.md) | Conversations + messages (proxied to chat-service) |
