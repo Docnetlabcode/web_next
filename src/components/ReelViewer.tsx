@@ -236,7 +236,7 @@ export default function ReelViewer({ reels, index, onClose, onRemoved, onReachEn
               </div>
               <p className="truncate text-xs text-white/70">{author.professionalHeadline?.split("·")[0] || author.specialization || "Clinician"}</p>
             </div>
-            {!isOwn && <FollowButton user={author} demo={demo} className="ml-1" />}
+            {!isOwn && <FollowButton user={author} demo={demo} className="ml-1" simple />}
           </div>
           <p className="text-sm leading-snug text-white/90">{caption}</p>
         </div>

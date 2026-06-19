@@ -23,22 +23,30 @@ export default function Network() {
   const [acting, setActing] = useState({}); // { [requestId]: "accept" | "reject" }
 
   useEffect(() => {
-    dok.network.discover("?limit=12").then((d) => setDiscover(d.users || [])).catch(() => setDiscover([]));
-    dok.network.requests().then((d) => setRequests(d.requests || [])).catch(() => setRequests([]));
+    // Be tolerant of the response key the backend uses (suggestions vs users, requests vs pending).
+    dok.network.discover("?limit=12")
+      .then((d) => setDiscover(d.suggestions || d.users || d.discover || (Array.isArray(d) ? d : [])))
+      .catch(() => setDiscover([]));
+    dok.network.requests()
+      .then((d) => setRequests(d.requests || d.pending || (Array.isArray(d) ? d : [])))
+      .catch(() => setRequests([]));
     dok.network.connections()
-      .then((d) => setConnections((d.connections || []).map((c) => c.recipient || c.user || c)))
+      .then((d) => setConnections((d.connections || d.users || (Array.isArray(d) ? d : [])).map((c) => c.recipient || c.requester || c.user || c)))
       .catch(() => setConnections([]));
   }, []);
 
   const resolve = async (req, action) => {
     const reqId = rid(req);
+    // The accept/reject route keys off the connection id — fall back across likely field names.
+    const connId = req.connectionId || req.connectionRequestId || req.requestId || reqId;
+    const who = req.requester || req.sender || req.user;
     setActing((a) => ({ ...a, [reqId]: action }));
     try {
-      if (!demo) await (action === "accept" ? dok.network.accept(reqId) : dok.network.reject(reqId));
+      if (!demo) await (action === "accept" ? dok.network.accept(connId) : dok.network.reject(connId));
       setRequests((rs) => (rs || []).filter((r) => rid(r) !== reqId));
       if (action === "accept") {
-        setConnections((cs) => [req.requester, ...(cs || [])]);
-        toast?.success(`You're now connected with ${req.requester?.fullName || "them"}`);
+        if (who) setConnections((cs) => [who, ...(cs || [])]);
+        toast?.success(`You're now connected with ${who?.fullName || "them"}`);
       }
     } catch {
       toast?.error("Couldn't update the request — try again");
@@ -73,7 +81,7 @@ export default function Network() {
           requests === null ? <ListSkeleton /> :
           requests.length === 0 ? <Empty label="No pending requests" hint="Connection requests from colleagues show up here." /> :
           requests.map((req) => {
-            const u = req.requester || req;
+            const u = req.requester || req.sender || req.user || req;
             const busy = acting[rid(req)];
             return (
               <div key={rid(req)} className="card flex items-center gap-3 p-4">

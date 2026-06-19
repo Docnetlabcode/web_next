@@ -8,6 +8,8 @@ import { Avatar, Skeleton } from "@/components/ui/Primitives";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { cn, roleLabel } from "@/lib/utils";
+import { usePullToRefresh, useAutoRefresh } from "@/hooks/usePullToRefresh";
+import PullToRefreshIndicator from "@/components/ui/PullToRefreshIndicator";
 
 /**
  * Home feed with the global specialty filter bar (docs/feed.md §1).
@@ -39,10 +41,19 @@ export default function Feed() {
   const sentinel = useRef(null);
   const reqSeq = useRef(0);
 
-  const refresh = () => {
-    setRefreshKey((k) => k + 1);
+  const pendingRefresh = useRef(null);
+  const refresh = useCallback(() => {
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+    return new Promise((resolve) => {
+      pendingRefresh.current?.(); // settle any prior awaiter
+      pendingRefresh.current = resolve;
+      setRefreshKey((k) => k + 1);
+    });
+  }, []);
+
+  // Pull-to-refresh (mobile) + auto-refresh when returning to the tab.
+  const { pull, refreshing: pulling } = usePullToRefresh(refresh);
+  useAutoRefresh(refresh);
 
   /* dynamic specialty chips from backend meta */
   useEffect(() => {
@@ -85,7 +96,10 @@ export default function Feed() {
         setPosts((p) => p ?? []);
         setHasMore(false);
       })
-      .finally(() => seq === reqSeq.current && setRefreshing(false));
+      .finally(() => {
+        if (seq === reqSeq.current) setRefreshing(false);
+        if (pendingRefresh.current) { pendingRefresh.current(); pendingRefresh.current = null; }
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, demo, refreshKey]);
 
@@ -116,6 +130,7 @@ export default function Feed() {
 
   return (
     <div className="flex gap-6">
+      <PullToRefreshIndicator pull={pull} refreshing={pulling} />
       <div className="mx-auto w-full max-w-xl space-y-5 pb-24">
         {/* Health-professional stats strip (app parity, mobile only) */}
         {user?.role === "doctor" && <DoctorStatsStrip />}

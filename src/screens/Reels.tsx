@@ -6,6 +6,8 @@ import ReelViewer from "@/components/ReelViewer";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { compact } from "@/lib/utils";
+import { usePullToRefresh, useAutoRefresh } from "@/hooks/usePullToRefresh";
+import PullToRefreshIndicator from "@/components/ui/PullToRefreshIndicator";
 
 const rid = (r) => r?._id || r?.id;
 
@@ -54,6 +56,17 @@ export default function Reels() {
     finally { setLoadingMore(false); }
   }, [fetchPage, loadingMore, exhausted]);
 
+  // Fresh discovery session (pull-to-refresh / auto-refresh on return).
+  const reload = useCallback(async () => {
+    sessionId.current = null;
+    setExhausted(false);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    try { setReels(await fetchPage(true)); } catch { setReels((x) => x || []); }
+  }, [fetchPage]);
+
+  const { pull, refreshing: pulling } = usePullToRefresh(reload, { disabled: open != null });
+  useAutoRefresh(reload);
+
   // infinite scroll on the grid
   useEffect(() => {
     if (!sentinel.current || exhausted || reels === null) return;
@@ -67,6 +80,7 @@ export default function Reels() {
 
   return (
     <div className="pb-24">
+      <PullToRefreshIndicator pull={pull} refreshing={pulling} />
       <header className="mb-5">
         <h1 className="font-display text-2xl font-extrabold text-ink-900">Pulse</h1>
         <p className="text-sm text-ink-500">Short-form medical teaching from verified clinicians.</p>

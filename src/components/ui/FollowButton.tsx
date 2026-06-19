@@ -21,11 +21,16 @@ import { deriveState } from "@/lib/relationships";
  * `variant`: "solid" (pill buttons, like-list rows) | "ghost" (inline text, card headers)
  */
 
-export default function FollowButton({ user, demo, variant = "solid", className, onStateChange }) {
+export default function FollowButton({ user, demo, variant = "solid", className, onStateChange, simple = false }) {
   const nav = useNavigate();
   const toast = useToast();
   const id = user?.id || user?._id;
-  const [state, setState] = useState(() => deriveState(user));
+  // `simple` (posts & reels): a plain Follow/Following toggle — collapse the
+  // connection sub-states (connect/connecting/accept/message) down to "following".
+  const [state, setState] = useState(() => {
+    const s = deriveState(user);
+    return simple && s !== "follow" && s !== "requested" && s !== "self" ? "following" : s;
+  });
   const [busy, setBusy] = useState(false);
   const morphTimer = useRef(null);
 
@@ -43,7 +48,8 @@ export default function FollowButton({ user, demo, variant = "solid", className,
   };
 
   const follow = async () => {
-    settleAsFollowing(); // optimistic — instant morph per spec
+    if (simple) commit("following"); // simple toggle: stay on Following (no Connect morph)
+    else settleAsFollowing(); // optimistic — instant morph per spec
     if (demo) return;
     try {
       const d = await dok.follows.follow(id);
@@ -56,6 +62,14 @@ export default function FollowButton({ user, demo, variant = "solid", className,
       commit("follow");
       toast?.error("Couldn't follow — try again");
     }
+  };
+
+  // simple mode only: tap "Following" to unfollow.
+  const unfollow = async () => {
+    commit("follow");
+    if (demo) return;
+    try { await dok.follows.unfollow(id); }
+    catch { commit("following"); toast?.error("Couldn't unfollow — try again"); }
   };
 
   const withdraw = async () => {
@@ -102,9 +116,9 @@ export default function FollowButton({ user, demo, variant = "solid", className,
     follow:     { label: "Follow",      icon: UserPlus,      onClick: follow,
                   solid: "bg-brand-600 text-white hover:bg-brand-700 shadow-glow",
                   ghost: "text-brand-600 hover:bg-brand-50" },
-    following:  { label: "Following",   icon: UserCheck,     onClick: undefined,
-                  solid: "bg-brand-50 text-brand-700",
-                  ghost: "text-brand-700" },
+    following:  { label: "Following",   icon: UserCheck,     onClick: simple ? unfollow : undefined, title: simple ? "Tap to unfollow" : undefined,
+                  solid: simple ? "bg-brand-50 text-brand-700 hover:bg-danger-50 hover:text-danger-500" : "bg-brand-50 text-brand-700",
+                  ghost: simple ? "text-brand-700 hover:text-danger-500" : "text-brand-700" },
     requested:  { label: "Requested",   icon: Clock,         onClick: withdraw, title: "Tap to withdraw",
                   solid: "border border-ink-900/[.12] bg-white text-ink-500 hover:border-danger-500/40 hover:text-danger-500",
                   ghost: "text-ink-400 hover:text-danger-500" },

@@ -200,7 +200,7 @@ export default function PostCard({ post, demo, onRemoved }) {
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              {!isOwn && <FollowButton user={a} demo={demo} />}
+              {!isOwn && <FollowButton user={a} demo={demo} simple />}
               <button onClick={() => setMoreOpen(true)} aria-label="Post options" className="press rounded-full p-1.5 text-ink-400 hover:bg-ink-900/5">
                 <MoreHorizontal size={18} />
               </button>

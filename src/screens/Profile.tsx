@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { MapPin, Briefcase, GraduationCap, Building2, Share2, ArrowLeft, Settings as SettingsIcon, Stethoscope, Activity, CalendarDays, Mail, Phone, Languages as LangIcon, Award } from "lucide-react";
-import { useNavigate } from "@/lib/router";
+import { MapPin, Briefcase, GraduationCap, Building2, Share2, ArrowLeft, Settings as SettingsIcon, Stethoscope, Activity, CalendarDays, Mail, Phone, Globe, Award, ExternalLink } from "lucide-react";
+import { useNavigate, Link } from "@/lib/router";
 import { Avatar, Verified, RoleBadge, Spinner } from "@/components/ui/Primitives";
 import PostCard from "@/components/PostCard";
 import ShareSheet from "@/components/ShareSheet";
+import PeopleSheet from "@/components/profile/PeopleSheet";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { cn, compact } from "@/lib/utils";
@@ -12,12 +13,23 @@ import { cn, compact } from "@/lib/utils";
 const TABS = ["About", "Posts", "Pulse", "Cases"];
 const yr = (d) => (d ? new Date(d).getFullYear() : "Now");
 const monthYear = (d) => (d ? new Date(d).toLocaleDateString(undefined, { month: "long", year: "numeric" }) : null);
+// Only allow http(s) hrefs — never trust a backend string as a link (blocks javascript:/data: XSS).
+const safeHttpUrl = (raw) => {
+  if (typeof raw !== "string" || !raw) return null;
+  try {
+    const u = new URL(raw, typeof window !== "undefined" ? window.location.origin : "http://localhost");
+    return u.protocol === "http:" || u.protocol === "https:" ? u.toString() : null;
+  } catch {
+    return null;
+  }
+};
 
 export default function Profile() {
   const { user: authUser } = useAuth();
   const nav = useNavigate();
   const [tab, setTab] = useState("About");
   const [share, setShare] = useState(false);
+  const [peopleTab, setPeopleTab] = useState(null); // null = closed; else "followers"|"following"|"connections"
 
   // Live profile: { user, roleProfile }.
   const [data, setData] = useState(null);
@@ -27,21 +39,23 @@ export default function Profile() {
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    Promise.allSettled([
-      dok.profile.me(),
-      dok.profile.full()
-    ]).then(([meRes, fullRes]) => {
-      if (!alive) return;
-      if (meRes.status === "fulfilled") setData(meRes.value);
-      if (fullRes.status === "fulfilled") setFull(fullRes.value);
-      setLoading(false);
-    });
+    // Primary profile drives the loading state. The richer hydrate (full) fills in
+    // when it lands — never block the whole screen on it (it can be slow/hang).
+    dok.profile.me()
+      .then((v) => { if (alive) setData(v); })
+      .catch(() => {})
+      .finally(() => { if (alive) setLoading(false); });
+    dok.profile.full()
+      .then((v) => { if (alive) setFull(v); })
+      .catch(() => {});
     return () => {
       alive = false;
     };
   }, []);
 
-  const user = full?.user || data?.user || authUser || {};
+  // Merge instead of pick: /me/full's user omits follower/following/connection/post
+  // counts, so it must not shadow /me (data) or authUser, which carry them.
+  const user = { ...(authUser || {}), ...(data?.user || {}), ...(full?.user || {}) };
   const doctor = full?.doctor || {};
   const student = full?.student || {};
   const general = full?.general || {};
@@ -52,16 +66,15 @@ export default function Profile() {
   const subtitle = [primaryPlace, user.city].filter(Boolean).join(" · ");
   const verified = user.isVerified || full?.verification?.status === "verified" || rp.kyc?.status === "verified";
   const since = monthYear(full?.memberSince || user.createdAt);
-  const ageLabel = full?.accountAge?.label;
 
   // Doctor-only metrics — render only when the value actually exists (never faked).
   const patients = full?.doctor?.patientVerificationCount ?? rp.patientVerificationCount;
   const yearsExp = full?.doctor?.yearsOfClinicalExperience ?? rp.yearsOfClinicalExperience;
 
   const metrics = [
-    { n: user.followingCount, label: "Following", onClick: () => nav("/app/connections?tab=following") },
-    { n: user.followersCount, label: "Followers", onClick: () => nav("/app/connections?tab=followers") },
-    { n: user.connectionsCount, label: "Connections", onClick: () => nav("/app/connections?tab=connections") },
+    { n: user.followingCount, label: "Following", onClick: () => setPeopleTab("following") },
+    { n: user.followersCount, label: "Followers", onClick: () => setPeopleTab("followers") },
+    { n: user.connectionsCount, label: "Connections", onClick: () => setPeopleTab("connections") },
     { n: user.postsCount, label: "Posts", onClick: () => setTab("Posts") },
   ];
 
@@ -86,28 +99,30 @@ export default function Profile() {
                 </span>
               )}
             </div>
-            <div className="mb-1 flex gap-2">
-              <button onClick={() => setShare(true)} className="btn-outline press px-4 py-2 text-sm"><Share2 size={15} /> Share</button>
-              <button onClick={() => nav("/app/profile/edit")} className="btn-primary press px-4 py-2 text-sm"><SettingsIcon size={15} /> Edit profile</button>
+            <div className="relative z-10 mb-1 flex gap-2">
+              <button type="button" onClick={() => setShare(true)} className="btn-outline press px-4 py-2 text-sm"><Share2 size={15} /> Share</button>
+              <Link to="/app/profile/edit" className="btn-primary press px-4 py-2 text-sm"><SettingsIcon size={15} /> Edit profile</Link>
             </div>
           </div>
 
-          {user.uniqueUsername && <p className="mt-3 text-sm font-semibold text-brand-700">@{user.uniqueUsername}</p>}
-          <div className={cn("flex items-center gap-1.5", user.uniqueUsername ? "mt-0.5" : "mt-3")}>
-            <h1 className="font-display text-2xl font-extrabold tracking-tight text-ink-900 text-balance">{user.titlePrefix ? `${user.titlePrefix} ` : ""}{user.fullName || "Your name"}</h1>
-          </div>
-          {subtitle && <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-500"><Building2 size={14} /> {subtitle}</p>}
-          {since && (
-            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink-400">
-              <CalendarDays size={13} /> Member since {since}{ageLabel ? ` · ${ageLabel} on DokLynk` : ""}
-            </p>
+          {user.uniqueUsername && <p className="mt-3 text-[13px] font-semibold tracking-wide text-brand-600">@{user.uniqueUsername}</p>}
+          <h1 className={cn("font-display text-[26px] font-extrabold leading-tight tracking-tight text-ink-900 text-balance", user.uniqueUsername ? "mt-1" : "mt-3")}>
+            {user.titlePrefix ? `${user.titlePrefix} ` : ""}{user.fullName || "Your name"}
+          </h1>
+          {headline && (
+            <div className="mt-2.5 flex items-center gap-2.5">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-glow ring-1 ring-inset ring-white/20"><Stethoscope size={16} /></span>
+              <span className="text-[15px] font-bold text-brand-700">{headline}</span>
+            </div>
           )}
+          {subtitle && <p className="mt-2 flex items-center gap-1.5 text-sm text-ink-500"><Building2 size={14} className="shrink-0 text-ink-400" /> {subtitle}</p>}
 
-          {/* doctor-only validated metrics */}
-          {user.role === "doctor" && (patients != null || yearsExp != null) && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {patients != null && <span className="chip bg-brand-50 text-brand-700"><Activity size={13} /> {compact(patients)} patients verified</span>}
-              {yearsExp != null && <span className="chip bg-ink-900/[.04] text-ink-600"><Stethoscope size={13} /> {yearsExp} yrs experience</span>}
+          {/* credential strip — uniform, refined pills */}
+          {(since || (user.role === "doctor" && (patients != null || yearsExp != null))) && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {since && <MetaPill icon={CalendarDays}>Member since {since}</MetaPill>}
+              {user.role === "doctor" && patients != null && <MetaPill icon={Activity}>{compact(patients)} patients verified</MetaPill>}
+              {user.role === "doctor" && yearsExp != null && <MetaPill icon={Stethoscope}>{yearsExp} yrs experience</MetaPill>}
             </div>
           )}
 
@@ -135,19 +150,25 @@ export default function Profile() {
       </div>
 
       <div className="mt-5 animate-fade-up">
-        {loading ? (
-          <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>
-        ) : (
-          <>
-            {tab === "Posts" && <Empty icon={Briefcase} text="Posts you publish will appear here." />}
-            {tab === "Pulse" && <Empty icon={Stethoscope} text="Your reels (Pulse) will appear here." />}
-            {tab === "Cases" && <Empty icon={Stethoscope} text="Clinical cases you publish will appear here." />}
-            {tab === "About" && <About user={user} doctor={doctor} student={student} general={general} />}
-          </>
+        {/* Static tabs need no data — render immediately, never behind the loader. */}
+        {tab === "Posts" && <Empty icon={Briefcase} text="Posts you publish will appear here." />}
+        {tab === "Pulse" && <Empty icon={Stethoscope} text="Your reels (Pulse) will appear here." />}
+        {tab === "Cases" && <Empty icon={Stethoscope} text="Clinical cases you publish will appear here." />}
+        {tab === "About" && (
+          loading
+            ? <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>
+            : <About user={user} doctor={doctor} student={student} general={general} />
         )}
       </div>
 
       <ShareSheet open={share} onClose={() => setShare(false)} kind="profile" />
+      <PeopleSheet
+        open={!!peopleTab}
+        tab={peopleTab || "followers"}
+        onClose={() => setPeopleTab(null)}
+        userId={user._id || user.id}
+        counts={{ followers: user.followersCount, following: user.followingCount, connections: user.connectionsCount }}
+      />
     </div>
   );
 }
@@ -193,7 +214,7 @@ function About({ user, doctor, student, general }) {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {user.city && <Line icon={MapPin} text={user.city} />}
             {user.age != null && <Line icon={CalendarDays} text={`${user.age} years`} />}
-            {user.languages?.length > 0 && <Line icon={LangIcon} text={user.languages.join(", ")} />}
+            {user.languages?.length > 0 && <Line icon={Globe} text={user.languages.join(", ")} />}
             {user.workEmail && <Line icon={Mail} text={user.workEmail} />}
             {user.workPhone && <Line icon={Phone} text={user.workPhone} />}
           </div>
@@ -209,7 +230,7 @@ function About({ user, doctor, student, general }) {
       )}
 
       {role === "doctor" && workplace.length > 0 && (
-        <Section title="Experience">
+        <Section title="Workplace">
           {workplace.map((h, i) => (
             <Row key={`w${i}`} icon={Briefcase} tint="bg-brand-50 text-brand-600"
               title={[h.role || h.designation, h.organizationName || h.name].filter(Boolean).join(" · ") || h.organizationName || h.name}
@@ -229,7 +250,7 @@ function About({ user, doctor, student, general }) {
       )}
 
       {role === "student" && academics.length > 0 && (
-        <Section title="Academics">
+        <Section title="Academic Details">
           {academics.map((a, i) => (
             <Row key={`a${i}`} icon={GraduationCap} tint="bg-amber-50 text-amber-600"
               title={[a.program, a.collegeName].filter(Boolean).join(" · ") || a.collegeName}
@@ -239,7 +260,7 @@ function About({ user, doctor, student, general }) {
       )}
 
       {role === "student" && experiences.length > 0 && (
-        <Section title="Experience & interests">
+        <Section title="Experience & Interest">
           {experiences.map((e, i) => (
             <Row key={`x${i}`} icon={Briefcase} tint="bg-brand-50 text-brand-600"
               title={[e.program, e.institution].filter(Boolean).join(" · ") || e.institution}
@@ -250,22 +271,34 @@ function About({ user, doctor, student, general }) {
 
       {role === "doctor" && certificates.length > 0 && (
         <Section title="Certificates">
-          {certificates.map((c, i) => (
-            <Row key={`c${i}`} icon={Award} tint="bg-ink-900/[.04] text-ink-600"
-              title={c.name}
-              text={[c.validationDate && `Valid ${monthYear(c.validationDate)}`, c.fileUrl && "Document attached"].filter(Boolean).join(" · ")} />
-          ))}
+          {certificates.map((c, i) => {
+            const fileUrl = safeHttpUrl(c.fileUrl || c.file);
+            return (
+              <Row key={`c${i}`} icon={Award} tint="bg-ink-900/[.04] text-ink-600"
+                href={fileUrl || undefined}
+                title={c.name}
+                text={[c.validationDate && `Valid ${monthYear(c.validationDate)}`, fileUrl ? "View document" : null].filter(Boolean).join(" · ")} />
+            );
+          })}
         </Section>
       )}
 
       {role === "general_user" && interests.length > 0 && (
-        <Section title="Clinical interests">
+        <Section title="Clinic Interests">
           <div className="flex flex-wrap gap-2">
             {interests.map((t, i) => <span key={i} className="chip bg-brand-50 text-brand-700">{typeof t === "string" ? t : t.topic}</span>)}
           </div>
         </Section>
       )}
     </div>
+  );
+}
+
+function MetaPill({ icon: Icon, children }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-900/[.07] bg-white px-3 py-1.5 text-xs font-semibold text-ink-600 shadow-sm">
+      <Icon size={13} className="shrink-0 text-brand-600" /> {children}
+    </span>
   );
 }
 
@@ -289,11 +322,24 @@ function Line({ icon: Icon, text }) {
   );
 }
 
-function Row({ icon: Icon, title, text, tint }) {
-  return (
-    <div className="flex gap-3 rounded-xl p-2 transition hover:bg-ink-900/[.02]">
+function Row({ icon: Icon, title, text, tint, href }) {
+  const body = (
+    <>
       <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-xl", tint)}><Icon size={18} /></span>
-      <div><p className="text-sm font-semibold text-ink-900">{title}</p>{text && <p className="text-sm text-ink-500">{text}</p>}</div>
-    </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-ink-900">{title}</p>
+        {text && <p className="text-sm text-ink-500">{text}</p>}
+      </div>
+      {href && <ExternalLink size={15} className="mt-0.5 shrink-0 text-ink-400" />}
+    </>
   );
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer"
+        className="press flex items-start gap-3 rounded-xl p-2 transition hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">
+        {body}
+      </a>
+    );
+  }
+  return <div className="flex items-start gap-3 rounded-xl p-2 transition hover:bg-ink-900/[.02]">{body}</div>;
 }

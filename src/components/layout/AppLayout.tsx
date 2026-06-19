@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Avatar, Logo, Verified, Spinner } from "@/components/ui/Primitives";
 import NavArrows from "@/components/ui/NavArrows";
+import NotificationBell from "@/components/ui/NotificationBell";
 import { useAuth } from "@/context/AuthContext";
 import { cn, compact } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -28,7 +29,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [menu, setMenu] = useState(false);
 
   // Route guards (previously <Protected> + <RequireProfile> in the router).
-  if (loading) return <div className="grid min-h-screen place-items-center"><Spinner className="h-8 w-8" /></div>;
+  if (loading) return <AppLoading />;
   if (!user) return <Navigate to="/login" replace />;
   if (!demo && !isProfileComplete) return <Navigate to="/onboarding" replace />;
 
@@ -51,6 +52,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <button onClick={() => nav("/app/create")} className="btn-primary hidden px-4 py-2 text-sm sm:inline-flex">
             <Plus size={17} /> Create
           </button>
+          <NotificationBell />
           <div className="relative">
             <button onClick={() => setMenu((m) => !m)} className="rounded-full ring-2 ring-transparent transition hover:ring-brand-200">
               <Avatar user={user} size={38} />
@@ -111,6 +113,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </NavLink>
         ))}
       </nav>
+    </div>
+  );
+}
+
+/** App-shell loader. After a few seconds it explains the likely cold-start wait
+ *  so a sleeping free-tier backend doesn't look like a frozen app. */
+function AppLoading() {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 5000);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div className="grid min-h-screen place-items-center px-6">
+      <div className="flex max-w-xs flex-col items-center gap-3 text-center">
+        <Spinner className="h-8 w-8" />
+        {slow && (
+          <p className="text-sm leading-relaxed text-ink-500">
+            Waking up the server… the backend sleeps when idle and can take up to a minute to respond.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

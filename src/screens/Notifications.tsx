@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Heart, MessageCircle, UserPlus, AtSign, Bell, Check, X, Loader2, ShieldCheck } from "lucide-react";
+import { Heart, MessageCircle, UserPlus, AtSign, Bell, Check, X, Loader2, ShieldCheck, Trash2 } from "lucide-react";
 import { useNavigate } from "@/lib/router";
 import { Avatar, Verified } from "@/components/ui/Primitives";
 import { useAuth } from "@/context/AuthContext";
@@ -27,7 +27,14 @@ const ICON = {
   verification_approved: { i: ShieldCheck, c: "bg-emerald-50 text-emerald-600" },
   verification_rejected: { i: ShieldCheck, c: "bg-rose-50 text-rose-500" },
 };
-const TABS = ["All", "Mentions", "Replies", "Network"];
+const FILTERS = [
+  { key: "All", match: () => true },
+  { key: "Mentions", match: (t) => t.startsWith("mention") },
+  { key: "Comments", match: (t) => t === "post_comment" || t === "reel_comment" },
+  { key: "Replies", match: (t) => t.includes("reply") },
+  { key: "Likes", match: (t) => t.includes("like") },
+  { key: "Network", match: (t) => t.startsWith("follow") || t.includes("connection") },
+];
 const nid = (n) => n?._id || n?.id;
 const uid = (u) => u?.id || u?._id;
 
@@ -44,22 +51,34 @@ export default function Notifications() {
     dok.notifications.list().then((d) => setItems(d.notifications || [])).catch(() => setItems([]));
   }, []);
 
-  const list = (items || []).filter((n) =>
-    tab === "All" ? true :
-    tab === "Mentions" ? n.type.startsWith("mention") :
-    tab === "Replies" ? (n.type.includes("comment") || n.type.includes("reply")) :
-    (n.type.includes("connection") || n.type.startsWith("follow"))
-  );
+  const matcher = FILTERS.find((f) => f.key === tab)?.match || (() => true);
+  const list = (items || []).filter((n) => matcher(n.type || ""));
+
+  // Keep the top-bar bell's unread count in sync after any read/clear action.
+  const notifyChanged = () => window.dispatchEvent(new CustomEvent("dl:notifications-changed"));
 
   const markRead = (n) => {
     if (n.isRead) return;
     setItems((xs) => (xs || []).map((x) => (nid(x) === nid(n) ? { ...x, isRead: true } : x)));
+    notifyChanged();
     if (!demo) dok.notifications.read(nid(n)).catch(() => {});
   };
 
   const markAllRead = () => {
     setItems((xs) => (xs || []).map((x) => ({ ...x, isRead: true })));
+    notifyChanged();
     if (!demo) dok.notifications.readAll().catch(() => toast?.error("Couldn't mark all read"));
+  };
+
+  // No bulk-delete endpoint exists, so clear removes each notification individually.
+  const clearAll = async () => {
+    const all = items || [];
+    if (all.length === 0) return;
+    setItems([]); // optimistic
+    notifyChanged();
+    if (demo) return;
+    const res = await Promise.allSettled(all.map((n) => dok.notifications.remove(nid(n))));
+    if (res.some((r) => r.status === "rejected")) toast?.error("Some notifications couldn't be cleared");
   };
 
   const open = (n) => {
@@ -94,13 +113,16 @@ export default function Notifications() {
 
   return (
     <div className="mx-auto max-w-2xl pb-24">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-extrabold text-ink-900">Notifications</h1>
-        <button onClick={markAllRead} className="flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:underline"><Check size={15} /> Mark all read</button>
+        <div className="flex items-center gap-3">
+          <button onClick={markAllRead} className="flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:underline"><Check size={15} /> Mark all read</button>
+          <button onClick={clearAll} className="flex items-center gap-1.5 text-sm font-semibold text-ink-500 transition hover:text-danger-500"><Trash2 size={15} /> Clear</button>
+        </div>
       </div>
-      <div className="mt-4 flex gap-2">
-        {TABS.map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={cn("rounded-full px-4 py-1.5 text-sm font-semibold", tab === t ? "bg-brand-600 text-white" : "bg-white text-ink-600 hover:bg-brand-50")}>{t}</button>
+      <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto">
+        {FILTERS.map((f) => (
+          <button key={f.key} onClick={() => setTab(f.key)} className={cn("shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold", tab === f.key ? "bg-brand-600 text-white" : "bg-white text-ink-600 hover:bg-brand-50")}>{f.key}</button>
         ))}
       </div>
 
