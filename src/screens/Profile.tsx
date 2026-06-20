@@ -1,16 +1,29 @@
 "use client";
 import { useEffect, useState } from "react";
-import { MapPin, Briefcase, GraduationCap, Building2, Share2, ArrowLeft, Settings as SettingsIcon, Stethoscope, Activity, CalendarDays, Mail, Phone, Globe, Award, ExternalLink } from "lucide-react";
+import { MapPin, Briefcase, GraduationCap, Building2, Share2, ArrowLeft, Settings as SettingsIcon, Stethoscope, Activity, CalendarDays, Mail, Phone, Globe, Award, ExternalLink, Play, Heart, Eye, Clapperboard } from "lucide-react";
 import { useNavigate, Link } from "@/lib/router";
 import { Avatar, Verified, RoleBadge, Spinner } from "@/components/ui/Primitives";
 import PostCard from "@/components/PostCard";
+import ReelViewer from "@/components/ReelViewer";
 import ShareSheet from "@/components/ShareSheet";
 import PeopleSheet from "@/components/profile/PeopleSheet";
+import MediaViewer from "@/components/profile/MediaViewer";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { cn, compact } from "@/lib/utils";
 
-const TABS = ["About", "Posts", "Pulse", "Cases"];
+const TABS = ["Posts", "About"];
+// Profile content grid categories (docs/API.md: GET /posts/user/:id?postType=, GET /reels/user/:id)
+const CONTENT_CATS = [
+  { key: "all", label: "All", kind: "post", type: null },
+  { key: "post", label: "Posts", kind: "post", type: "post" },
+  { key: "case_study", label: "Case studies", kind: "post", type: "case_study" },
+  { key: "research", label: "Research", kind: "post", type: "research" },
+  { key: "thesis", label: "Thesis", kind: "post", type: "thesis" },
+  { key: "reel", label: "Reels", kind: "reel", type: null },
+];
+// The reel feed often omits a thumbnail; derive a poster frame from the video (Cloudinary serves .jpg).
+const reelPoster = (r) => r?.thumbnailUrl || (r?.videoUrl ? r.videoUrl.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined);
 const yr = (d) => (d ? new Date(d).getFullYear() : "Now");
 const monthYear = (d) => (d ? new Date(d).toLocaleDateString(undefined, { month: "long", year: "numeric" }) : null);
 // Only allow http(s) hrefs — never trust a backend string as a link (blocks javascript:/data: XSS).
@@ -25,11 +38,12 @@ const safeHttpUrl = (raw) => {
 };
 
 export default function Profile() {
-  const { user: authUser } = useAuth();
+  const { user: authUser, demo } = useAuth();
   const nav = useNavigate();
-  const [tab, setTab] = useState("About");
+  const [tab, setTab] = useState("Posts");
   const [share, setShare] = useState(false);
   const [peopleTab, setPeopleTab] = useState(null); // null = closed; else "followers"|"following"|"connections"
+  const [viewer, setViewer] = useState(null); // fullscreen photo src, or null
 
   // Live profile: { user, roleProfile }.
   const [data, setData] = useState(null);
@@ -83,20 +97,25 @@ export default function Profile() {
       <div className="card overflow-hidden">
         {/* cover */}
         <div className="relative h-40 bg-gradient-to-br from-brand-500 via-brand-600 to-brand-900">
-          {user.coverPhoto && <img src={user.coverPhoto} alt="" className="absolute inset-0 h-full w-full object-cover" />}
-          <div className="absolute inset-0 grid-bg opacity-30" />
+          {user.coverPhoto && (
+            <button type="button" onClick={() => setViewer(user.coverPhoto)} aria-label="View cover photo" className="absolute inset-0 h-full w-full cursor-zoom-in">
+              <img src={user.coverPhoto} alt="" className="h-full w-full object-cover" />
+            </button>
+          )}
+          <div className="pointer-events-none absolute inset-0 grid-bg opacity-30" />
           <button onClick={() => nav(-1)} className="press absolute left-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"><ArrowLeft size={18} /></button>
         </div>
 
         <div className="px-5 pb-5">
           <div className="-mt-14 flex items-end justify-between">
-            {/* avatar with verified badge overlapping the DP frame */}
+            {/* avatar — tap to view full screen */}
             <div className="relative">
-              <Avatar user={user} size={104} className="ring-4 ring-white" />
-              {verified && (
-                <span className="absolute -bottom-0.5 -right-0.5 grid h-8 w-8 place-items-center rounded-full bg-white ring-1 ring-ink-900/[.06]" title="Verified professional">
-                  <Verified size={22} />
-                </span>
+              {user.profilePhoto ? (
+                <button type="button" onClick={() => setViewer(user.profilePhoto)} aria-label="View profile photo" className="press rounded-full cursor-zoom-in">
+                  <Avatar user={user} size={104} className="ring-4 ring-white" />
+                </button>
+              ) : (
+                <Avatar user={user} size={104} className="ring-4 ring-white" />
               )}
             </div>
             <div className="relative z-10 mb-1 flex gap-2">
@@ -108,6 +127,11 @@ export default function Profile() {
           {user.uniqueUsername && <p className="mt-3 text-[13px] font-semibold tracking-wide text-brand-600">@{user.uniqueUsername}</p>}
           <h1 className={cn("font-display text-[26px] font-extrabold leading-tight tracking-tight text-ink-900 text-balance", user.uniqueUsername ? "mt-1" : "mt-3")}>
             {user.titlePrefix ? `${user.titlePrefix} ` : ""}{user.fullName || "Your name"}
+            {verified && (
+              <span title="Verified professional" className="ml-1.5 inline-block align-middle">
+                <Verified size={20} />
+              </span>
+            )}
           </h1>
           {headline && (
             <div className="mt-2.5 flex items-center gap-2.5">
@@ -150,10 +174,7 @@ export default function Profile() {
       </div>
 
       <div className="mt-5 animate-fade-up">
-        {/* Static tabs need no data — render immediately, never behind the loader. */}
-        {tab === "Posts" && <Empty icon={Briefcase} text="Posts you publish will appear here." />}
-        {tab === "Pulse" && <Empty icon={Stethoscope} text="Your reels (Pulse) will appear here." />}
-        {tab === "Cases" && <Empty icon={Stethoscope} text="Clinical cases you publish will appear here." />}
+        {tab === "Posts" && <ProfileContent userId={user._id || user.id} demo={demo} />}
         {tab === "About" && (
           loading
             ? <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>
@@ -161,6 +182,7 @@ export default function Profile() {
         )}
       </div>
 
+      {viewer && <MediaViewer src={viewer} kind="image" onClose={() => setViewer(null)} />}
       <ShareSheet open={share} onClose={() => setShare(false)} kind="profile" />
       <PeopleSheet
         open={!!peopleTab}
@@ -169,6 +191,102 @@ export default function Profile() {
         userId={user._id || user.id}
         counts={{ followers: user.followersCount, following: user.followingCount, connections: user.connectionsCount }}
       />
+    </div>
+  );
+}
+
+/* Category-wise content grid: All · Posts · Case studies · Research · Thesis · Reels.
+   Posts come from /posts/user/:id?postType=, reels from /reels/user/:id. Each
+   category is fetched lazily on first open and cached for the session. */
+function ProfileContent({ userId, demo }) {
+  const [cat, setCat] = useState("all");
+  const [cache, setCache] = useState({}); // key -> items[] | null (loading) | undefined (untouched)
+  const [openReel, setOpenReel] = useState(null); // index into the reel list
+
+  const def = CONTENT_CATS.find((c) => c.key === cat);
+  const items = cache[cat];
+
+  useEffect(() => {
+    if (!userId || cache[cat] !== undefined) return; // already loading or loaded
+    let alive = true;
+    setCache((c) => ({ ...c, [cat]: null }));
+    const run = def.kind === "reel"
+      ? dok.reels.byUser(userId, "?limit=30").then((d) => d.reels || d.items || d.feed || [])
+      : dok.posts.byUser(userId, `?limit=30${def.type ? `&postType=${def.type}` : ""}`).then((d) => d.posts || d.feed || []);
+    run
+      .then((list) => alive && setCache((c) => ({ ...c, [cat]: Array.isArray(list) ? list : [] })))
+      .catch(() => alive && setCache((c) => ({ ...c, [cat]: [] })));
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cat, userId]);
+
+  const removePost = (pid) =>
+    setCache((c) => ({ ...c, [cat]: (c[cat] || []).filter((p) => (p._id || p.id) !== pid) }));
+  const removeReel = (rid) =>
+    setCache((c) => ({ ...c, reel: (c.reel || []).filter((r) => (r._id || r.id) !== rid) }));
+
+  return (
+    <div>
+      {/* category chips */}
+      <div className="no-scrollbar -mx-1 mb-5 flex gap-2 overflow-x-auto px-1">
+        {CONTENT_CATS.map((c) => (
+          <button
+            key={c.key}
+            onClick={() => setCat(c.key)}
+            className={cn(
+              "press whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold transition",
+              cat === c.key
+                ? "bg-brand-600 text-white shadow-glow"
+                : "bg-white text-ink-600 ring-1 ring-ink-900/[.06] hover:bg-brand-50 hover:text-brand-700"
+            )}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      {/* content */}
+      {items == null ? (
+        <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>
+      ) : items.length === 0 ? (
+        <Empty icon={def.kind === "reel" ? Clapperboard : Briefcase} text={`No ${def.label.toLowerCase()} yet.`} />
+      ) : def.kind === "reel" ? (
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {items.map((r, idx) => (
+              <button
+                key={r._id || r.id}
+                onClick={() => setOpenReel(idx)}
+                className="lift group relative block aspect-[9/16] overflow-hidden rounded-2xl bg-ink-900 text-left shadow-card"
+              >
+                <img
+                  src={reelPoster(r)}
+                  alt=""
+                  onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
+                  className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-110 group-hover:opacity-100"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10" />
+                <div className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/15 backdrop-blur"><Play size={14} className="fill-white text-white" /></div>
+                <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+                  {r.caption && <p className="line-clamp-2 text-xs leading-snug text-white/90">{r.caption}</p>}
+                  <div className="mt-1.5 flex items-center gap-3 text-[11px] text-white/80">
+                    <span className="flex items-center gap-1"><Heart size={12} /> {compact(r.likesCount || 0)}</span>
+                    <span className="flex items-center gap-1"><Eye size={12} /> {compact(r.viewsCount || 0)}</span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+          {openReel != null && (
+            <ReelViewer reels={items} index={openReel} onClose={() => setOpenReel(null)} onRemoved={removeReel} />
+          )}
+        </>
+      ) : (
+        <div className="space-y-5">
+          {items.map((p) => <PostCard key={p._id || p.id} post={p} demo={demo} onRemoved={removePost} />)}
+        </div>
+      )}
     </div>
   );
 }

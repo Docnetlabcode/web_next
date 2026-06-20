@@ -214,6 +214,7 @@ export const dok = {
   },
   reels: {
     feed: (q = "") => unwrap(api.get(`/reels/feed${q}`)),
+    byUser: (userId, q = "") => unwrap(api.get(`/reels/user/${userId}${q}`)), // a user's reels (profile content grid)
     create: (form) => postForm("/reels", form), // multipart: video + caption/visibility/specialties/hashtags/mentions
     get: (id) => unwrap(api.get(`/reels/${id}`)),
     update: (id, b) => unwrap(api.put(`/reels/${id}`, b)), // caption/tags ≤24h (403 after)
@@ -241,7 +242,7 @@ export const dok = {
     requests: (q = "") => unwrap(api.get(`/follows/requests${q}`)), // incoming (private accounts)
     acceptRequest: (requesterId) => unwrap(api.post(`/follows/requests/${requesterId}/accept`)),
     rejectRequest: (requesterId) => unwrap(api.post(`/follows/requests/${requesterId}/reject`)),
-    suggestions: () => unwrap(api.get("/follows/suggestions?limit=6")),
+    suggestions: () => unwrap(api.get("/follows/suggestions?limit=15")),
   },
   search: {
     all: (q) => unwrap(api.get(`/search?q=${encodeURIComponent(q)}&limit=6`)),

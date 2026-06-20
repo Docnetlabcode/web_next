@@ -1,7 +1,7 @@
 "use client";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "@/lib/router";
-import { FileText, Stethoscope, Clapperboard, PenLine, ChevronLeft, ChevronRight, Loader2, Sparkles, RefreshCw, Search as SearchIcon } from "lucide-react";
+import { FileText, Stethoscope, Clapperboard, PenLine, Loader2, Sparkles, RefreshCw, Search as SearchIcon } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import RightRail from "@/components/layout/RightRail";
 import { Avatar, Skeleton } from "@/components/ui/Primitives";
@@ -12,25 +12,15 @@ import { usePullToRefresh, useAutoRefresh } from "@/hooks/usePullToRefresh";
 import PullToRefreshIndicator from "@/components/ui/PullToRefreshIndicator";
 
 /**
- * Home feed with the global specialty filter bar (docs/feed.md §1).
- * "All" loads the unified multi-specialty feed; tapping a chip fires an
- * instant background payload request scoped to creators with that specialty.
- * Content-type chips (Research / Case studies / Theses) ride the same bar.
+ * Home feed (docs/feed.md §1) — loads the unified multi-specialty feed.
  */
 
-const FALLBACK_SPECIALTIES = ["Cardiology", "Dermatology", "Neurology", "Oncology", "Pediatrics", "Homeopathy", "Orthopedics", "Psychiatry", "Radiology"];
-const TYPE_CHIPS = [
-  { key: "research", label: "Research" },
-  { key: "case_study", label: "Case studies" },
-  { key: "thesis", label: "Theses" },
-];
 const PAGE = "limit=12";
 
 export default function Feed() {
   const { user, demo } = useAuth();
   const nav = useNavigate();
 
-  const [specialties, setSpecialties] = useState(FALLBACK_SPECIALTIES);
   const [filter, setFilter] = useState({ kind: "all", key: "all", label: "All" });
   const [posts, setPosts] = useState(null);
   const [refreshing, setRefreshing] = useState(false); // chip switch (keeps layout, dims list)
@@ -54,18 +44,6 @@ export default function Feed() {
   // Pull-to-refresh (mobile) + auto-refresh when returning to the tab.
   const { pull, refreshing: pulling } = usePullToRefresh(refresh);
   useAutoRefresh(refresh);
-
-  /* dynamic specialty chips from backend meta */
-  useEffect(() => {
-    if (demo) return;
-    dok.auth
-      .meta()
-      .then((d) => {
-        const list = (d.specializations || d || []).map((s) => s?.name || s).filter(Boolean);
-        if (list.length) setSpecialties(list);
-      })
-      .catch(() => {});
-  }, [demo]);
 
   const buildQuery = useCallback((f, cur) => {
     const parts = [PAGE];
@@ -156,9 +134,6 @@ export default function Feed() {
             </button>
           ))}
         </div>
-
-        {/* Global specialty filter bar */}
-        <FilterBar specialties={specialties} active={filter} onPick={setFilter} />
 
         {/* Posts */}
         {posts === null ? (
@@ -290,87 +265,6 @@ function SuggestionCard({ user, demo }) {
       >
         {done ? "Requested" : "+ Connect"}
       </button>
-    </div>
-  );
-}
-
-/* ---------------- filter bar: sticky, scrollable, edge-faded ---------------- */
-
-function FilterBar({ specialties, active, onPick }) {
-  const scroller = useRef(null);
-  const [canL, setCanL] = useState(false);
-  const [canR, setCanR] = useState(false);
-
-  const updateArrows = useCallback(() => {
-    const el = scroller.current;
-    if (!el) return;
-    setCanL(el.scrollLeft > 8);
-    setCanR(el.scrollLeft + el.clientWidth < el.scrollWidth - 8);
-  }, []);
-
-  useEffect(() => {
-    updateArrows();
-    const el = scroller.current;
-    el?.addEventListener("scroll", updateArrows, { passive: true });
-    window.addEventListener("resize", updateArrows);
-    return () => { el?.removeEventListener("scroll", updateArrows); window.removeEventListener("resize", updateArrows); };
-  }, [updateArrows, specialties]);
-
-  const nudge = (dir) => scroller.current?.scrollBy({ left: dir * 260, behavior: "smooth" });
-
-  const chips = [
-    { kind: "all", key: "all", label: "All" },
-    ...specialties.map((s) => ({ kind: "specialty", key: s, label: s })),
-    ...TYPE_CHIPS.map((t) => ({ kind: "type", key: t.key, label: t.label })),
-  ];
-
-  return (
-    <div className="glass sticky top-16 z-30 -mx-1 rounded-2xl px-1 py-2">
-      <div className="relative">
-        {canL && (
-          <button onClick={() => nudge(-1)} aria-label="Scroll filters left" className="absolute -left-1 top-1/2 z-10 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full border border-ink-900/[.06] bg-white text-ink-600 shadow-2 transition hover:text-brand-700">
-            <ChevronLeft size={16} />
-          </button>
-        )}
-        <div
-          ref={scroller}
-          role="tablist"
-          aria-label="Filter feed by specialty"
-          className="no-scrollbar flex gap-2 overflow-x-auto scroll-smooth px-1"
-          style={{
-            maskImage: "linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%)",
-            WebkitMaskImage: "linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%)",
-          }}
-        >
-          {chips.map((c, i) => {
-            const isActive = active.kind === c.kind && active.key === c.key;
-            const isTypeBoundary = c.kind === "type" && chips[i - 1]?.kind !== "type";
-            return (
-              <span key={`${c.kind}-${c.key}`} className="flex items-center gap-2">
-                {isTypeBoundary && <span className="h-5 w-px shrink-0 bg-ink-900/10" aria-hidden />}
-                <button
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => onPick(c)}
-                  className={cn(
-                    "press whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200",
-                    isActive
-                      ? "scale-[1.03] bg-brand-600 text-white shadow-glow"
-                      : "bg-white text-ink-600 ring-1 ring-ink-900/[.06] hover:bg-brand-50 hover:text-brand-700"
-                  )}
-                >
-                  {c.label}
-                </button>
-              </span>
-            );
-          })}
-        </div>
-        {canR && (
-          <button onClick={() => nudge(1)} aria-label="Scroll filters right" className="absolute -right-1 top-1/2 z-10 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full border border-ink-900/[.06] bg-white text-ink-600 shadow-2 transition hover:text-brand-700">
-            <ChevronRight size={16} />
-          </button>
-        )}
-      </div>
     </div>
   );
 }

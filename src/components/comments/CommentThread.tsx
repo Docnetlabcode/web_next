@@ -244,6 +244,20 @@ function CommentNode({ c, depth, meId, isPostOwner, onLike, onReply, onDelete, o
   const canDelete = isPostOwner || (meId && String(uid(c.author)) === String(meId));
   const authorId = uid(c.author);
 
+  // Resolve a @username mention to the tagged user and open their profile.
+  // Falls back to search if the handle doesn't resolve (typo / deleted account).
+  const openMention = async (handle) => {
+    const username = String(handle).trim().replace(/^@/, "");
+    if (!username) return;
+    try {
+      const d = await dok.profile.byUsername(username);
+      const u = d?.user || d;
+      const pid = u?.id || u?._id;
+      if (pid) { nav(`/app/profile/${pid}`); return; }
+    } catch {}
+    nav(`/app/search?q=${encodeURIComponent("@" + username)}`);
+  };
+
   const toggleReplies = async () => {
     if (!open && c.replies === null) {
       setLoading(true);
@@ -269,7 +283,7 @@ function CommentNode({ c, depth, meId, isPostOwner, onLike, onReply, onDelete, o
               <span className="ml-auto shrink-0 text-[11px] font-normal text-ink-400">{c.pending ? "sending…" : timeAgoLong(c.createdAt)}</span>
             </p>
             {c.author?.professionalHeadline && <p className="truncate text-[11px] text-ink-400">{c.author.professionalHeadline}</p>}
-            <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-ink-700">{renderRich(c.content, nav)}</p>
+            <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-ink-700">{renderRich(c.content, openMention)}</p>
           </div>
 
           <div className="mt-1 flex items-center gap-4 px-2 text-xs text-ink-500">
@@ -416,13 +430,13 @@ const Composer = forwardRef(function Composer({ user, demo, replyTo, onCancelRep
 
 /* ---------------- rich text: @mentions + #hashtags ---------------- */
 
-function renderRich(text = "", nav) {
+function renderRich(text = "", onMention) {
   return text.split(/((?:^|\s)[#@][a-zA-Z0-9_.]+)/g).map((part, i) => {
     const t = part.trimStart();
     if (t.startsWith("#")) return <span key={i} className="font-medium text-brand-600">{part}</span>;
     if (t.startsWith("@")) {
       return (
-        <button key={i} onClick={(e) => { e.stopPropagation(); nav(`/app/search?q=${encodeURIComponent(t)}`); }} className="font-medium text-brand-600 hover:underline">
+        <button key={i} onClick={(e) => { e.stopPropagation(); onMention(t); }} className="font-medium text-brand-600 hover:underline">
           {part}
         </button>
       );

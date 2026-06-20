@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
   X, Check, Crop, SlidersHorizontal, Sparkles, Type, Music2, Scissors,
-  Sun, Contrast, Droplets, Flame, Aperture, Plus, Trash2, Play, Pause, Square,
+  Sun, Contrast, Droplets, Flame, Aperture, Plus, Trash2, Play, Pause, Square, Camera,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +49,7 @@ export default function MediaEditor({ item, isReel = false, onSave, onClose }) {
   const [activeText, setActiveText] = useState(null);
   const [music, setMusic] = useState(item.music || null);
   const [trim, setTrim] = useState(item.trim || { start: 0, end: 0 });
+  const [cover, setCover] = useState(item.cover ?? null); // reel thumbnail frame (seconds)
   const [duration, setDuration] = useState(0);
   const [playing, setPlaying] = useState(false);
   const videoRef = useRef(null);
@@ -82,6 +83,15 @@ export default function MediaEditor({ item, isReel = false, onSave, onClose }) {
     if (v.paused) { v.currentTime = trim.start || 0; v.play(); setPlaying(true); } else { v.pause(); setPlaying(false); }
   };
 
+  // Entering the Cover tool: pause and freeze on the chosen frame so it's visible.
+  useEffect(() => {
+    if (tool !== "cover" || !isVideo) return;
+    const v = videoRef.current; if (!v) return;
+    v.pause(); setPlaying(false);
+    v.currentTime = cover ?? 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tool]);
+
   /* drag text overlays */
   const dragText = useCallback((id) => (e) => {
     e.preventDefault();
@@ -105,13 +115,14 @@ export default function MediaEditor({ item, isReel = false, onSave, onClose }) {
   const TOOLS = [
     { key: "crop", icon: Crop, label: "Crop" },
     ...(isVideo ? [{ key: "trim", icon: Scissors, label: "Trim" }] : []),
+    ...(isReel && isVideo ? [{ key: "cover", icon: Camera, label: "Cover" }] : []),
     { key: "filter", icon: Sparkles, label: "Filters" },
     { key: "adjust", icon: SlidersHorizontal, label: "Adjust" },
     { key: "text", icon: Type, label: "Text" },
     ...(isReel || isVideo ? [{ key: "music", icon: Music2, label: "Music" }] : []),
   ];
 
-  const apply = () => onSave({ ...item, filter, adjust, crop: { ratio, zoom }, texts, music, trim, _editedCss: filterCss });
+  const apply = () => onSave({ ...item, filter, adjust, crop: { ratio, zoom }, texts, music, trim, cover, _editedCss: filterCss });
 
   return createPortal(
     <div className="fixed inset-0 z-[90] flex flex-col bg-ink-900 text-white animate-fade-in">
@@ -156,7 +167,7 @@ export default function MediaEditor({ item, isReel = false, onSave, onClose }) {
           ))}
 
           {/* play btn for video */}
-          {isVideo && tool !== "trim" && (
+          {isVideo && tool !== "trim" && tool !== "cover" && (
             <button onClick={togglePlay} className="absolute bottom-3 left-3 grid h-10 w-10 place-items-center rounded-full bg-black/50 backdrop-blur hover:bg-black/70">
               {playing ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
             </button>
@@ -205,6 +216,10 @@ export default function MediaEditor({ item, isReel = false, onSave, onClose }) {
 
         {tool === "trim" && isVideo && (
           <TrimBar duration={duration} trim={trim} setTrim={setTrim} videoRef={videoRef} />
+        )}
+
+        {tool === "cover" && isVideo && (
+          <CoverBar duration={duration} cover={cover} setCover={setCover} videoRef={videoRef} />
         )}
 
         {tool === "text" && (
@@ -308,6 +323,37 @@ function TrimBar({ duration, trim, setTrim, videoRef }) {
     </div>
   );
 }
+function CoverBar({ duration, cover, setCover, videoRef }) {
+  const barRef = useRef(null);
+  const val = cover ?? 0;
+  const seek = (e) => {
+    e.preventDefault();
+    const rect = barRef.current.getBoundingClientRect();
+    const move = (ev) => {
+      const x = (ev.touches?.[0]?.clientX ?? ev.clientX) - rect.left;
+      const t = Math.max(0, Math.min(duration, (x / rect.width) * duration));
+      setCover(t);
+      if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = t; }
+    };
+    move(e);
+    const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
+    window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+  };
+  const pct = duration ? (val / duration) * 100 : 0;
+  return (
+    <div className="pb-1">
+      <p className="mb-2 text-center text-xs text-white/60">Drag to choose the cover frame</p>
+      <div ref={barRef} onPointerDown={seek} className="relative h-14 cursor-pointer rounded-xl bg-white/10">
+        <div className="absolute inset-y-0 left-0 rounded-l-xl bg-brand-600/25" style={{ width: `${pct}%` }} />
+        <div className="absolute top-1/2 z-10 grid h-12 w-5 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize place-items-center rounded-md bg-brand-500 shadow-lg" style={{ left: `${pct}%` }}>
+          <span className="h-5 w-0.5 rounded bg-white/80" />
+        </div>
+      </div>
+      <div className="mt-2 text-center text-xs text-white/60">Cover frame at {fmt(val)}</div>
+    </div>
+  );
+}
+
 function Handle({ pos, onDown }) {
   return (
     <div onPointerDown={onDown} className="absolute top-1/2 z-10 grid h-12 w-5 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize place-items-center rounded-md bg-brand-500 shadow-lg" style={{ left: `${pos}%` }}>

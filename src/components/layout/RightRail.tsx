@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { TrendingUp, Sparkles } from "lucide-react";
+import { useNavigate } from "@/lib/router";
 import UserCard from "@/components/UserCard";
 import { dok } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -8,6 +9,7 @@ import { compact } from "@/lib/utils";
 
 export default function RightRail() {
   const { demo } = useAuth();
+  const nav = useNavigate();
   const [people, setPeople] = useState([]);
   const [tags, setTags] = useState([]);
 
@@ -20,7 +22,7 @@ export default function RightRail() {
     <aside className="sticky top-[5.5rem] hidden h-fit w-80 shrink-0 space-y-5 xl:block">
       <div className="card p-4">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-ink-900"><Sparkles size={16} className="text-brand-600" /> Suggested clinicians</h3>
-        <div className="space-y-3.5">
+        <div className="max-h-[20rem] space-y-3.5 overflow-y-auto overscroll-contain pr-1">
           {people.length === 0
             ? <p className="text-xs text-ink-400">No suggestions yet.</p>
             : people.map((u) => <UserCard key={u._id || u.id} user={u} demo={demo} />)}
@@ -29,16 +31,21 @@ export default function RightRail() {
 
       <div className="card p-4">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-ink-900"><TrendingUp size={16} className="text-brand-600" /> Trending in medicine</h3>
-        <div className="space-y-1">
+        <div className="max-h-[20rem] space-y-1 overflow-y-auto overscroll-contain pr-1">
           {tags.length === 0 && <p className="px-2 text-xs text-ink-400">No trending tags yet.</p>}
           {tags.map((t, i) => (
-            <div key={t.tag} className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-ink-900/[.03]">
+            <button
+              key={t.tag}
+              type="button"
+              onClick={() => nav(`/app/tag/${encodeURIComponent(t.tag)}`)}
+              className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left transition hover:bg-ink-900/[.03]"
+            >
               <div>
                 <p className="text-sm font-semibold text-brand-700">#{t.tag}</p>
                 <p className="text-xs text-ink-400">{compact(t.score || t.count || 0)} posts</p>
               </div>
               <span className="text-xs font-bold text-ink-400">{i + 1}</span>
-            </div>
+            </button>
           ))}
         </div>
       </div>

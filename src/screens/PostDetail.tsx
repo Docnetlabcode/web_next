@@ -5,6 +5,7 @@ import { Bookmark, Share2, ThumbsUp } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Avatar, Verified, PostTypeBadge, Skeleton } from "@/components/ui/Primitives";
 import CommentThread from "@/components/comments/CommentThread";
+import { RichText } from "@/components/ui/RichText";
 import ShareSheet from "@/components/ShareSheet";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
@@ -113,7 +114,7 @@ export default function PostDetail() {
               {post.content.split(".")[0]}.
             </h1>
           )}
-          <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-ink-900">{post.content}</p>
+          <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-ink-900"><RichText text={post.content} /></p>
           {post.media?.[0]?.url && <img src={post.media[0].url} alt="" className="mt-3 max-h-96 w-full rounded-2xl object-cover" />}
           <div className="mt-4 flex items-center justify-between border-t border-ink-900/[.05] pt-3 text-sm text-ink-500">
             <span>{compact(likes)} reactions · {compact(commentsCount)} replies</span>

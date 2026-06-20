@@ -1,7 +1,7 @@
 "use client";
 import { NavLink, useNavigate, Link, useLocation, Navigate } from "@/lib/router";
 import {
-  Home, Compass, Clapperboard, Stethoscope, Users, MessageSquare,
+  Home, Clapperboard, Stethoscope, Users, MessageSquare,
   Bell, Bookmark, Search, Plus, LogOut, Settings,
 } from "lucide-react";
 import { Avatar, Logo, Verified, Spinner } from "@/components/ui/Primitives";
@@ -13,7 +13,6 @@ import { useState, useEffect } from "react";
 
 const NAV = [
   { to: "/app", icon: Home, label: "Home", end: true },
-  { to: "/app/explore", icon: Compass, label: "Explore" },
   { to: "/app/reels", icon: Clapperboard, label: "Pulse" },
   { to: "/app/cases", icon: Stethoscope, label: "Cases" },
   { to: "/app/network", icon: Users, label: "Network" },

@@ -6,6 +6,7 @@ import {
   Send as SendIcon, Link2, Flag, PenLine, Trash2, AlertTriangle, Loader2, Undo2,
 } from "lucide-react";
 import { Avatar, Verified, PostTypeBadge } from "@/components/ui/Primitives";
+import { RichText } from "@/components/ui/RichText";
 import ReactionButton, { REACTIONS } from "@/components/ui/ReactionButton";
 import FollowButton from "@/components/ui/FollowButton";
 import { BottomSheet, SheetRow, Modal } from "@/components/ui/Overlays";
@@ -208,8 +209,8 @@ export default function PostCard({ post, demo, onRemoved }) {
           </div>
 
           {/* ---------- body ---------- */}
-          <div className="cursor-pointer px-4 pb-3" onClick={() => nav(`/app/post/${post._id || post.id}`)}>
-            <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink-900">{renderContent(content)}</p>
+          <div className="px-4 pb-3">
+            <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink-900"><RichText text={content} /></p>
             {post.specialties?.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {post.specialties.map((s) => <span key={s} className="chip bg-brand-50 text-brand-700">{s}</span>)}
@@ -339,10 +340,3 @@ export default function PostCard({ post, demo, onRemoved }) {
   );
 }
 
-function renderContent(text = "") {
-  return text.split(/((?:^|\s)[#@][\w.]+)/g).map((part, i) =>
-    part.trim().startsWith("#") || part.trim().startsWith("@")
-      ? <span key={i} className="font-medium text-brand-600">{part}</span>
-      : part
-  );
-}
