@@ -19,10 +19,10 @@ export default function RightRail() {
   }, []);
 
   return (
-    <aside className="sticky top-[5.5rem] hidden h-fit w-80 shrink-0 space-y-5 xl:block">
+    <aside className="no-scrollbar sticky top-[5.5rem] hidden max-h-[calc(100vh-7rem)] w-80 shrink-0 space-y-5 overflow-y-auto overscroll-contain xl:block">
       <div className="card p-4">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-ink-900"><Sparkles size={16} className="text-brand-600" /> Suggested clinicians</h3>
-        <div className="max-h-[20rem] space-y-3.5 overflow-y-auto overscroll-contain pr-1">
+        <div className="space-y-3.5">
           {people.length === 0
             ? <p className="text-xs text-ink-400">No suggestions yet.</p>
             : people.map((u) => <UserCard key={u._id || u.id} user={u} demo={demo} />)}
@@ -31,22 +31,25 @@ export default function RightRail() {
 
       <div className="card p-4">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-ink-900"><TrendingUp size={16} className="text-brand-600" /> Trending in medicine</h3>
-        <div className="max-h-[20rem] space-y-1 overflow-y-auto overscroll-contain pr-1">
+        <div className="space-y-1">
           {tags.length === 0 && <p className="px-2 text-xs text-ink-400">No trending tags yet.</p>}
-          {tags.map((t, i) => (
-            <button
-              key={t.tag}
-              type="button"
-              onClick={() => nav(`/app/tag/${encodeURIComponent(t.tag)}`)}
-              className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left transition hover:bg-ink-900/[.03]"
-            >
-              <div>
-                <p className="text-sm font-semibold text-brand-700">#{t.tag}</p>
-                <p className="text-xs text-ink-400">{compact(t.score || t.count || 0)} posts</p>
-              </div>
-              <span className="text-xs font-bold text-ink-400">{i + 1}</span>
-            </button>
-          ))}
+          {tags.map((t, i) => {
+            const tag = String(t.tag ?? "").replace(/^#+/, ""); // backend stores hashtags as "#tag" — show a single #
+            return (
+              <button
+                key={tag || i}
+                type="button"
+                onClick={() => nav(`/app/tag/${encodeURIComponent(tag)}`)}
+                className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left transition hover:bg-ink-900/[.03]"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-brand-700">#{tag}</p>
+                  <p className="text-xs text-ink-400">{compact(t.score || t.count || 0)} posts</p>
+                </div>
+                <span className="text-xs font-bold text-ink-400">{i + 1}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

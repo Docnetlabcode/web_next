@@ -37,9 +37,20 @@ export default function Saved() {
     return () => { alive = false; };
   }, [tab]);
 
-  const isReel = (x) => x._feedType === "reel" || x.thumbnailUrl;
+  const isReel = (x) => x.type === "reel" || x._feedType === "reel" || Boolean(x.videoUrl || x.thumbnailUrl);
+  const reelPoster = (r) => r.thumbnailUrl || (r.videoUrl ? r.videoUrl.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined);
   const reels = (items || []).filter(isReel);
   const posts = (items || []).filter((x) => !isReel(x));
+
+  // Tapping the (already-saved) bookmark un-saves → drop the card; restore it if the call fails.
+  const onSavedChange = (post, isSaved) => {
+    const id = post._id || post.id;
+    setItems((x) => {
+      const list = x || [];
+      if (isSaved) return list.some((y) => (y._id || y.id) === id) ? list : [post, ...list];
+      return list.filter((y) => (y._id || y.id) !== id);
+    });
+  };
 
   return (
     <div className="mx-auto max-w-xl pb-24">
@@ -79,8 +90,8 @@ export default function Saved() {
           {reels.length > 0 && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {reels.map((r) => (
-                <button key={r._id || r.id} onClick={() => nav("/app/reels")} className="press group relative aspect-[3/4] overflow-hidden rounded-2xl">
-                  <img src={r.thumbnailUrl} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
+                <button key={r._id || r.id} onClick={() => nav("/app/reels")} className="press group relative aspect-[3/4] overflow-hidden rounded-2xl bg-ink-900">
+                  <img src={reelPoster(r)} alt="" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
                   <span className="absolute inset-0 bg-gradient-to-t from-ink-900/60 via-transparent" />
                   <span className="absolute bottom-2 left-2 right-2 truncate text-left text-xs font-semibold text-white">{r.caption}</span>
                   <span className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-ink-900/40 text-white backdrop-blur"><Play size={13} /></span>
@@ -89,7 +100,13 @@ export default function Saved() {
             </div>
           )}
           {posts.map((p) => (
-            <PostCard key={p._id || p.id} post={p} demo={demo} onRemoved={(pid) => setItems((x) => x.filter((y) => (y._id || y.id) !== pid))} />
+            <PostCard
+              key={p._id || p.id}
+              post={{ ...p, isSaved: true }}
+              demo={demo}
+              onRemoved={(pid) => setItems((x) => x.filter((y) => (y._id || y.id) !== pid))}
+              onSavedChange={onSavedChange}
+            />
           ))}
         </div>
       )}

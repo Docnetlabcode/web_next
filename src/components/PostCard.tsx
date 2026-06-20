@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@/lib/router";
 import {
   MessageCircle, Share2, Bookmark, MoreHorizontal, Heart, EyeOff, UserX,
-  Send as SendIcon, Link2, Flag, PenLine, Trash2, AlertTriangle, Loader2, Undo2,
+  Send as SendIcon, Link2, Flag, PenLine, Trash2, AlertTriangle, Loader2, Undo2, Play,
 } from "lucide-react";
 import { Avatar, Verified, PostTypeBadge } from "@/components/ui/Primitives";
 import { RichText } from "@/components/ui/RichText";
@@ -15,6 +15,7 @@ import LikesSheet from "@/components/LikesSheet";
 import CommentsSheet from "@/components/CommentsSheet";
 import ReportSheet from "@/components/ReportSheet";
 import EditPostModal, { canEditPost } from "@/components/EditPostModal";
+import PostMediaViewer from "@/components/PostMediaViewer";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/Toast";
 import { cn, timeAgo, timeAgoLong, compact, roleLabel } from "@/lib/utils";
@@ -26,13 +27,24 @@ import { dok } from "@/lib/api";
  * the optimistic like/save engines, comments, share tray, and the
  * owner / third-party 3-dot context menus (docs/feed.md §1–§3).
  */
-export default function PostCard({ post, demo, onRemoved }) {
+// Some endpoints (e.g. /feed/saved) return raw mediaUrls/mediaTypes instead of the
+// built `media` array; normalize so the card renders media regardless of source.
+const _toMediaType = (t) => (t === "video" ? "video" : t === "audio" ? "audio" : t === "pdf" ? "pdf" : "image");
+const normalizeMedia = (post) => {
+  if (Array.isArray(post.media) && post.media.length) return post.media;
+  const items = (post.mediaUrls || []).map((url, i) => ({ url, type: _toMediaType(post.mediaTypes?.[i]) }));
+  if (post.documentUrl) items.push({ url: post.documentUrl, type: "document", name: post.documentName });
+  return items;
+};
+
+export default function PostCard({ post, demo, onRemoved, onSavedChange }) {
   const nav = useNavigate();
   const toast = useToast();
   const { user: me } = useAuth();
   const a = post.author || {};
   const authorId = a.id || a._id;
   const isOwn = Boolean(authorId && (me?._id === authorId || me?.id === authorId));
+  const media = normalizeMedia(post);
 
   // --- engagement state (optimistic with rollback) ---
   const [reaction, setReaction] = useState(post.isLiked ? "helpful" : null);
@@ -51,6 +63,7 @@ export default function PostCard({ post, demo, onRemoved }) {
   const [editOpen, setEditOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [viewer, setViewer] = useState(null); // full-screen media index, or null
 
   // --- removal pipeline: collapse animation → stub / drop ---
   const [collapsed, setCollapsed] = useState(false);
@@ -99,10 +112,13 @@ export default function PostCard({ post, demo, onRemoved }) {
   /* ---- save engine ---- */
   const toggleSave = () => {
     const prev = saved;
-    setSaved(!prev);
+    const next = !prev;
+    setSaved(next);
+    onSavedChange?.(post, next); // let the Saved screen drop/restore the card
     if (demo) return;
     dok.posts.save(post._id || post.id).catch(() => {
       setSaved(prev);
+      onSavedChange?.(post, prev);
       toast?.error("Couldn't update saved items");
     });
   };
@@ -218,20 +234,23 @@ export default function PostCard({ post, demo, onRemoved }) {
             )}
           </div>
 
-          {/* ---------- media (double-tap to react) ---------- */}
-          {post.media?.length > 0 && post.media[0]?.url && (
-            <div className="relative mx-1 mb-1 select-none overflow-hidden rounded-2xl" onDoubleClick={dblTap}>
-              {post.media.length === 1 ? (
-                <img src={post.media[0].url} alt="" className="max-h-[460px] w-full object-cover" loading="lazy" />
+          {/* ---------- media (tap → full screen · double-tap → react) ---------- */}
+          {media.length > 0 && media[0]?.url && (
+            <div className="relative mx-1 mb-1 select-none overflow-hidden rounded-2xl">
+              {media.length === 1 ? (
+                <MediaTile m={media[0]} onOpen={() => setViewer(0)} onLike={dblTap} wrap="" media="max-h-[460px] w-full object-cover" />
               ) : (
                 <div className="grid grid-cols-2 gap-0.5">
-                  {post.media.slice(0, 4).map((m, i) => (
-                    <div key={i} className="relative aspect-square">
-                      <img src={m.url} alt="" className="h-full w-full object-cover" loading="lazy" />
-                      {i === 3 && post.media.length > 4 && (
-                        <span className="absolute inset-0 grid place-items-center bg-ink-900/50 text-xl font-bold text-white">+{post.media.length - 4}</span>
-                      )}
-                    </div>
+                  {media.slice(0, 4).map((m, i) => (
+                    <MediaTile
+                      key={i}
+                      m={m}
+                      onOpen={() => setViewer(i)}
+                      onLike={dblTap}
+                      wrap="aspect-square"
+                      media="h-full w-full object-cover"
+                      overlay={i === 3 && media.length > 4 ? `+${media.length - 4}` : null}
+                    />
                   ))}
                 </div>
               )}
@@ -334,8 +353,31 @@ export default function PostCard({ post, demo, onRemoved }) {
           <CommentsSheet open={commentsOpen} onClose={() => setCommentsOpen(false)} post={{ ...post, commentsCount }} demo={demo} onCountChange={(d) => setCommentsCount((n) => Math.max(0, n + d))} />
           <ReportSheet open={reportOpen} onClose={() => setReportOpen(false)} postId={post._id || post.id} demo={demo} />
           <EditPostModal open={editOpen} onClose={() => setEditOpen(false)} post={{ ...post, content }} demo={demo} onSaved={(text) => { setContent(text); setEdited(true); }} />
+          {viewer != null && <PostMediaViewer media={media} index={viewer} onClose={() => setViewer(null)} />}
         </article>
       </div>
+    </div>
+  );
+}
+
+/* A single image/video thumbnail in the card: tap → open full screen, double-tap → like. */
+function MediaTile({ m, onOpen, onLike, wrap, media, overlay }) {
+  const timer = useRef(null);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  const click = () => { clearTimeout(timer.current); timer.current = setTimeout(onOpen, 200); };
+  const dbl = () => { clearTimeout(timer.current); onLike?.(); };
+  const isVideo = m.type === "video";
+  return (
+    <div className={cn("relative cursor-pointer", wrap)} onClick={click} onDoubleClick={dbl}>
+      {isVideo
+        ? <video src={m.url} muted playsInline preload="metadata" className={media} />
+        : <img src={m.url} alt="" loading="lazy" className={media} />}
+      {isVideo && (
+        <span className="pointer-events-none absolute inset-0 grid place-items-center">
+          <span className="grid h-11 w-11 place-items-center rounded-full bg-black/50 text-white backdrop-blur"><Play size={20} className="ml-0.5 fill-white text-white" /></span>
+        </span>
+      )}
+      {overlay && <span className="pointer-events-none absolute inset-0 grid place-items-center bg-ink-900/50 text-xl font-bold text-white">{overlay}</span>}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { ArrowLeft, MapPin, Share2, Lock, MoreHorizontal, ShieldOff, UserMinus, 
 import { Avatar, Verified, RoleBadge, Skeleton } from "@/components/ui/Primitives";
 import PostCard from "@/components/PostCard";
 import ShareSheet from "@/components/ShareSheet";
+import MediaViewer from "@/components/profile/MediaViewer";
 import { useToast } from "@/components/ui/Toast";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
@@ -28,6 +29,7 @@ export default function UserProfile() {
   const [posts, setPosts] = useState(null);
   const [share, setShare] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [viewer, setViewer] = useState(null); // fullscreen photo src, or null
 
   const isMe = me && (me._id === id || me.id === id);
 
@@ -102,8 +104,12 @@ export default function UserProfile() {
     <div className="mx-auto max-w-2xl pb-24">
       <div className="card overflow-hidden">
         <div className="relative h-40 bg-gradient-to-br from-brand-500 via-brand-600 to-brand-900">
-          {u.coverPhoto && <img src={u.coverPhoto} alt="" className="absolute inset-0 h-full w-full object-cover" />}
-          <div className="grid-bg absolute inset-0 opacity-30" />
+          {u.coverPhoto && (
+            <button type="button" onClick={() => setViewer(u.coverPhoto)} aria-label="View cover photo" className="absolute inset-0 h-full w-full cursor-zoom-in">
+              <img src={u.coverPhoto} alt="" className="h-full w-full object-cover" />
+            </button>
+          )}
+          <div className="grid-bg pointer-events-none absolute inset-0 opacity-30" />
           <button onClick={() => nav(-1)} aria-label="Back" className="press absolute left-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"><ArrowLeft size={18} /></button>
           <div className="absolute right-3 top-3 flex gap-2">
             <button onClick={() => setShare(true)} aria-label="Share profile" className="press grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"><Share2 size={17} /></button>
@@ -114,7 +120,13 @@ export default function UserProfile() {
         <div className="px-5 pb-5">
           {/* relative z-10 lifts the DP + action above the absolutely-positioned cover image */}
           <div className="relative z-10 -mt-14">
-            <span className="inline-block rounded-full ring-4 ring-white"><Avatar user={u} size={104} /></span>
+            {u.profilePhoto ? (
+              <button type="button" onClick={() => setViewer(u.profilePhoto)} aria-label="View profile photo" className="press inline-block cursor-zoom-in rounded-full ring-4 ring-white">
+                <Avatar user={u} size={104} />
+              </button>
+            ) : (
+              <span className="inline-block rounded-full ring-4 ring-white"><Avatar user={u} size={104} /></span>
+            )}
           </div>
 
           <div className="mt-3">
@@ -188,6 +200,7 @@ export default function UserProfile() {
         </div>
       )}
 
+      {viewer && <MediaViewer src={viewer} kind="image" onClose={() => setViewer(null)} />}
       <ShareSheet
         open={share}
         onClose={() => setShare(false)}

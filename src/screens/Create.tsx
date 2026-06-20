@@ -1,5 +1,6 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "@/lib/router";
 import {
   Image as ImageIcon, FileText, Stethoscope, Clapperboard, X, Globe, Smile,
@@ -61,6 +62,7 @@ export default function Create() {
   const [type, setType] = useState("post");
   const [text, setText] = useState("");
   const [suggest, setSuggest] = useState(null); // { kind: "mention"|"hashtag", items: array|null }
+  const [menuPos, setMenuPos] = useState(null); // fixed coords for the @/# dropdown (portaled past the card's overflow-hidden)
   const [emoji, setEmoji] = useState(false);
   const [media, setMedia] = useState([]);
   const [editing, setEditing] = useState(null);
@@ -130,6 +132,21 @@ export default function Create() {
     setSuggest(null);
     requestAnimationFrame(() => { el?.focus(); el?.setSelectionRange(before.length, before.length); });
   };
+
+  // Keep the portaled suggestion menu pinned to the textarea (and follow page scroll/resize).
+  useEffect(() => {
+    if (!suggest) { setMenuPos(null); return; }
+    const update = () => {
+      const el = taRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setMenuPos({ left: r.left, top: r.bottom + 4, width: r.width });
+    };
+    update();
+    window.addEventListener("scroll", update, true);
+    window.addEventListener("resize", update);
+    return () => { window.removeEventListener("scroll", update, true); window.removeEventListener("resize", update); };
+  }, [suggest]);
 
   const onFiles = (e) => {
     const files = Array.from(e.target.files || []);
@@ -226,36 +243,40 @@ export default function Create() {
             placeholder={isReel ? "Add a caption for your Pulse…  use # and @" : "Share a case, paper or healthcare update…  use # and @"}
             className="w-full resize-none text-[15px] outline-none placeholder:text-ink-400"
           />
-          {suggest && (
-            <div className="anim-pop absolute inset-x-4 top-full z-20 mt-1 max-h-64 overflow-y-auto rounded-2xl border border-ink-900/[.08] bg-white shadow-card">
-              {suggest.items === null ? (
-                <div className="grid place-items-center py-4"><Loader2 size={16} className="animate-spin text-ink-400" /></div>
-              ) : suggest.items.length === 0 ? (
-                <p className="px-3 py-3 text-center text-xs text-ink-400">No matches</p>
-              ) : suggest.kind === "mention" ? (
-                suggest.items.map((u) => (
-                  <button key={u._id || u.id} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pickMention(u)} className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition hover:bg-brand-50">
-                    <Avatar user={u} size={30} />
-                    <span className="min-w-0">
-                      <span className="flex items-center gap-1 truncate text-sm font-semibold text-ink-900">{u.fullName} {u.isVerified && <Verified size={11} />}</span>
-                      <span className="block truncate text-[11px] text-ink-500">@{u.uniqueUsername}</span>
-                    </span>
-                  </button>
-                ))
-              ) : (
-                suggest.items.map((h, i) => {
-                  const tag = String(h.tag || h.name || h).replace(/^#/, "");
-                  return (
-                    <button key={tag + i} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pickHashtag(tag)} className="flex w-full items-center justify-between px-3 py-2 text-left transition hover:bg-brand-50">
-                      <span className="text-sm font-semibold text-brand-700">#{tag}</span>
-                      {(h.count != null || h.postsCount != null) && <span className="text-[11px] text-ink-400">{compact(h.count ?? h.postsCount)} posts</span>}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          )}
         </div>
+        {suggest && menuPos && createPortal(
+          <div
+            style={{ position: "fixed", left: menuPos.left, top: menuPos.top, width: menuPos.width }}
+            className="anim-pop z-[80] max-h-72 overflow-y-auto overscroll-contain rounded-2xl border border-ink-900/[.08] bg-white shadow-card"
+          >
+            {suggest.items === null ? (
+              <div className="grid place-items-center py-4"><Loader2 size={16} className="animate-spin text-ink-400" /></div>
+            ) : suggest.items.length === 0 ? (
+              <p className="px-3 py-3 text-center text-xs text-ink-400">No matches</p>
+            ) : suggest.kind === "mention" ? (
+              suggest.items.map((u) => (
+                <button key={u._id || u.id} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pickMention(u)} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition hover:bg-brand-50">
+                  <Avatar user={u} size={32} />
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1 truncate text-sm font-semibold text-ink-900">{u.fullName} {u.isVerified && <Verified size={11} />}</span>
+                    <span className="block truncate text-[11px] text-ink-500">@{u.uniqueUsername}</span>
+                  </span>
+                </button>
+              ))
+            ) : (
+              suggest.items.map((h, i) => {
+                const tag = String(h.tag || h.name || h).replace(/^#/, "");
+                return (
+                  <button key={tag + i} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pickHashtag(tag)} className="flex w-full items-center justify-between px-3 py-2.5 text-left transition hover:bg-brand-50">
+                    <span className="text-sm font-semibold text-brand-700">#{tag}</span>
+                    {(h.count != null || h.postsCount != null) && <span className="text-[11px] text-ink-400">{compact(h.count ?? h.postsCount)} posts</span>}
+                  </button>
+                );
+              })
+            )}
+          </div>,
+          document.body
+        )}
 
         {media.length > 0 && (
           <div className="px-4 pb-2">
