@@ -245,7 +245,24 @@ export const dok = {
   },
   search: {
     all: (q) => unwrap(api.get(`/search?q=${encodeURIComponent(q)}&limit=6`)),
-    users: (q) => unwrap(api.get(`/search/users?q=${encodeURIComponent(q)}`)),
+    // Predictive typeahead → { users:[...], hashtags:[...] } (PRD §1). Backend: 200ms-friendly, ≥3 chars.
+    suggest: (q) => unwrap(api.get(`/search/suggest?q=${encodeURIComponent(q)}`)),
+    // Unified search. `extra` carries the filter query string, e.g. "&role=doctor&city=Mumbai" (PRD §3).
+    users: (q, extra = "") => unwrap(api.get(`/search/users?q=${encodeURIComponent(q)}${extra}`)),
+    posts: (q, extra = "") => unwrap(api.get(`/search/posts?q=${encodeURIComponent(q)}${extra}`)),
+    // Unified content (posts + cases + reels) with an opaque keyset cursor (docs/modules/search.md).
+    content: (q, extra = "") => unwrap(api.get(`/search/content?q=${encodeURIComponent(q)}${extra}`)),
+    hashtags: (q) => unwrap(api.get(`/search/hashtags?q=${encodeURIComponent(q)}`)),
+    // Trending hashtags ranked by 48h engagement velocity (PRD §4).
+    trending: () => unwrap(api.get("/search/trending")),
+    // Hashtag workspace feed; `qs` e.g. "?type=case_study&cursor=…" (PRD §4).
+    hashtag: (tag, qs = "") => unwrap(api.get(`/search/hashtag/${encodeURIComponent(tag)}${qs}`)),
+    // Search history (logged-in). Recorded explicitly on a committed search / result tap, not typeahead.
+    history: () => unwrap(api.get("/search/history")),                                  // { items:[{id,query,queryRaw,searchType,createdAt}] }
+    recordSearch: (b) => unwrap(api.post("/search/history", b)),                        // { q, type?, entityId?, entityType? }
+    deleteHistory: (id) => unwrap(api.delete(`/search/history/${id}`)),
+    clearHistory: () => unwrap(api.delete("/search/history")),
+    popular: () => unwrap(api.get("/search/popular")),                                  // { terms:[{query,count}] } — distinct from #trending
   },
   cases: {
     feed: (q = "") => unwrap(api.get(`/cases/feed${q}`)),

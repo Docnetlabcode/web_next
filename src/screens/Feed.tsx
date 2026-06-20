@@ -1,7 +1,7 @@
 "use client";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "@/lib/router";
-import { FileText, Stethoscope, Clapperboard, PenLine, ChevronLeft, ChevronRight, Loader2, Sparkles, RefreshCw } from "lucide-react";
+import { FileText, Stethoscope, Clapperboard, PenLine, ChevronLeft, ChevronRight, Loader2, Sparkles, RefreshCw, Search as SearchIcon } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import RightRail from "@/components/layout/RightRail";
 import { Avatar, Skeleton } from "@/components/ui/Primitives";
@@ -132,6 +132,10 @@ export default function Feed() {
     <div className="flex gap-6">
       <PullToRefreshIndicator pull={pull} refreshing={pulling} />
       <div className="mx-auto w-full max-w-xl space-y-5 pb-24">
+        {/* mobile search entry — the top-bar search is desktop-only */}
+        <button onClick={() => nav("/app/search")} className="press flex w-full items-center gap-2 rounded-full border border-ink-900/10 bg-white px-4 py-3 text-sm text-ink-400 transition hover:border-brand-300 sm:hidden">
+          <SearchIcon size={18} /> Search people, papers, #tags…
+        </button>
         {/* Health-professional stats strip (app parity, mobile only) */}
         {user?.role === "doctor" && <DoctorStatsStrip />}
 

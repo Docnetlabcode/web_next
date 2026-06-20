@@ -18,7 +18,7 @@ module call depends on (base URL, auth, the response envelope, pagination, error
 | Follows | [follows.md](follows.md) | Follow state machine + private follow requests |
 | Network | [network.md](network.md) | Connections (accept/reject), discover |
 | Notifications | [notifications.md](notifications.md) | Activity feed, unread count, preferences |
-| Search | [search.md](search.md) | Users / posts / hashtags / global |
+| Search | [search.md](search.md) | **Discovery engine**: fuzzy profiles + unified content, typeahead, trending, hashtag workspace |
 | Reels | [reels.md](reels.md) | Reel feed, upload (HLS), like/comment/analytics |
 | Cases | [cases.md](cases.md) | Case-study CRUD, helpful, follow |
 | Consultations | [consultations.md](consultations.md) | Booking, pay, approve/decline, refund |
@@ -30,6 +30,9 @@ module call depends on (base URL, auth, the response envelope, pagination, error
 
 > Deep-dive guides with extra worked examples: [../profile.md](../profile.md),
 > [../feed.md](../feed.md). Full single-page table: [../API.md](../API.md).
+>
+> Want the **code** structure (what every file/folder does), not the wire format?
+> See the codebase guide: [../codebase/README.md](../codebase/README.md).
 
 ---
 

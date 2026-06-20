@@ -352,14 +352,32 @@ Row cards carry `mutualConnectionsCount` + `uniqueUsername`/`professionalHeadlin
 
 ---
 
-## Search — `/api/search`
+## Search — `/api/search`  (Global Search Discovery Engine)
+
+Fault-tolerant fuzzy search (PostgreSQL `pg_trgm` + `fuzzystrmatch`, auto-degrading to
+`ILIKE`). Typeahead, profiles, unified content (posts + cases + reels), trending
+hashtags, hashtag workspace. Full guide + JSON: [modules/search.md](modules/search.md).
 
 | Method | Path | Auth | Query params | Description |
 |--------|------|------|-------------|-------------|
-| GET | `/` | 🔓 | `q`, `limit`, `cursor` | Cross-type search |
-| GET | `/users` | 🔓 | `q`, `role`, `specialty` | User search |
-| GET | `/posts` | 🔓 | `q`, `type` | Post search |
-| GET | `/hashtags` | 🔓 | `q` | Hashtag search |
+| GET | `/suggest` | 🔓 | `q` (≥3), `limit` | Typeahead → `{ users[], hashtags[] }` (empty if q<3) |
+| GET | `/` | 🔓 | `q`, `limit` | Home preview → `{ users, posts, hashtags, fallback? }` |
+| GET | `/users` | 🔓 | `q`, `role`, `city`, `state`, `country`, `headline`, `education`, `workplace`, `cursor`, `limit` | Profiles tab (fuzzy + filters); adds `fallback` on zero results |
+| GET | `/posts` | 🔓 | `q`, `type`, `time`, `sort`, `specialty`, `affiliation`, `cursor`, `limit` | Posts-only (fuzzy + filters) |
+| GET | `/content` | 🔓 | `q`, `type`(post·research·thesis·case_study·case·reel·all), `time`(24h·week·month), `sort`(recent·trending), `specialty`, `affiliation`, `cursor` | **Unified** posts + cases + reels → `{ items[{kind,…}], hasMore, nextCursor }` (opaque cursor) |
+| GET | `/hashtags` | 🔓 | `q`, `limit` | Hashtag suggestions → `{ hashtags[{tag,count}] }` |
+| GET | `/trending` | — | `limit` | Trending hashtags by 48h velocity → `{ hashtags[{tag,count,score}] }` |
+| GET | `/hashtag/:tag` | 🔓 | `type`(all·case_study·research·reel), `cursor`, `limit` | Hashtag workspace → `{ tag, tab, totalCount, items, hasMore, nextCursor }` |
+| POST | `/history` | 🔒 | body `{ q, type?, entityId?, entityType? }` | Record a committed search (deduped; keeps last 50/user) |
+| GET | `/history` | 🔒 | `limit` | My recent searches → `{ items[] }` |
+| DELETE | `/history/:id` | 🔒 | — | Remove one history entry |
+| DELETE | `/history` | 🔒 | — | Clear my search history → `{ cleared }` |
+| GET | `/popular` | — | `limit` | Popular search **terms** (7d) → `{ terms[{query,count}] }` (distinct from `/trending` #hashtags) |
+
+> Fuzzy: `cardo`→`cardio` (D=1), `dermatologyy`→`dermatology` (D=2), phonetic
+> `kardiology`→`cardiology` (metaphone). Profile/post lists use id cursors; `/content`
+> and `/hashtag/:tag` use an opaque (createdAt,id) keyset cursor — pass it back verbatim.
+> Migration `010_search_engine.sql` enables the extensions + trigram indexes.
 
 ---
 
