@@ -16,7 +16,7 @@ import EditPostModal, { canEditPost } from "@/components/EditPostModal";
 import ReelVideo from "@/components/ReelVideo";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/Toast";
-import { cn, compact, timeAgoLong } from "@/lib/utils";
+import { cn, compact, timeAgoLong, reelPoster } from "@/lib/utils";
 import { dok } from "@/lib/api";
 
 const rid = (r) => r?._id || r?.id;
@@ -201,7 +201,7 @@ export default function ReelViewer({ reels, index, onClose, onRemoved, onReachEn
       <div key={id} className="relative h-[88vh] w-[min(94vw,420px)] overflow-hidden rounded-3xl bg-ink-900 shadow-2xl anim-pop">
         <ReelVideo
           src={reel.hlsUrl || reel.videoUrl}
-          poster={reel.thumbnailUrl || (reel.videoUrl ? reel.videoUrl.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined)}
+          poster={reelPoster(reel)}
           muted={muted}
           status={reel.processingStatus}
           loop={isLast}

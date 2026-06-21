@@ -6,7 +6,7 @@ import { Avatar, Skeleton } from "@/components/ui/Primitives";
 import PostCard from "@/components/PostCard";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
-import { cn, compact } from "@/lib/utils";
+import { cn, compact, reelPoster } from "@/lib/utils";
 
 /**
  * Dedicated hashtag workspace (PRD §4B) — deep-linked from any #tag chip.
@@ -100,7 +100,7 @@ export default function HashtagWorkspace() {
 }
 
 function ReelRow({ reel, onOpen }) {
-  const poster = reel.thumbnailUrl || (reel.videoUrl ? reel.videoUrl.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined);
+  const poster = reelPoster(reel);
   return (
     <button onClick={onOpen} className="card lift flex w-full items-center gap-3 p-3 text-left">
       <span className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl bg-ink-900">

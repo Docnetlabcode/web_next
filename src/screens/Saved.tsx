@@ -6,7 +6,7 @@ import PostCard from "@/components/PostCard";
 import { Skeleton } from "@/components/ui/Primitives";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
-import { cn, compact } from "@/lib/utils";
+import { cn, compact, reelPoster } from "@/lib/utils";
 
 /**
  * Private Saved repository (docs/feed.md §6) — visible only to the owner,
@@ -38,7 +38,6 @@ export default function Saved() {
   }, [tab]);
 
   const isReel = (x) => x.type === "reel" || x._feedType === "reel" || Boolean(x.videoUrl || x.thumbnailUrl);
-  const reelPoster = (r) => r.thumbnailUrl || (r.videoUrl ? r.videoUrl.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined);
   const reels = (items || []).filter(isReel);
   const posts = (items || []).filter((x) => !isReel(x));
 

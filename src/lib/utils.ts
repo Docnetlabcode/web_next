@@ -50,6 +50,24 @@ export function avatarColor(seed = "") {
 export const roleLabel = (r) =>
   ({ doctor: "Health Professional", student: "Medical Student", general_user: "General User" }[r] || "Member");
 
+// A URL is only usable as an <img>/poster if it points at an actual image file.
+const isImageUrl = (u) => /\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i.test(u || "");
+
+/**
+ * Poster frame for a reel/Pulse. The backend currently points `thumbnailUrl`/
+ * `posterUrl` at the raw Cloudinary .mp4 (not an image), so an <img> with those
+ * fails to load. Cloudinary serves a real JPEG frame when the video extension is
+ * swapped to .jpg, so derive that — and only trust the thumbnail fields when they
+ * actually are an image (e.g. if the backend starts returning real posters).
+ */
+export function reelPoster(r) {
+  if (!r) return undefined;
+  const real = [r.thumbnailUrl, r.posterUrl].find(isImageUrl);
+  if (real) return real;
+  const video = r.videoUrl || r.hlsUrl || r.thumbnailUrl || r.posterUrl;
+  return video ? video.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined;
+}
+
 /** Animate elements with .reveal into view as they scroll. */
 export function useScrollReveal() {
   useEffect(() => {

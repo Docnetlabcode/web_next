@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cn, compact, roleLabel, initials, timeAgo, timeAgoLong, avatarColor } from "@/lib/utils";
+import { cn, compact, roleLabel, initials, timeAgo, timeAgoLong, avatarColor, reelPoster } from "@/lib/utils";
 
 describe("cn", () => {
   it("joins truthy class names and drops falsy ones", () => {
@@ -57,5 +57,27 @@ describe("timeAgo / timeAgoLong", () => {
 describe("avatarColor", () => {
   it("is deterministic for a given seed", () => {
     expect(avatarColor("Priya")).toBe(avatarColor("Priya"));
+  });
+});
+
+describe("reelPoster", () => {
+  const mp4 = "https://res.cloudinary.com/x/video/upload/v1/r/a.mp4";
+  it("derives a Cloudinary .jpg frame from the video url", () => {
+    expect(reelPoster({ videoUrl: mp4 })).toBe("https://res.cloudinary.com/x/video/upload/v1/r/a.jpg");
+  });
+  it("ignores thumbnailUrl/posterUrl when they point at a video file (the backend's current bug)", () => {
+    // backend sends every media field as the same .mp4 — an <img> can't render that
+    expect(reelPoster({ videoUrl: mp4, thumbnailUrl: mp4, posterUrl: mp4 }))
+      .toBe("https://res.cloudinary.com/x/video/upload/v1/r/a.jpg");
+  });
+  it("prefers a real image thumbnail when the backend provides one", () => {
+    expect(reelPoster({ videoUrl: mp4, thumbnailUrl: "https://cdn/x/cover.jpg" })).toBe("https://cdn/x/cover.jpg");
+  });
+  it("falls back to hlsUrl and strips query strings", () => {
+    expect(reelPoster({ hlsUrl: "https://cdn/x/a.m3u8?token=1" })).toBe("https://cdn/x/a.jpg");
+  });
+  it("returns undefined when there is no media at all", () => {
+    expect(reelPoster({})).toBeUndefined();
+    expect(reelPoster(null)).toBeUndefined();
   });
 });

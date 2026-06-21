@@ -5,16 +5,11 @@ import { Avatar, Verified } from "@/components/ui/Primitives";
 import ReelViewer from "@/components/ReelViewer";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
-import { compact } from "@/lib/utils";
+import { compact, reelPoster } from "@/lib/utils";
 import { usePullToRefresh, useAutoRefresh } from "@/hooks/usePullToRefresh";
 import PullToRefreshIndicator from "@/components/ui/PullToRefreshIndicator";
 
 const rid = (r) => r?._id || r?.id;
-
-// The discovery feed returns `videoUrl` (a Cloudinary mp4) but no `thumbnailUrl`,
-// so derive a poster frame from the video (Cloudinary serves a .jpg frame).
-const reelPoster = (r) =>
-  r?.thumbnailUrl || (r?.videoUrl ? r.videoUrl.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined);
 
 export default function Reels() {
   const { demo } = useAuth();

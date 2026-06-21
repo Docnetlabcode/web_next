@@ -10,7 +10,7 @@ import PeopleSheet from "@/components/profile/PeopleSheet";
 import MediaViewer from "@/components/profile/MediaViewer";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
-import { cn, compact } from "@/lib/utils";
+import { cn, compact, reelPoster } from "@/lib/utils";
 
 const TABS = ["Posts", "About"];
 // Profile content grid categories (docs/API.md: GET /posts/user/:id?postType=, GET /reels/user/:id)
@@ -22,8 +22,6 @@ const CONTENT_CATS = [
   { key: "thesis", label: "Thesis", kind: "post", type: "thesis" },
   { key: "reel", label: "Reels", kind: "reel", type: null },
 ];
-// The reel feed often omits a thumbnail; derive a poster frame from the video (Cloudinary serves .jpg).
-const reelPoster = (r) => r?.thumbnailUrl || (r?.videoUrl ? r.videoUrl.replace(/\.(mp4|mov|webm|m3u8)(\?.*)?$/i, ".jpg") : undefined);
 const yr = (d) => (d ? new Date(d).getFullYear() : "Now");
 const monthYear = (d) => (d ? new Date(d).toLocaleDateString(undefined, { month: "long", year: "numeric" }) : null);
 // Only allow http(s) hrefs — never trust a backend string as a link (blocks javascript:/data: XSS).
