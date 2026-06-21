@@ -19,8 +19,8 @@ const STATUS_LABEL = {
 const labelFor = (k) => ({
   countryOfPractice: "Country of practice", stateRegion: "State / region", professionType: "Profession type",
   registrationNumber: "Registration number", highestQualification: "Highest qualification",
-  aadhaarDoc: "Aadhaar / Gov-ID", panDoc: "PAN card", workIdCard: "Work ID card", livenessMedia: "Liveness scan",
-  workplaceContactNumber: "Workplace contact number", workplaceLocation: "Workplace location", contactNumber: "Your contact number",
+  aadhaarFront: "Aadhaar / Gov-ID (front)", aadhaarBack: "Aadhaar / Gov-ID (back)",
+  livenessMedia: "Liveness scan", contactNumber: "Your contact number",
 }[k] || k);
 
 export default function VerificationWizard({ onChanged }) {
@@ -35,11 +35,10 @@ export default function VerificationWizard({ onChanged }) {
   const [licenseDoc, setLicenseDoc] = useState(null);
   const setAk = (k) => (v) => setA((s) => ({ ...s, [k]: v }));
 
-  // Path B (document + liveness)
-  const [b, setB] = useState({ workplaceName: "", workplaceContactNumber: "", workplaceLocation: "", contactNumber: "" });
-  const [aadhaarDoc, setAadhaar] = useState(null);
-  const [panDoc, setPan] = useState(null);
-  const [workIdCard, setWorkId] = useState(null);
+  // Path B (Aadhaar/Gov-ID both sides + contact number + liveness)
+  const [b, setB] = useState({ contactNumber: "" });
+  const [aadhaarFront, setAadhaarFront] = useState(null);
+  const [aadhaarBack, setAadhaarBack] = useState(null);
   const [livenessBlob, setLivenessBlob] = useState(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [livenessView, setLivenessView] = useState(false);
@@ -59,41 +58,38 @@ export default function VerificationWizard({ onChanged }) {
     return () => URL.revokeObjectURL(url);
   }, [livenessBlob]);
 
-  const submitA = async () => {
+  // Path A no longer submits on its own — it validates and advances to Path B.
+  // Everything is sent in one combined POST from submitAll (backend dropped pathType).
+  const nextFromA = () => {
     setErr("");
     const missing = verificationMissing("credential", a, {});
     if (missing.length) { setErr(`${labelFor(missing[0])} is required.`); return; }
-    setBusy(true);
-    try {
-      const fd = new FormData();
-      fd.append("pathType", "credential");
-      Object.entries(a).forEach(([k, v]) => v && fd.append(k, v));
-      if (licenseDoc instanceof Blob) fd.append("licenseDoc", licenseDoc, licenseDoc.name || "license");
-      await dok.profile.verificationSubmit(fd);
-      setStep(2);
-    } catch (e) { setErr(e?.response?.data?.message || "Couldn't submit Path A."); }
-    finally { setBusy(false); }
+    setStep(2);
   };
 
-  const submitB = async () => {
+  const submitAll = async () => {
     setErr("");
-    const files = { aadhaarDoc, panDoc, workIdCard, livenessMedia: livenessBlob };
-    const missing = verificationMissing("document", b, files);
-    if (missing.length) { setErr(`${labelFor(missing[0])} is required.`); return; }
+    const filesB = { aadhaarFront, aadhaarBack, livenessMedia: livenessBlob };
+    const missingB = verificationMissing("document", b, filesB);
+    if (missingB.length) { setErr(`${labelFor(missingB[0])} is required.`); return; }
+    const missingA = verificationMissing("credential", a, {});
+    if (missingA.length) { setErr(`${labelFor(missingA[0])} is required — go back to Path A.`); return; }
     setBusy(true);
     try {
       const fd = new FormData();
-      fd.append("pathType", "document");
+      // Path A (professional credential)
+      Object.entries(a).forEach(([k, v]) => v && fd.append(k, v));
+      if (licenseDoc instanceof Blob) fd.append("licenseDoc", licenseDoc, licenseDoc.name || "license");
+      // Path B (Gov-ID both sides + contact number + liveness)
       Object.entries(b).forEach(([k, v]) => v && fd.append(k, v));
-      fd.append("aadhaarDoc", aadhaarDoc, aadhaarDoc.name || "aadhaar");
-      fd.append("panDoc", panDoc, panDoc.name || "pan");
-      fd.append("workIdCard", workIdCard, workIdCard.name || "workid");
+      fd.append("aadhaarFront", aadhaarFront, aadhaarFront.name || "aadhaar-front");
+      fd.append("aadhaarBack", aadhaarBack, aadhaarBack.name || "aadhaar-back");
       fd.append("livenessMedia", livenessBlob, "liveness.jpg");
       fd.append("livenessPassed", "true");
       await dok.profile.verificationSubmit(fd);
       setStatus("pending");
       onChanged?.();
-    } catch (e) { setErr(e?.response?.data?.message || "Couldn't submit Path B."); }
+    } catch (e) { setErr(e?.response?.data?.message || "Couldn't submit verification."); }
     finally { setBusy(false); }
   };
 
@@ -135,20 +131,15 @@ export default function VerificationWizard({ onChanged }) {
               <Field label="Highest qualification *"><Text value={a.highestQualification} onChange={setAk("highestQualification")} placeholder="DM Cardiology" /></Field>
               <Field label="License document" hint="Image or PDF (optional)"><FileUpload value={licenseDoc} onChange={setLicenseDoc} label="License document" /></Field>
               {err && <p className="text-sm text-rose-600">{err}</p>}
-              <button type="button" onClick={submitA} disabled={busy} className="btn-primary w-full py-3 text-sm">{busy ? "Submitting…" : "Complete Path A →"}</button>
+              <button type="button" onClick={nextFromA} className="btn-primary w-full py-3 text-sm">Continue to documents →</button>
             </div>
           ) : (
             <div className="space-y-3">
               <button onClick={() => { setErr(""); setStep(1); }} className="flex items-center gap-1 text-sm text-ink-500 hover:text-brand-700"><ArrowLeft size={15} /> Back to Path A</button>
-              <Field label="Aadhaar / Government ID *"><FileUpload value={aadhaarDoc} onChange={setAadhaar} label="Aadhaar / Gov-ID" /></Field>
-              <Field label="PAN card *"><FileUpload value={panDoc} onChange={setPan} label="PAN card" /></Field>
-              <Field label="Work ID card *"><FileUpload value={workIdCard} onChange={setWorkId} label="Work ID card" /></Field>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="Workplace name"><Text value={b.workplaceName} onChange={setBk("workplaceName")} placeholder="Lilavati Hospital" /></Field>
-                <Field label="Workplace contact number *"><Text value={b.workplaceContactNumber} onChange={setBk("workplaceContactNumber")} placeholder="+91 22 5555 1234" /></Field>
-                <Field label="Workplace location *"><Text value={b.workplaceLocation} onChange={setBk("workplaceLocation")} placeholder="Bandra, Mumbai" /></Field>
-                <Field label="Your contact number *"><Text value={b.contactNumber} onChange={setBk("contactNumber")} placeholder="+91 98765 43210" /></Field>
-              </div>
+              <p className="rounded-xl bg-ink-900/[.03] p-3 text-xs text-ink-500">Upload both sides of your Aadhaar / Government ID. Your ID is kept private (redacted) and queued for manual review by an admin.</p>
+              <Field label="Aadhaar / Gov-ID — Front *" hint="Image or PDF · redacted for privacy"><FileUpload value={aadhaarFront} onChange={setAadhaarFront} label="Aadhaar / Gov-ID front" /></Field>
+              <Field label="Aadhaar / Gov-ID — Back *" hint="Image or PDF · redacted for privacy"><FileUpload value={aadhaarBack} onChange={setAadhaarBack} label="Aadhaar / Gov-ID back" /></Field>
+              <Field label="Your contact number *"><Text value={b.contactNumber} onChange={setBk("contactNumber")} placeholder="+91 98765 43210" /></Field>
 
               {/* liveness */}
               <div className={cn("flex items-center gap-3 rounded-xl border-2 p-3", livenessBlob ? "border-emerald-300 bg-emerald-50" : "border-ink-900/15")}>
@@ -163,7 +154,7 @@ export default function VerificationWizard({ onChanged }) {
               </div>
 
               {err && <p className="text-sm text-rose-600">{err}</p>}
-              <button type="button" onClick={submitB} disabled={busy} className="btn-primary w-full py-3 text-sm">{busy ? "Submitting…" : "Submit for verification"}</button>
+              <button type="button" onClick={submitAll} disabled={busy} className="btn-primary w-full py-3 text-sm">{busy ? "Submitting…" : "Submit for verification"}</button>
             </div>
           )}
         </>

@@ -219,7 +219,7 @@ is populated; the others are `null`.
 
 ---
 
-## 8. Doctor verification — dual-path (Phase 2) 👤 doctor
+## 8. Doctor verification — combined Path A + Path B (Phase 2) 👤 doctor
 
 Run `npm run migrate` (creates `doctor_verifications`) before using these.
 
@@ -240,10 +240,11 @@ not internal ids).
 
 ### `POST /me/doctor/verification` 🔒👤 — `multipart/form-data`
 
-Pick a path with the `pathType` field. **All fields are required except those
-marked optional.**
+One combined submission — **both** Path A and Path B are mandatory (the user
+fills Path A then proceeds directly to Path B). There is no `pathType`. **All
+fields are required except those marked optional.**
 
-**Path A — `pathType=credential`** (professional credential):
+**Path A — professional credential:**
 
 | Field | Type | Required |
 |---|---|---|
@@ -254,16 +255,12 @@ marked optional.**
 | highestQualification | text | ✔ |
 | `licenseDoc` | file (image/pdf) | optional |
 
-**Path B — `pathType=document`** (document upload + liveness):
+**Path B — document upload + liveness:**
 
 | Field | Type | Required |
 |---|---|---|
-| `aadhaarDoc` | file (Aadhaar / Gov-ID) | ✔ |
-| `panDoc` | file (PAN card) | ✔ |
-| `workIdCard` | file (work ID) | ✔ |
-| workplaceName | text | optional |
-| workplaceContactNumber | text | ✔ |
-| workplaceLocation | text | ✔ |
+| `aadhaarFront` | file (Gov-ID front) | ✔ |
+| `aadhaarBack` | file (Gov-ID back) | ✔ |
 | contactNumber | text | ✔ |
 | `livenessMedia` | file (3-sec live face scan) | ✔ |
 | livenessPassed | boolean | optional (defaults `true`) |
@@ -273,8 +270,8 @@ marked optional.**
 > **queued for manual admin review** — the backend stores the evidence and flag;
 > it does not run face-matching itself.
 
-**200** → `{ "status": "pending", "pathType": "document" }`
-Errors: `400` invalid path / failed validation / missing required upload.
+**200** → `{ "status": "pending" }`
+Errors: `400` failed validation / missing required upload.
 
 ### Admin side (`/api/admin`, internal)
 
@@ -445,29 +442,22 @@ curl -X PUT "$BASE/api/profile/me/doctor/specialties" \
   -d '{ "specialties": ["Cardiology","Interventional Cardiology"] }'
 ```
 
-### E. Doctor verification (dual-path, multipart)
+### E. Doctor verification (combined Path A + Path B, multipart)
 
 ```bash
-# Path A — professional credential (license file optional)
+# One submission — both paths together (licenseDoc optional; aadhaarFront,
+# aadhaarBack and livenessMedia required).
 curl -X POST "$BASE/api/profile/me/doctor/verification" \
   -H "Authorization: Bearer $TOKEN" \
-  -F "pathType=credential" \
   -F "countryOfPractice=India" -F "stateRegion=Maharashtra" \
   -F "professionType=Cardiologist" -F "registrationNumber=MH-2014-55821" \
   -F "highestQualification=DM Cardiology" \
-  -F "licenseDoc=@/path/license.pdf"
-# data: { "status": "pending", "pathType": "credential" }
-
-# Path B — document upload + liveness (all 4 files required)
-curl -X POST "$BASE/api/profile/me/doctor/verification" \
-  -H "Authorization: Bearer $TOKEN" \
-  -F "pathType=document" \
-  -F "workplaceContactNumber=+912255551234" \
-  -F "workplaceLocation=Lilavati Hospital, Bandra" \
   -F "contactNumber=+919876543210" -F "livenessPassed=true" \
-  -F "aadhaarDoc=@/path/aadhaar.jpg" -F "panDoc=@/path/pan.jpg" \
-  -F "workIdCard=@/path/workid.jpg" -F "livenessMedia=@/path/liveness.jpg"
-# 400 if a required upload is missing: "Missing required upload(s): panDoc."
+  -F "licenseDoc=@/path/license.pdf" \
+  -F "aadhaarFront=@/path/aadhaar-front.jpg" -F "aadhaarBack=@/path/aadhaar-back.jpg" \
+  -F "livenessMedia=@/path/liveness.jpg"
+# data: { "status": "pending" }
+# 400 if a required upload is missing: "Missing required upload(s): aadhaarBack."
 
 # Check your own status (poll after submitting)
 curl -H "Authorization: Bearer $TOKEN" "$BASE/api/profile/me/doctor/verification"

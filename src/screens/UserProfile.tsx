@@ -11,6 +11,8 @@ import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { compact, roleLabel } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { reconcileFollowState } from "@/lib/relationships";
+import { broadcastFollow, onFollowChange } from "@/lib/followBus";
 
 /**
  * Another user's profile — the routing target for every DP / display-name tap
@@ -231,7 +233,7 @@ function ProfileMenu({ user, demo, onChanged }) {
     setOpen(false);
     if (demo || !window.confirm(`Block ${user.fullName}? They won't be able to find, follow or message you.`)) return;
     setBusy(true);
-    try { await dok.profile.block(id); toast?.success?.("User blocked"); onChanged?.({ isFollowing: false, isBlocked: true }); }
+    try { await dok.profile.block(id); broadcastFollow(id, false); toast?.success?.("User blocked"); onChanged?.({ isFollowing: false, isBlocked: true }); }
     catch { toast?.error("Couldn't block — try again"); }
     finally { setBusy(false); }
   };
@@ -239,7 +241,7 @@ function ProfileMenu({ user, demo, onChanged }) {
   const unfollow = async () => {
     setOpen(false);
     setBusy(true);
-    try { await dok.follows.unfollow(id); toast?.success?.("Unfollowed"); onChanged?.({ isFollowing: false, connectionStatus: "none" }); }
+    try { await dok.follows.unfollow(id); broadcastFollow(id, false); toast?.success?.("Unfollowed"); onChanged?.({ isFollowing: false, connectionStatus: "none" }); }
     catch { toast?.error("Couldn't unfollow — try again"); }
     finally { setBusy(false); }
   };
@@ -274,40 +276,66 @@ function ProfileActions({ user, demo }) {
 
   const initFollow = user.isFollowing ? "following" : user.isRequested ? "requested" : "follow";
   const cs = user.connectionStatus;
-  const initConnect = cs === "connected" ? "message" : cs === "pending_outgoing" ? "connecting" : cs === "pending_incoming" ? "accept" : "connect";
+  const initConnect = cs === "connected" ? "message" : cs === "pending_outgoing" ? "requested" : cs === "pending_incoming" ? "accept" : "connect";
 
   const [fState, setF] = useState(initFollow);
   const [cState, setC] = useState(initConnect);
   const [busyMsg, setBusyMsg] = useState(false);
+  const src = useRef(Math.random().toString(36).slice(2)); // ignore our own broadcast echo
+  const fRef = useRef(fState);
+  fRef.current = fState;
+  const reqIdRef = useRef(user.connectionRequestId || null); // connection request id, captured for cancel
 
   // re-sync if the viewed user changes (block/unfollow from the 3-dot menu, navigation, etc.)
   useEffect(() => { setF(initFollow); setC(initConnect); /* eslint-disable-next-line */ }, [id, user.isFollowing, user.isRequested, cs]);
+
+  // Resync when this user is followed/unfollowed on another surface (post, reel, suggestion card).
+  useEffect(() => {
+    return onFollowChange((d) => {
+      if (d.source === src.current || String(d.id) !== String(id)) return;
+      const next = reconcileFollowState(fRef.current, d, true); // the profile's Follow button is a plain toggle
+      if (next !== fRef.current) { setF(next); if (next === "follow") setC("connect"); } // unfollow resets the connect side
+    });
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!id) return null;
 
   /* follow side */
   const doFollow = async () => {
     setF("following");
+    broadcastFollow(id, true, { source: src.current });
     if (demo) return;
-    try { const d = await dok.follows.follow(id); if (d?.status === "requested") setF("requested"); }
-    catch { setF("follow"); toast?.error("Couldn't follow — try again"); }
+    try { const d = await dok.follows.follow(id); if (d?.status === "requested") { setF("requested"); broadcastFollow(id, false, { requested: true, source: src.current }); } }
+    catch { setF("follow"); broadcastFollow(id, false, { source: src.current }); toast?.error("Couldn't follow — try again"); }
   };
   const doUnfollow = async () => {
     setF("follow");
+    broadcastFollow(id, false, { source: src.current });
     if (demo) return;
-    try { await dok.follows.unfollow(id); } catch { setF("following"); toast?.error("Couldn't unfollow"); }
+    try { await dok.follows.unfollow(id); } catch { setF("following"); broadcastFollow(id, true, { source: src.current }); toast?.error("Couldn't unfollow"); }
   };
   const doWithdraw = async () => {
     setF("follow");
+    broadcastFollow(id, false, { source: src.current });
     if (demo) return;
-    try { await dok.follows.withdraw(id); } catch { setF("requested"); toast?.error("Couldn't withdraw the request"); }
+    try { await dok.follows.withdraw(id); } catch { setF("requested"); broadcastFollow(id, false, { requested: true, source: src.current }); toast?.error("Couldn't withdraw the request"); }
   };
 
   /* connect side */
   const doConnect = async () => {
-    setC("connecting");
+    setC("requested"); // optimistic — pending outgoing request
     if (demo) return;
-    try { await dok.network.request(id); } catch (e) { setC("connect"); toast?.error(e?.response?.data?.message || "Couldn't send the connection request"); }
+    try {
+      const d = await dok.network.request(id);
+      reqIdRef.current = d?.request?.id || d?.request?._id || d?.requestId || d?.connectionRequest?.id || reqIdRef.current;
+    } catch (e) { setC("connect"); toast?.error(e?.response?.data?.message || "Couldn't send the connection request"); }
+  };
+  // Tap the pending "Requested" button to cancel the outgoing request (docs/feed.md §5: cancel = reject).
+  const doCancelConnect = async () => {
+    setC("connect");
+    if (demo) return;
+    try { await dok.network.reject(reqIdRef.current || user.connectionRequestId || id); reqIdRef.current = null; }
+    catch { setC("requested"); toast?.error("Couldn't cancel the request"); }
   };
   const doAccept = async () => {
     setC("message");
@@ -333,7 +361,7 @@ function ProfileActions({ user, demo }) {
 
   const CONNECT = {
     connect: { label: "Connect", icon: Link2, onClick: doConnect, cls: "btn-outline" },
-    connecting: { label: "Connecting", icon: Loader2, onClick: undefined, cls: "btn-outline", spin: true },
+    requested: { label: "Requested", icon: Clock, onClick: doCancelConnect, cls: "btn-outline", title: "Tap to cancel request" },
     accept: { label: "Accept", icon: UserCheck, onClick: doAccept, cls: "btn-primary" },
     message: { label: "Message", icon: MessageSquare, onClick: doMessage, cls: "btn-ghost", busy: busyMsg },
   }[cState];
@@ -346,7 +374,7 @@ function ProfileActions({ user, demo }) {
       <button onClick={FOLLOW.onClick} className={cn(FOLLOW.cls, "flex-1 py-2.5 text-sm")}>
         <FIcon size={16} /> {FOLLOW.label}
       </button>
-      <button onClick={CONNECT.onClick} disabled={!CONNECT.onClick || CONNECT.busy} className={cn(CONNECT.cls, "flex-1 py-2.5 text-sm")}>
+      <button onClick={CONNECT.onClick} disabled={!CONNECT.onClick || CONNECT.busy} title={CONNECT.title} className={cn(CONNECT.cls, "flex-1 py-2.5 text-sm")}>
         {CONNECT.busy || CONNECT.spin ? <Loader2 size={16} className="animate-spin" /> : <CIcon size={16} />} {CONNECT.label}
       </button>
     </div>

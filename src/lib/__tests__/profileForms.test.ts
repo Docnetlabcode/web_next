@@ -69,8 +69,14 @@ describe("verificationMissing", () => {
   });
   it("flags missing required document files + text (path B)", () => {
     const missing = verificationMissing("document",
-      { workplaceContactNumber: "123", workplaceLocation: "", contactNumber: "999" },
-      { aadhaarDoc: new Blob(["a"]), panDoc: null, workIdCard: new Blob(["c"]), livenessMedia: null });
-    expect(missing.sort()).toEqual(["livenessMedia", "panDoc", "workplaceLocation"].sort());
+      { contactNumber: "999" },
+      { aadhaarFront: new Blob(["a"]), aadhaarBack: null, livenessMedia: null });
+    expect(missing.sort()).toEqual(["aadhaarBack", "livenessMedia"].sort());
+  });
+  it("path B passes with both Aadhaar sides, contact number, and liveness", () => {
+    const missing = verificationMissing("document",
+      { contactNumber: "999" },
+      { aadhaarFront: new Blob(["a"]), aadhaarBack: new Blob(["b"]), livenessMedia: new Blob(["c"]) });
+    expect(missing).toEqual([]);
   });
 });

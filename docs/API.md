@@ -132,7 +132,7 @@ Returns a fresh `accessToken` (and rotated refresh token).
 | GET·POST·PATCH·DELETE | `/me/doctor/certificates[/:entryId]` | 🔒 DOCTOR | **Multi-entry** certificates CRUD `multipart: file` (optional) |
 | POST | `/me/doctor/document` | 🔒 DOCTOR | Medical license `multipart: document` |
 | GET | `/me/doctor/verification` | 🔒 DOCTOR | Own verification status + submission |
-| POST | `/me/doctor/verification` | 🔒 DOCTOR | **Dual-path** verification submit `multipart` (`pathType` + files); queued for admin |
+| POST | `/me/doctor/verification` | 🔒 DOCTOR | **Combined** verification submit `multipart` (Path A + Path B, all required; files `licenseDoc?`·`aadhaarFront`·`aadhaarBack`·`livenessMedia`); queued for admin |
 | POST | `/me/doctor/submit-verification` | 🔒 DOCTOR | Legacy submit flag |
 | GET·POST·PATCH·DELETE | `/me/student/academics[/:entryId]` | 🔒 STUDENT | **Multi-entry** academics CRUD |
 | GET·POST·PATCH·DELETE | `/me/student/experiences[/:entryId]` | 🔒 STUDENT | **Multi-entry** experiences + interests CRUD |

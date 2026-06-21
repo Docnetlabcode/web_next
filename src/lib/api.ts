@@ -166,9 +166,9 @@ export const dok = {
       remove: (id) => unwrap(api.delete(`/profile/me/general/interests/${id}`)),
     },
     doctorSpecialties: (specialties) => unwrap(api.put("/profile/me/doctor/specialties", { specialties })), // { specialties }
-    // --- Doctor verification (dual-path, multipart, docs/profile.md §8) ---
+    // --- Doctor verification (combined Path A + Path B, multipart, docs/profile.md §8) ---
     verificationGet: () => unwrap(api.get("/profile/me/doctor/verification")),       // { status, rejectionReason?, submission? }
-    verificationSubmit: (formData) => postForm("/profile/me/doctor/verification", formData), // pathType=credential|document
+    verificationSubmit: (formData) => postForm("/profile/me/doctor/verification", formData), // one POST: credential + aadhaarFront/aadhaarBack + liveness (no pathType)
     // Blocking
     blockList: (q = "") => unwrap(api.get(`/profile/block/list${q}`)),
     block: (userId) => unwrap(api.post(`/profile/block/${userId}`)),
@@ -257,7 +257,16 @@ export const dok = {
     // Trending hashtags ranked by 48h engagement velocity (PRD §4).
     trending: () => unwrap(api.get("/search/trending")),
     // Hashtag workspace feed; `qs` e.g. "?type=case_study&cursor=…" (PRD §4).
-    hashtag: (tag, qs = "") => unwrap(api.get(`/search/hashtag/${encodeURIComponent(tag)}${qs}`)),
+    // Falls back to the posts-by-hashtag route on 404 (older backend builds lack /search/hashtag/:tag).
+    hashtag: async (tag, qs = "") => {
+      const t = encodeURIComponent(tag);
+      try {
+        return await unwrap(api.get(`/search/hashtag/${t}${qs}`));
+      } catch (e) {
+        if (e?.response?.status === 404) return unwrap(api.get(`/posts/hashtag/${t}`));
+        throw e;
+      }
+    },
     // Search history (logged-in). Recorded explicitly on a committed search / result tap, not typeahead.
     history: () => unwrap(api.get("/search/history")),                                  // { items:[{id,query,queryRaw,searchType,createdAt}] }
     recordSearch: (b) => unwrap(api.post("/search/history", b)),                        // { q, type?, entityId?, entityType? }

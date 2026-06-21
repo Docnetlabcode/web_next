@@ -5,7 +5,8 @@ import { UserPlus, UserCheck, Clock, MessageSquare, Loader2, Link2 } from "lucid
 import { dok } from "@/lib/api";
 import { useToast } from "@/components/ui/Toast";
 import { cn } from "@/lib/utils";
-import { deriveState } from "@/lib/relationships";
+import { deriveState, reconcileFollowState } from "@/lib/relationships";
+import { broadcastFollow, onFollowChange } from "@/lib/followBus";
 
 /**
  * The centralized network state machine (docs/feed.md §5).
@@ -33,6 +34,9 @@ export default function FollowButton({ user, demo, variant = "solid", className,
   });
   const [busy, setBusy] = useState(false);
   const morphTimer = useRef(null);
+  const src = useRef(Math.random().toString(36).slice(2)); // ignore our own broadcast echo
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => () => clearTimeout(morphTimer.current), []);
 
@@ -40,6 +44,15 @@ export default function FollowButton({ user, demo, variant = "solid", className,
     setState(next);
     onStateChange?.(next);
   };
+
+  // Resync when the same user is followed/unfollowed on another surface.
+  useEffect(() => {
+    return onFollowChange((d) => {
+      if (d.source === src.current || String(d.id) !== String(id)) return;
+      const next = reconcileFollowState(stateRef.current, d, simple);
+      if (next !== stateRef.current) { clearTimeout(morphTimer.current); commit(next); }
+    });
+  }, [id, simple]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Public follow lands as a transient "Following ✓", then morphs into Connect (State B).
   const settleAsFollowing = () => {
@@ -50,16 +63,19 @@ export default function FollowButton({ user, demo, variant = "solid", className,
   const follow = async () => {
     if (simple) commit("following"); // simple toggle: stay on Following (no Connect morph)
     else settleAsFollowing(); // optimistic — instant morph per spec
+    broadcastFollow(id, true, { source: src.current });
     if (demo) return;
     try {
       const d = await dok.follows.follow(id);
       if (d?.status === "requested") {
         clearTimeout(morphTimer.current);
         commit("requested"); // private account → Requested
+        broadcastFollow(id, false, { requested: true, source: src.current });
       }
     } catch {
       clearTimeout(morphTimer.current);
       commit("follow");
+      broadcastFollow(id, false, { source: src.current });
       toast?.error("Couldn't follow — try again");
     }
   };
@@ -67,16 +83,18 @@ export default function FollowButton({ user, demo, variant = "solid", className,
   // simple mode only: tap "Following" to unfollow.
   const unfollow = async () => {
     commit("follow");
+    broadcastFollow(id, false, { source: src.current });
     if (demo) return;
     try { await dok.follows.unfollow(id); }
-    catch { commit("following"); toast?.error("Couldn't unfollow — try again"); }
+    catch { commit("following"); broadcastFollow(id, true, { source: src.current }); toast?.error("Couldn't unfollow — try again"); }
   };
 
   const withdraw = async () => {
     commit("follow"); // silent revocation: row simply vanishes on the target's side
+    broadcastFollow(id, false, { source: src.current });
     if (demo) return;
     try { await dok.follows.withdraw(id); }
-    catch { commit("requested"); toast?.error("Couldn't withdraw the request"); }
+    catch { commit("requested"); broadcastFollow(id, false, { requested: true, source: src.current }); toast?.error("Couldn't withdraw the request"); }
   };
 
   const connect = async () => {

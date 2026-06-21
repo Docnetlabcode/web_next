@@ -51,7 +51,7 @@ export function dataUrlToBlob(dataUrl) {
 // Required fields/files per verification path. Returns the list of missing keys.
 const VERIFICATION_REQUIRED = {
   credential: { text: ["countryOfPractice", "stateRegion", "professionType", "registrationNumber", "highestQualification"], files: [] },
-  document: { text: ["workplaceContactNumber", "workplaceLocation", "contactNumber"], files: ["aadhaarDoc", "panDoc", "workIdCard", "livenessMedia"] },
+  document: { text: ["contactNumber"], files: ["aadhaarFront", "aadhaarBack", "livenessMedia"] },
 };
 
 export function verificationMissing(pathType, fields = {}, files = {}) {

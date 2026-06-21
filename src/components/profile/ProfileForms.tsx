@@ -25,6 +25,7 @@ export function BasicContactForm({ user, role, locks = {}, onSaved }) {
     age: user.age ?? "",
     workEmail: user.workEmail || "",
     email: user.email || "",
+    phoneNumber: user.phoneNumber || "",
     city: user.city || "",
     workPhone: user.workPhone || "",
     languages: user.languages || [],
@@ -32,9 +33,9 @@ export function BasicContactForm({ user, role, locks = {}, onSaved }) {
   });
   const set = (k) => (v) => setF((s) => ({ ...s, [k]: v }));
 
-  // Personal email/phone come from auth and may be locked; phone is never sent.
-  const emailLocked = !!locks.personalEmailLocked;
-  const phoneLocked = !!locks.personalPhoneLocked;
+  // Personal email/phone come from auth; each is locked only when it's the login identifier.
+  const emailLocked = !!locks.personalEmailLocked; // Google/email login
+  const phoneLocked = !!locks.personalPhoneLocked; // OTP/phone login
 
   const save = () => run(() => {
     const payload = prune({
@@ -46,6 +47,7 @@ export function BasicContactForm({ user, role, locks = {}, onSaved }) {
       ...(role !== "general_user" ? { gender: f.gender } : {}),
       ...(role === "general_user" ? { age: f.age } : {}),
       ...(emailLocked ? {} : { email: f.email }), // omit personal email when locked (Google)
+      ...(phoneLocked ? {} : { phoneNumber: f.phoneNumber }), // omit personal phone when locked (OTP login)
     });
     return dok.profile.updateBasic(payload);
   });
@@ -70,8 +72,8 @@ export function BasicContactForm({ user, role, locks = {}, onSaved }) {
       <Field label="Personal email" hint={emailLocked ? "Used to sign in (Google) — can't be changed" : undefined}>
         <Text type="email" value={f.email} onChange={set("email")} placeholder="you@personal.com" disabled={emailLocked} />
       </Field>
-      <Field label="Personal phone" hint={phoneLocked ? "Used to sign in — can't be changed" : "Set during signup"}>
-        <Text value={user.phoneNumber || ""} onChange={() => {}} placeholder="—" disabled />
+      <Field label="Personal phone" hint={phoneLocked ? "Used to sign in — can't be changed" : undefined}>
+        <Text value={f.phoneNumber} onChange={set("phoneNumber")} placeholder="+91 98765 43210" disabled={phoneLocked} />
       </Field>
       {role === "doctor" && <Field label="Work phone"><Text value={f.workPhone} onChange={set("workPhone")} placeholder="+91 22 5555 1234" /></Field>}
 

@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/Toast";
 import { dok } from "@/lib/api";
 import { routeFor } from "@/lib/notify";
+import { broadcastFollow } from "@/lib/followBus";
 import { cn, timeAgo } from "@/lib/utils";
 
 const ICON = {
@@ -97,7 +98,7 @@ export default function Notifications() {
     try {
       if (!demo) {
         if (action === "confirmed") await dok.follows.acceptRequest(requesterId);
-        else if (action === "followedback") await dok.follows.follow(requesterId);
+        else if (action === "followedback") { await dok.follows.follow(requesterId); broadcastFollow(requesterId, true); }
         else if (action === "accepted") await dok.network.accept(requestId);
         else if (action === "ignored") await dok.network.reject(requestId);
       }
