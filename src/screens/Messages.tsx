@@ -4,6 +4,7 @@ import { useSearchParams } from "@/lib/router";
 import { Send, Check, CheckCheck, Phone, Video, Search, MessageSquare, Loader2 } from "lucide-react";
 import { Avatar, Verified } from "@/components/ui/Primitives";
 import { useAuth } from "@/context/AuthContext";
+import { useCall } from "@/context/CallContext";
 import { useToast } from "@/components/ui/Toast";
 import { dok } from "@/lib/api";
 import { cn, timeAgo } from "@/lib/utils";
@@ -13,6 +14,7 @@ const midOf = (m) => m?._id || m?.id;
 
 export default function Messages() {
   const { user } = useAuth();
+  const { startCall } = useCall();
   const toast = useToast();
   const myId = user?._id || user?.id;
   const [sp] = useSearchParams();
@@ -135,8 +137,12 @@ export default function Messages() {
                 <p className="flex items-center gap-1 font-semibold">{peer(active).fullName} {peer(active).isVerified && <Verified size={12} />}</p>
                 <p className="text-xs text-emerald-600">{active.isOnline ? "Online" : "last seen recently"}</p>
               </div>
-              <button className="rounded-full p-2 text-ink-500 hover:bg-ink-900/5"><Phone size={18} /></button>
-              <button className="rounded-full p-2 text-brand-600 hover:bg-brand-50"><Video size={18} /></button>
+              <button
+                onClick={() => { const p = peer(active); startCall(p.id || p._id, p.fullName || "User", p.profilePhoto || p.avatar || null, "audio"); }}
+                className="rounded-full p-2 text-ink-500 hover:bg-ink-900/5" title="Audio call"><Phone size={18} /></button>
+              <button
+                onClick={() => { const p = peer(active); startCall(p.id || p._id, p.fullName || "User", p.profilePhoto || p.avatar || null, "video"); }}
+                className="rounded-full p-2 text-brand-600 hover:bg-brand-50" title="Video call"><Video size={18} /></button>
             </div>
 
             <div className="flex-1 space-y-3 overflow-y-auto p-5">
