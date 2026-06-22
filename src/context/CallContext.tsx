@@ -17,6 +17,13 @@ export interface ActiveCall {
   isCaller: boolean;
 }
 
+export interface CallDebug {
+  lastInvite?: any;
+  lastOffer?: any;
+  lastAnswer?: any;
+  lastIce?: any;
+}
+
 interface CallCtx {
   phase: CallPhase;
   call: ActiveCall | null;
@@ -26,12 +33,16 @@ interface CallCtx {
   camOn: boolean;
   logs: string[];
   socketConnected: boolean;
+  connectionState: string;
+  debug: CallDebug;
+  myId: string | undefined;
   startCall: (peerId: string, peerName: string, peerPhoto: string | null, type: CallType) => void;
   acceptCall: () => void;
   rejectCall: () => void;
   endCall: () => void;
   toggleMic: () => void;
   toggleCam: () => void;
+  switchCamera: () => void;
 }
 
 const Ctx = createContext<CallCtx | null>(null);
@@ -56,6 +67,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const [camOn, setCamOn] = useState(true);
   const [logs, setLogs] = useState<string[]>([]);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [connectionState, setConnectionState] = useState<string>("");
+  const [debug, setDebug] = useState<CallDebug>({});
 
   const svcRef = useRef<WebRTCService | null>(null);
   const callRef = useRef<ActiveCall | null>(null);
@@ -76,8 +89,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     const svc = new WebRTCService(c.callId, c.peerId, c.type === "video", {
       send: (event, payload) => socket.current?.emit(event, payload),
       onRemoteStream: (s) => setRemoteStream(s),
-      onConnected: () => setPhase((p) => (p === "connected" ? p : (log("✅ connected"), "connected"))),
-      onIceType: (dir, t) => log(`ICE ${dir} ${t}`),
+      onConnected: () => setPhase((p) => (p === "connected" ? p : (log("CONNECTED"), "connected"))),
+      onIceType: (dir, t) => log(`ICE ${dir === "sent" ? "ICE_SENT" : "ICE_RECEIVED"} ${t}`),
+      onState: (s) => setConnectionState(s),
+      onFailed: () => log("⚠️ connection FAILED"),
       log,
     });
     svcRef.current = svc;
@@ -92,7 +107,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     setRemoteStream(null);
     setMicOn(true);
     setCamOn(true);
-    log(`🔚 ended (${reason})`);
+    setConnectionState("");
+    log(`CALL_ENDED (${reason})`);
     setPhase("idle");
     setCall(null);
   }, [log]);
@@ -103,11 +119,12 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     const s = connectCallSocket();
     socket.current = s;
 
-    const onConnect = () => { setSocketConnected(true); log("socket connected"); s.emit("user_join", myId); };
+    const onConnect = () => { setSocketConnected(true); log("socket connected"); s.emit("user_join", { userId: myId }); };
     const onDisconnect = () => { setSocketConnected(false); log("socket disconnected"); };
 
     const onInvite = (d: any) => {
-      log(`INVITE RECEIVED ${d.callId} from ${d.fromUserId} (${d.callType})`);
+      log(`INVITE_RECEIVED ${d.callId} from ${d.fromUserId} (${d.callType})`);
+      setDebug((x) => ({ ...x, lastInvite: d }));
       if (callRef.current) { s.emit("user_call_busy", { callId: d.callId, toUserId: d.fromUserId }); return; }
       setCall({
         callId: d.callId, peerId: d.fromUserId, peerName: d.callerName || "Unknown",
@@ -120,11 +137,12 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       const c = callRef.current;
       if (!c || d.callId !== c.callId) return;
       if (ringTimeout.current) clearTimeout(ringTimeout.current);
-      log("callee accepted → starting media/offer");
+      log("CALL_ACCEPTED (callee) → starting media/offer");
       setPhase("connecting");
       const svc = buildService(c);
       await svc.start();
       setLocalStream(svc.localStream);
+      log("OFFER_CREATED");
       await svc.createOffer();
     };
 
@@ -136,16 +154,21 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     const onOffer = async (d: any) => {
       const c = callRef.current;
       if (!c || d.callSessionId !== c.callId || c.isCaller) return;
+      setDebug((x) => ({ ...x, lastOffer: d.offer }));
+      log("OFFER received → ANSWER_CREATED");
       await svcRef.current?.handleOffer(d.offer);
     };
     const onAnswer = async (d: any) => {
       const c = callRef.current;
       if (!c || d.callSessionId !== c.callId || !c.isCaller) return;
+      setDebug((x) => ({ ...x, lastAnswer: d.answer }));
+      log("ANSWER received");
       await svcRef.current?.handleAnswer(d.answer);
     };
     const onIce = async (d: any) => {
       const c = callRef.current;
       if (!c || d.callSessionId !== c.callId) return;
+      setDebug((x) => ({ ...x, lastIce: d.candidate }));
       await svcRef.current?.addIce(d.candidate);
     };
 
@@ -189,22 +212,26 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       callId: c.callId, toUserId: peerId, callType: type,
       callerName: user?.fullName, callerPhoto: user?.profilePhoto || null,
     });
-    log(`INVITE SENT ${c.callId} → ${peerId} (${type})`);
+    log(`INVITE_SENT ${c.callId} → ${peerId} (${type})`);
+    // Step 12: 30s ring timeout → missed call.
     ringTimeout.current = setTimeout(() => {
       socket.current?.emit("user_call_timeout", { callId: c.callId, toUserId: peerId });
-      cleanup("no answer");
-    }, 45000);
+      cleanup("no answer (missed)");
+    }, 30000);
   }, [user, log, cleanup]);
 
   const acceptCall = useCallback(async () => {
     const c = callRef.current;
     if (!c) return;
-    socket.current?.emit("user_call_accept", { callId: c.callId, toUserId: c.peerId });
-    log("ACCEPT sent → waiting for offer");
     setPhase("connecting");
+    // Build the peer connection + acquire media BEFORE telling the caller to send
+    // the offer. On localhost the caller's offer arrives in ~ms while getUserMedia
+    // can take hundreds of ms — accepting first would drop the offer onto a null pc.
     const svc = buildService(c);
     await svc.start();
     setLocalStream(svc.localStream);
+    socket.current?.emit("user_call_accept", { callId: c.callId, toUserId: c.peerId });
+    log("CALL_ACCEPTED → ACCEPT sent, waiting for offer");
   }, [buildService, log]);
 
   const rejectCall = useCallback(() => {
@@ -225,11 +252,13 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const toggleCam = useCallback(() => {
     setCamOn((on) => { svcRef.current?.toggleCam(!on); return !on; });
   }, []);
+  const switchCamera = useCallback(() => { svcRef.current?.switchCamera(); }, []);
 
   return (
     <Ctx.Provider value={{
       phase, call, localStream, remoteStream, micOn, camOn, logs, socketConnected,
-      startCall, acceptCall, rejectCall, endCall, toggleMic, toggleCam,
+      connectionState, debug, myId,
+      startCall, acceptCall, rejectCall, endCall, toggleMic, toggleCam, switchCamera,
     }}>
       {children}
     </Ctx.Provider>

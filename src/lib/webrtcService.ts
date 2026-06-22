@@ -42,6 +42,8 @@ export interface CallHandlers {
   onRemoteStream: (s: MediaStream) => void;
   onConnected: () => void;
   onIceType?: (dir: "sent" | "recv", type: string) => void;
+  onState?: (state: string) => void;
+  onFailed?: () => void;
   log?: Log;
 }
 
@@ -51,6 +53,7 @@ export class WebRTCService {
   localStream: MediaStream | null = null;
   private pending: RTCIceCandidateInit[] = [];
   private hasRemote = false;
+  private facing: "user" | "environment" = "user";
 
   constructor(
     public callId: string,
@@ -99,8 +102,33 @@ export class WebRTCService {
       if (pc.iceConnectionState === "connected" || pc.iceConnectionState === "completed") {
         this.h.onConnected();
       }
+      if (pc.iceConnectionState === "failed") this.h.onFailed?.();
     };
-    pc.onconnectionstatechange = () => this.log(`pc: ${pc.connectionState}`);
+    pc.onconnectionstatechange = () => {
+      this.log(`pc: ${pc.connectionState}`);
+      this.h.onState?.(pc.connectionState);
+      if (pc.connectionState === "failed") this.h.onFailed?.();
+    };
+  }
+
+  /** Swap to the next camera (mobile front/back). On single-camera desktops this is a no-op visually. */
+  async switchCamera(): Promise<void> {
+    if (!this.hasVideo || !this.pc || !this.localStream) return;
+    this.facing = this.facing === "user" ? "environment" : "user";
+    let newStream: MediaStream;
+    try {
+      newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: this.facing }, audio: false });
+    } catch {
+      return;
+    }
+    const newTrack = newStream.getVideoTracks()[0];
+    if (!newTrack) return;
+    const sender = this.pc.getSenders().find((s) => s.track?.kind === "video");
+    if (sender) await sender.replaceTrack(newTrack);
+    const old = this.localStream.getVideoTracks()[0];
+    if (old) { this.localStream.removeTrack(old); old.stop(); }
+    this.localStream.addTrack(newTrack);
+    this.log(`switched camera → ${this.facing}`);
   }
 
   async createOffer() {
