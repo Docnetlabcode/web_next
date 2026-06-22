@@ -2,9 +2,11 @@
 
 import { Phone, PhoneOff, Video } from "lucide-react";
 import { useCall } from "@/context/CallContext";
+import { useRingtone } from "@/hooks/useRingtone";
 
 export default function IncomingCallModal() {
   const { call, acceptCall, rejectCall } = useCall();
+  useRingtone(!!call, "ring");
   if (!call) return null;
   const isVideo = call.type === "video";
 

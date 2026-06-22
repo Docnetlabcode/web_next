@@ -2,9 +2,11 @@
 
 import { PhoneOff } from "lucide-react";
 import { useCall } from "@/context/CallContext";
+import { useRingtone } from "@/hooks/useRingtone";
 
 export default function OutgoingCallModal() {
   const { call, endCall } = useCall();
+  useRingtone(!!call, "ringback");
   if (!call) return null;
 
   return (
