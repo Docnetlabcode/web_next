@@ -69,12 +69,46 @@ export class WebRTCService {
 
   async start(): Promise<void> {
     try {
-      this.localStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: this.hasVideo ? { facingMode: "user" } : false,
-      });
-      console.log("[WEBRTC] getUserMedia success");
-      this.log(`local media: ${this.localStream.getAudioTracks().length}a/${this.localStream.getVideoTracks().length}v`);
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasAudio = devices.some(d => d.kind === "audioinput");
+      const hasVideo = devices.some(d => d.kind === "videoinput");
+      
+      console.log("[WEBRTC] Available devices:", devices.map(d => `${d.kind}: ${d.label || d.deviceId}`).join(", "));
+      
+      let audioConstraints: boolean | MediaTrackConstraints = hasAudio;
+      let videoConstraints: boolean | MediaTrackConstraints = false;
+      
+      if (this.hasVideo) {
+        if (hasVideo) {
+          videoConstraints = { facingMode: "user" };
+          console.log("[WEBRTC] Video requested and camera found. Selected default camera.");
+        } else {
+          console.log("[WEBRTC] Fallback: Video requested but no camera found. Falling back to audio-only.");
+        }
+      }
+      
+      if (!hasAudio) {
+        console.log("[WEBRTC] Fallback: No microphone found.");
+      }
+
+      console.log("[WEBRTC] getUserMedia constraints:", { audio: audioConstraints, video: videoConstraints });
+      
+      try {
+        this.localStream = await navigator.mediaDevices.getUserMedia({
+          audio: audioConstraints,
+          video: videoConstraints,
+        });
+        console.log("[WEBRTC] getUserMedia success");
+      } catch (e: any) {
+        console.error(`[WEBRTC] Primary getUserMedia failed: ${e.message}. Retrying with basic constraints.`);
+        this.localStream = await navigator.mediaDevices.getUserMedia({
+          audio: audioConstraints ? true : false,
+          video: videoConstraints ? true : false,
+        });
+        console.log("[WEBRTC] getUserMedia fallback success");
+      }
+      
+      this.log(`local media: ${this.localStream?.getAudioTracks().length || 0}a/${this.localStream?.getVideoTracks().length || 0}v`);
 
       const pc = new RTCPeerConnection(rtcConfig());
       console.log("[WEBRTC] createPeerConnection success");
