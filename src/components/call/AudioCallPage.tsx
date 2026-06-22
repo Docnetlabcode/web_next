@@ -1,15 +1,26 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+<<<<<<< HEAD
 import { Mic, MicOff, PhoneOff } from "lucide-react";
+=======
+import { Mic, MicOff, PhoneOff, Volume2, VolumeX } from "lucide-react";
+>>>>>>> 3aa5a3bac3ede00e58343cae27abe5a5f169d6cd
 import { useCall } from "@/context/CallContext";
 
 export default function AudioCallPage() {
   const { call, phase, remoteStream, micOn, toggleMic, endCall } = useCall();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [secs, setSecs] = useState(0);
+<<<<<<< HEAD
 
   useEffect(() => { if (audioRef.current) audioRef.current.srcObject = remoteStream; }, [remoteStream]);
+=======
+  const [speakerOn, setSpeakerOn] = useState(true);
+
+  useEffect(() => { if (audioRef.current) audioRef.current.srcObject = remoteStream; }, [remoteStream]);
+  useEffect(() => { if (audioRef.current) audioRef.current.muted = !speakerOn; }, [speakerOn, remoteStream]);
+>>>>>>> 3aa5a3bac3ede00e58343cae27abe5a5f169d6cd
   useEffect(() => {
     if (phase !== "connected") return;
     const t = setInterval(() => setSecs((s) => s + 1), 1000);
@@ -37,6 +48,12 @@ export default function AudioCallPage() {
           <button onClick={toggleMic} className={`grid h-14 w-14 place-items-center rounded-full ${micOn ? "bg-white/15" : "bg-red-600/40"}`}>
             {micOn ? <Mic size={22} /> : <MicOff size={22} />}
           </button>
+<<<<<<< HEAD
+=======
+          <button onClick={() => setSpeakerOn((v) => !v)} className={`grid h-14 w-14 place-items-center rounded-full ${speakerOn ? "bg-white/15" : "bg-red-600/40"}`}>
+            {speakerOn ? <Volume2 size={22} /> : <VolumeX size={22} />}
+          </button>
+>>>>>>> 3aa5a3bac3ede00e58343cae27abe5a5f169d6cd
           <button onClick={endCall} className="grid h-14 w-14 place-items-center rounded-full bg-red-600"><PhoneOff size={24} /></button>
         </div>
       </div>
