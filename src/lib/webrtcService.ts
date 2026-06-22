@@ -68,62 +68,100 @@ export class WebRTCService {
   }
 
   async start(): Promise<void> {
-    this.localStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: this.hasVideo ? { facingMode: "user" } : false,
-    });
-    console.log("[WEBRTC] getUserMedia success");
-    this.log(`local media: ${this.localStream.getAudioTracks().length}a/${this.localStream.getVideoTracks().length}v`);
-
-    const pc = new RTCPeerConnection(rtcConfig());
-    console.log("[WEBRTC] createPeerConnection success");
-    this.pc = pc;
-    this.localStream.getTracks().forEach((t) => {
-      pc.addTrack(t, this.localStream!);
-      console.log(`[WEBRTC] addTrack: ${t.kind}`);
-    });
-
-    pc.ontrack = (e) => {
-      if (e.streams[0]) {
-        this.h.onRemoteStream(e.streams[0]);
-        this.h.onConnected();
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasAudio = devices.some(d => d.kind === "audioinput");
+      const hasVideo = devices.some(d => d.kind === "videoinput");
+      
+      console.log("[WEBRTC] Available devices:", devices.map(d => `${d.kind}: ${d.label || d.deviceId}`).join(", "));
+      
+      let audioConstraints: boolean | MediaTrackConstraints = hasAudio;
+      let videoConstraints: boolean | MediaTrackConstraints = false;
+      
+      if (this.hasVideo) {
+        if (hasVideo) {
+          videoConstraints = { facingMode: "user" };
+          console.log("[WEBRTC] Video requested and camera found. Selected default camera.");
+        } else {
+          console.log("[WEBRTC] Fallback: Video requested but no camera found. Falling back to audio-only.");
+        }
       }
-    };
-    pc.onicecandidate = (e) => {
-      if (!e.candidate) return;
-      console.log(`[WEBRTC] ICE_GENERATED: ${e.candidate.candidate}`);
-      this.h.send("webrtc_ice_candidate", {
-        recipientId: this.peerId,
-        callSessionId: this.callId,
-        candidate: {
-          candidate: e.candidate.candidate,
-          sdpMid: e.candidate.sdpMid,
-          sdpMLineIndex: e.candidate.sdpMLineIndex,
-        },
+      
+      if (!hasAudio) {
+        console.log("[WEBRTC] Fallback: No microphone found.");
+      }
+
+      console.log("[WEBRTC] getUserMedia constraints:", { audio: audioConstraints, video: videoConstraints });
+      
+      try {
+        this.localStream = await navigator.mediaDevices.getUserMedia({
+          audio: audioConstraints,
+          video: videoConstraints,
+        });
+        console.log("[WEBRTC] getUserMedia success");
+      } catch (e: any) {
+        console.error(`[WEBRTC] Primary getUserMedia failed: ${e.message}. Retrying with basic constraints.`);
+        this.localStream = await navigator.mediaDevices.getUserMedia({
+          audio: audioConstraints ? true : false,
+          video: videoConstraints ? true : false,
+        });
+        console.log("[WEBRTC] getUserMedia fallback success");
+      }
+      
+      this.log(`local media: ${this.localStream?.getAudioTracks().length || 0}a/${this.localStream?.getVideoTracks().length || 0}v`);
+
+      const pc = new RTCPeerConnection(rtcConfig());
+      console.log("[WEBRTC] createPeerConnection success");
+      this.pc = pc;
+      this.localStream.getTracks().forEach((t) => {
+        pc.addTrack(t, this.localStream!);
+        console.log(`[WEBRTC] addTrack: ${t.kind}`);
       });
-      console.log("[WEBRTC] ICE_SENT");
-      this.h.onIceType?.("sent", iceType(e.candidate.candidate));
-    };
-    pc.oniceconnectionstatechange = () => {
-      console.log(`[WEBRTC] ICE_CONNECTION_STATE=${pc.iceConnectionState}`);
-      this.log(`ICE: ${pc.iceConnectionState}`);
-      if (pc.iceConnectionState === "connected" || pc.iceConnectionState === "completed") {
-        this.h.onConnected();
-      }
-      if (pc.iceConnectionState === "failed") this.h.onFailed?.();
-    };
-    pc.onconnectionstatechange = () => {
-      console.log(`[WEBRTC] CONNECTION_STATE=${pc.connectionState}`);
-      this.log(`pc: ${pc.connectionState}`);
-      this.h.onState?.(pc.connectionState);
-      if (pc.connectionState === "failed") this.h.onFailed?.();
-    };
-    pc.onicegatheringstatechange = () => {
-      console.log(`[WEBRTC] ICE_GATHERING_STATE=${pc.iceGatheringState}`);
-    };
-    pc.onsignalingstatechange = () => {
-      console.log(`[WEBRTC] SIGNALING_STATE=${pc.signalingState}`);
-    };
+
+      pc.ontrack = (e) => {
+        if (e.streams[0]) {
+          this.h.onRemoteStream(e.streams[0]);
+          this.h.onConnected();
+        }
+      };
+      pc.onicecandidate = (e) => {
+        if (!e.candidate) return;
+        console.log(`[WEBRTC] ICE_GENERATED: ${e.candidate.candidate}`);
+        this.h.send("webrtc_ice_candidate", {
+          recipientId: this.peerId,
+          callSessionId: this.callId,
+          candidate: {
+            candidate: e.candidate.candidate,
+            sdpMid: e.candidate.sdpMid,
+            sdpMLineIndex: e.candidate.sdpMLineIndex,
+          },
+        });
+        console.log("[WEBRTC] ICE_SENT");
+        this.h.onIceType?.("sent", iceType(e.candidate.candidate));
+      };
+      pc.oniceconnectionstatechange = () => {
+        console.log(`[WEBRTC] ICE_CONNECTION_STATE=${pc.iceConnectionState}`);
+        this.log(`ICE: ${pc.iceConnectionState}`);
+        if (pc.iceConnectionState === "connected" || pc.iceConnectionState === "completed") {
+          this.h.onConnected();
+        }
+        if (pc.iceConnectionState === "failed") this.h.onFailed?.();
+      };
+      pc.onconnectionstatechange = () => {
+        console.log(`[WEBRTC] CONNECTION_STATE=${pc.connectionState}`);
+        this.log(`pc: ${pc.connectionState}`);
+        this.h.onState?.(pc.connectionState);
+        if (pc.connectionState === "failed") this.h.onFailed?.();
+      };
+      pc.onicegatheringstatechange = () => {
+        console.log(`[WEBRTC] ICE_GATHERING_STATE=${pc.iceGatheringState}`);
+      };
+      pc.onsignalingstatechange = () => {
+        console.log(`[WEBRTC] SIGNALING_STATE=${pc.signalingState}`);
+      };
+    } catch (e: any) {
+      console.error(`[WEBRTC] ERROR in src/lib/webrtcService.ts:start - ${e.message}`, e);
+    }
   }
 
   /** Swap to the next camera (mobile front/back). On single-camera desktops this is a no-op visually. */
@@ -148,46 +186,58 @@ export class WebRTCService {
 
   async createOffer() {
     if (!this.pc) return;
-    const offer = await this.pc.createOffer();
-    console.log("[WEBRTC] OFFER_CREATED");
-    await this.pc.setLocalDescription(offer);
-    console.log("[WEBRTC] setLocalDescription(offer) success");
-    this.h.send("webrtc_offer", {
-      recipientId: this.peerId,
-      callSessionId: this.callId,
-      offer: { sdp: offer.sdp, type: offer.type },
-    });
-    console.log("[WEBRTC] OFFER_SENT");
-    this.log("offer sent");
+    try {
+      const offer = await this.pc.createOffer();
+      console.log("[WEBRTC] OFFER_CREATED");
+      await this.pc.setLocalDescription(offer);
+      console.log("[WEBRTC] setLocalDescription(offer) success");
+      this.h.send("webrtc_offer", {
+        recipientId: this.peerId,
+        callSessionId: this.callId,
+        offer: { sdp: offer.sdp, type: offer.type },
+      });
+      console.log("[WEBRTC] OFFER_SENT");
+      this.log("offer sent");
+    } catch (e: any) {
+      console.error(`[WEBRTC] ERROR in src/lib/webrtcService.ts:createOffer - ${e.message}`, e);
+    }
   }
 
   async handleOffer(offer: any) {
     if (!this.pc) return;
     console.log("[WEBRTC] OFFER_RECEIVED");
     this.log("offer received");
-    await this.pc.setRemoteDescription(new RTCSessionDescription(offer));
-    console.log("[WEBRTC] setRemoteDescription(offer) success");
-    await this.drain();
-    const answer = await this.pc.createAnswer();
-    console.log("[WEBRTC] ANSWER_CREATED");
-    await this.pc.setLocalDescription(answer);
-    console.log("[WEBRTC] setLocalDescription(answer) success");
-    this.h.send("webrtc_answer", {
-      recipientId: this.peerId,
-      callSessionId: this.callId,
-      answer: { sdp: answer.sdp, type: answer.type },
-    });
-    console.log("[WEBRTC] ANSWER_SENT");
-    this.log("answer sent");
+    try {
+      await this.pc.setRemoteDescription(new RTCSessionDescription(offer));
+      console.log("[WEBRTC] setRemoteDescription(offer) success");
+      await this.drain();
+      const answer = await this.pc.createAnswer();
+      console.log("[WEBRTC] ANSWER_CREATED");
+      await this.pc.setLocalDescription(answer);
+      console.log("[WEBRTC] setLocalDescription(answer) success");
+      this.h.send("webrtc_answer", {
+        recipientId: this.peerId,
+        callSessionId: this.callId,
+        answer: { sdp: answer.sdp, type: answer.type },
+      });
+      console.log("[WEBRTC] ANSWER_SENT");
+      this.log("answer sent");
+    } catch (e: any) {
+      console.error(`[WEBRTC] ERROR in src/lib/webrtcService.ts:handleOffer - ${e.message}`, e);
+    }
   }
 
   async handleAnswer(answer: any) {
     if (!this.pc) return;
     console.log("[WEBRTC] ANSWER_RECEIVED");
-    await this.pc.setRemoteDescription(new RTCSessionDescription(answer));
-    console.log("[WEBRTC] setRemoteDescription(answer) success");
-    await this.drain();
-    this.log("answer received");
+    try {
+      await this.pc.setRemoteDescription(new RTCSessionDescription(answer));
+      console.log("[WEBRTC] setRemoteDescription(answer) success");
+      await this.drain();
+      this.log("answer received");
+    } catch (e: any) {
+      console.error(`[WEBRTC] ERROR in src/lib/webrtcService.ts:handleAnswer - ${e.message}`, e);
+    }
   }
 
   async addIce(candidate: RTCIceCandidateInit) {
@@ -197,7 +247,9 @@ export class WebRTCService {
       try { 
         await this.pc.addIceCandidate(candidate); 
         console.log("[WEBRTC] ICE_ADDED");
-      } catch {}
+      } catch (e: any) {
+        console.error(`[WEBRTC] ERROR in src/lib/webrtcService.ts:addIce - ${e.message}`, e);
+      }
     } else {
       this.pending.push(candidate);
       console.log("[WEBRTC] ICE_QUEUED");
@@ -210,7 +262,9 @@ export class WebRTCService {
       try { 
         await this.pc?.addIceCandidate(c); 
         console.log("[WEBRTC] ICE_ADDED (from queue)");
-      } catch {}
+      } catch (e: any) {
+        console.error(`[WEBRTC] ERROR in src/lib/webrtcService.ts:drain - ${e.message}`, e);
+      }
     }
     this.pending = [];
   }
