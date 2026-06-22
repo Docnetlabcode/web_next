@@ -75,7 +75,8 @@ export class WebRTCService {
       
       console.log("[WEBRTC] Available devices:", devices.map(d => `${d.kind}: ${d.label || d.deviceId}`).join(", "));
       
-      let audioConstraints: boolean | MediaTrackConstraints = hasAudio;
+      // Always request audio. EnumerateDevices might not see inputs until permission is granted.
+      let audioConstraints: boolean | MediaTrackConstraints = true;
       let videoConstraints: boolean | MediaTrackConstraints = false;
       
       if (this.hasVideo) {
@@ -88,7 +89,7 @@ export class WebRTCService {
       }
       
       if (!hasAudio) {
-        console.log("[WEBRTC] Fallback: No microphone found.");
+        console.log("[WEBRTC] Fallback: No microphone found in enumeration, but requesting audio anyway to prompt permissions.");
       }
 
       console.log("[WEBRTC] getUserMedia constraints:", { audio: audioConstraints, video: videoConstraints });
@@ -100,10 +101,10 @@ export class WebRTCService {
         });
         console.log("[WEBRTC] getUserMedia success");
       } catch (e: any) {
-        console.error(`[WEBRTC] Primary getUserMedia failed: ${e.message}. Retrying with basic constraints.`);
+        console.error(`[WEBRTC] Primary getUserMedia failed: ${e.message}. Retrying with audio-only basic constraints.`);
         this.localStream = await navigator.mediaDevices.getUserMedia({
-          audio: audioConstraints ? true : false,
-          video: videoConstraints ? true : false,
+          audio: true,
+          video: false,
         });
         console.log("[WEBRTC] getUserMedia fallback success");
       }
