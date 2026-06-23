@@ -1,16 +1,11 @@
 import { io, Socket } from "socket.io-client";
-<<<<<<< HEAD
 import { dok, TOKENS } from "./api";
-=======
-import { TOKENS } from "./api";
->>>>>>> 3aa5a3bac3ede00e58343cae27abe5a5f169d6cd
 
 // The calling signaling lives in chat-service (port 5001), NOT api-service.
 // Point NEXT_PUBLIC_CHAT_SOCKET_URL at the chat-service origin, e.g.
 //   NEXT_PUBLIC_CHAT_SOCKET_URL=http://localhost:5001
 // Falls back to NEXT_PUBLIC_SOCKET_URL, then same-origin.
 let callSocket: Socket | null = null;
-<<<<<<< HEAD
 let refreshing = false;
 
 function chatOrigin(): string | undefined {
@@ -57,29 +52,11 @@ export function getCallSocket(): Socket {
     }
   });
 
-=======
-
-export function getCallSocket(): Socket {
-  if (callSocket) return callSocket;
-  const url =
-    process.env.NEXT_PUBLIC_CHAT_SOCKET_URL ||
-    process.env.NEXT_PUBLIC_SOCKET_URL ||
-    undefined;
-  callSocket = io(url, {
-    autoConnect: false,
-    transports: ["websocket"],
-    auth: { token: TOKENS.access },
-  });
->>>>>>> 3aa5a3bac3ede00e58343cae27abe5a5f169d6cd
   return callSocket;
 }
 
 export function connectCallSocket(): Socket {
   const s = getCallSocket();
-<<<<<<< HEAD
-=======
-  s.auth = { token: TOKENS.access };
->>>>>>> 3aa5a3bac3ede00e58343cae27abe5a5f169d6cd
   if (!s.connected) s.connect();
   return s;
 }
