@@ -17,7 +17,9 @@ export function getSocket() {
 
   socket = io(socketOrigin(), {
     autoConnect: false,
-    transports: ["websocket"],
+    // Polling first, then upgrade to WebSocket — a websocket-only handshake is
+    // rejected by Render's edge / many proxies (the onrender.com WS failures).
+    transports: ["polling", "websocket"],
     // Function form so every (re)connect sends the CURRENT token. A static
     // object snapshots the token once and goes stale after it rotates, which
     // makes reconnects fail with "Invalid token" and drops the user offline.

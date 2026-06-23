@@ -21,7 +21,10 @@ export function getCallSocket(): Socket {
 
   callSocket = io(chatOrigin(), {
     autoConnect: false,
-    transports: ["websocket"],
+    // Start with HTTP long-polling, then upgrade to WebSocket. A websocket-ONLY
+    // handshake is rejected by Render's edge (and many proxies), which require the
+    // polling handshake first — that was why wss://…onrender.com/socket.io failed.
+    transports: ["polling", "websocket"],
     // `auth` MUST be a function, not a static object. socket.io invokes it before
     // every (re)connect, so the CURRENT access token is always sent. With an
     // object the token is snapshotted once; after it rotates (~15 min) reconnects
