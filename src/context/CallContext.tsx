@@ -34,6 +34,7 @@ interface CallCtx {
   logs: string[];
   socketConnected: boolean;
   connectionState: string;
+  callStatus: string;
   debug: CallDebug;
   myId: string | undefined;
   startCall: (peerId: string, peerName: string, peerPhoto: string | null, type: CallType) => void;
@@ -69,10 +70,15 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const [socketConnected, setSocketConnected] = useState(false);
   const [connectionState, setConnectionState] = useState<string>("");
   const [debug, setDebug] = useState<CallDebug>({});
+  // WhatsApp-style caller status: "" / "Calling…" / "Ringing…" / "Connecting…" /
+  // "User is unavailable" / "User is offline" / "No answer".
+  const [callStatus, setCallStatus] = useState<string>("");
 
   const svcRef = useRef<WebRTCService | null>(null);
   const callRef = useRef<ActiveCall | null>(null);
   const ringTimeout = useRef<any>(null);
+  const reachTimeout = useRef<any>(null); // bound how long we wait before "unavailable"
+  const peerRang = useRef<boolean>(false);
   callRef.current = call;
 
   const log = useCallback((line: string) => {
@@ -101,6 +107,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const cleanup = useCallback((reason: string) => {
     if (ringTimeout.current) clearTimeout(ringTimeout.current);
+    if (reachTimeout.current) clearTimeout(reachTimeout.current);
+    peerRang.current = false;
     svcRef.current?.close();
     svcRef.current = null;
     setLocalStream(null);
@@ -108,6 +116,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     setMicOn(true);
     setCamOn(true);
     setConnectionState("");
+    setCallStatus("");
     log(`CALL_ENDED (${reason})`);
     setPhase("idle");
     setCall(null);
@@ -131,12 +140,42 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
         peerPhoto: d.callerPhoto, type: d.callType === "audio" ? "audio" : "video", isCaller: false,
       });
       setPhase("incoming");
+      // Delivery ACK → caller can show "Ringing…" instead of spinning "Calling…".
+      s.emit("user_call_ringing", { callId: d.callId, toUserId: d.fromUserId });
+    };
+
+    // Caller: server presence ACK (was the invite delivered to a live socket?).
+    const onStatus = (d: any) => {
+      const c = callRef.current;
+      if (!c || !c.isCaller || d.callId !== c.callId) return;
+      if (!d.online && !peerRang.current) {
+        if (reachTimeout.current) clearTimeout(reachTimeout.current);
+        reachTimeout.current = setTimeout(() => {
+          if (!peerRang.current && callRef.current?.callId === d.callId) {
+            setCallStatus("User is unavailable");
+            log("peer unavailable (no ring ack)");
+            s.emit("user_call_timeout", { callId: d.callId, toUserId: c.peerId });
+            cleanup("unavailable");
+          }
+        }, 12000);
+      }
+    };
+    // Caller: callee's device is now displaying the incoming call.
+    const onRinging = (d: any) => {
+      const c = callRef.current;
+      if (!c || !c.isCaller || d.callId !== c.callId) return;
+      peerRang.current = true;
+      if (reachTimeout.current) clearTimeout(reachTimeout.current);
+      setCallStatus("Ringing…");
+      log("peer ringing");
     };
 
     const onAccepted = async (d: any) => {
       const c = callRef.current;
       if (!c || d.callId !== c.callId) return;
       if (ringTimeout.current) clearTimeout(ringTimeout.current);
+      if (reachTimeout.current) clearTimeout(reachTimeout.current);
+      setCallStatus("Connecting…");
       log("CALL_ACCEPTED (callee) → starting media/offer");
       setPhase("connecting");
       const svc = buildService(c);
@@ -146,10 +185,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       await svc.createOffer();
     };
 
-    const onRejected = (d: any) => { if (callRef.current && d.callId === callRef.current.callId) cleanup("rejected/timeout"); };
-    const onBusy = (d: any) => { if (callRef.current && d.callId === callRef.current.callId) cleanup("busy"); };
+    const onRejected = (d: any) => { if (callRef.current && d.callId === callRef.current.callId) { setCallStatus("Call declined"); cleanup("rejected/timeout"); } };
+    const onBusy = (d: any) => { if (callRef.current && d.callId === callRef.current.callId) { setCallStatus("User is busy"); cleanup("busy"); } };
     const onRemoteEnd = (d: any) => { if (callRef.current && d.callId === callRef.current.callId) cleanup("remote ended"); };
-    const onUnavailable = (d: any) => { if (callRef.current && d.callId === callRef.current.callId) cleanup("unavailable"); };
+    const onUnavailable = (d: any) => { if (callRef.current && d.callId === callRef.current.callId) { setCallStatus("User is unavailable"); cleanup("unavailable"); } };
 
     const onOffer = async (d: any) => {
       const c = callRef.current;
@@ -181,6 +220,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     s.on("user_call_busy", onBusy);
     s.on("user_call_end", onRemoteEnd);
     s.on("user_call_unavailable", onUnavailable);
+    s.on("user_call_status", onStatus);
+    s.on("user_call_ringing", onRinging);
     s.on("webrtc_offer", onOffer);
     s.on("webrtc_answer", onAnswer);
     s.on("webrtc_ice_candidate", onIce);
@@ -196,6 +237,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       s.off("user_call_busy", onBusy);
       s.off("user_call_end", onRemoteEnd);
       s.off("user_call_unavailable", onUnavailable);
+      s.off("user_call_status", onStatus);
+      s.off("user_call_ringing", onRinging);
       s.off("webrtc_offer", onOffer);
       s.off("webrtc_answer", onAnswer);
       s.off("webrtc_ice_candidate", onIce);
@@ -206,8 +249,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const startCall = useCallback((peerId: string, peerName: string, peerPhoto: string | null, type: CallType) => {
     if (!peerId || callRef.current) return;
     const c: ActiveCall = { callId: newCallId(), peerId, peerName, peerPhoto, type, isCaller: true };
+    peerRang.current = false;
     setCall(c);
     setPhase("outgoing");
+    setCallStatus("Calling…");
     socket.current?.emit("user_call_invite", {
       callId: c.callId, toUserId: peerId, callType: type,
       callerName: user?.fullName, callerPhoto: user?.profilePhoto || null,
@@ -257,7 +302,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   return (
     <Ctx.Provider value={{
       phase, call, localStream, remoteStream, micOn, camOn, logs, socketConnected,
-      connectionState, debug, myId,
+      connectionState, callStatus, debug, myId,
       startCall, acceptCall, rejectCall, endCall, toggleMic, toggleCam, switchCamera,
     }}>
       {children}

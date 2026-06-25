@@ -5,14 +5,14 @@ import { useCall } from "@/context/CallContext";
 import { useRingtone } from "@/hooks/useRingtone";
 
 export default function OutgoingCallModal() {
-  const { call, endCall } = useCall();
+  const { call, endCall, callStatus } = useCall();
   useRingtone(!!call, "ringback");
   if (!call) return null;
 
   return (
     <div className="fixed inset-0 z-[100] grid place-items-center bg-black/70">
       <div className="w-[320px] rounded-2xl bg-[#0B1A19] p-6 text-center text-white shadow-2xl">
-        <p className="text-sm text-white/60">Calling…</p>
+        <p className="text-sm text-white/60">{callStatus || "Calling…"}</p>
         <div className="mx-auto my-5 grid h-28 w-28 place-items-center overflow-hidden rounded-full bg-emerald-700/30">
           {call.peerPhoto ? (
             // eslint-disable-next-line @next/next/no-img-element
