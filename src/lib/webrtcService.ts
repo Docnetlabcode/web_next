@@ -75,49 +75,36 @@ export class WebRTCService {
 
       console.log("[WEBRTC] Available devices:", devices.map(d => `${d.kind}: ${d.label || d.deviceId}`).join(", "));
 
-      // Always request audio. EnumerateDevices might not see inputs until permission is granted.
-      let audioConstraints: boolean | MediaTrackConstraints = true;
-      let videoConstraints: boolean | MediaTrackConstraints = false;
-
-      if (this.hasVideo) {
-        if (hasVideo) {
-          videoConstraints = { facingMode: "user" };
-          console.log("[WEBRTC] Video requested and camera found. Selected default camera.");
-        } else {
-          console.log("[WEBRTC] Fallback: Video requested but no camera found. Falling back to audio-only.");
-        }
+      if (this.hasVideo && !hasVideo) {
+        console.log("[WEBRTC] Video requested but no camera found. Falling back to audio-only.");
       }
-
       if (!hasAudio) {
-        console.log("[WEBRTC] Fallback: No microphone found in enumeration, but requesting audio anyway to prompt permissions.");
+        console.log("[WEBRTC] No microphone found in enumeration, but requesting audio anyway to prompt permissions.");
       }
 
-      console.log("[WEBRTC] getUserMedia constraints:", { audio: audioConstraints, video: videoConstraints });
-
-      try {
-        this.localStream = await navigator.mediaDevices.getUserMedia({
-          audio: audioConstraints,
-          video: videoConstraints,
-        });
-        console.log("[WEBRTC] getUserMedia success");
-      } catch (e: any) {
-        console.error(`[WEBRTC] Primary getUserMedia failed: ${e.message}. Retrying with audio-only basic constraints.`);
-        this.localStream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: false,
-        });
-        console.log("[WEBRTC] getUserMedia fallback success");
-      }
-
+      // Acquire local media with progressive fallback. A missing camera/mic must
+      // NEVER throw out of start() and kill the call (that left the caller stuck
+      // on "Connecting…"): degrade audio+video → audio-only → no local media.
+      this.localStream = await this.acquireLocalMedia(this.hasVideo && hasVideo);
       this.log(`local media: ${this.localStream?.getAudioTracks().length || 0}a/${this.localStream?.getVideoTracks().length || 0}v`);
 
       const pc = new RTCPeerConnection(rtcConfig());
       console.log("[WEBRTC] createPeerConnection success");
       this.pc = pc;
-      this.localStream.getTracks().forEach((t) => {
-        pc.addTrack(t, this.localStream!);
-        console.log(`[WEBRTC] addTrack: ${t.kind}`);
-      });
+
+      if (this.localStream) {
+        this.localStream.getTracks().forEach((t) => {
+          pc.addTrack(t, this.localStream!);
+          console.log(`[WEBRTC] addTrack: ${t.kind}`);
+        });
+      } else {
+        // No local mic/cam at all → still connect so the user can RECEIVE the
+        // remote audio/video. Without a track or transceiver the offer would
+        // have no media lines and the call would never connect.
+        console.warn("[WEBRTC] No local media available — proceeding recvonly (receive-only).");
+        try { pc.addTransceiver("audio", { direction: "recvonly" }); } catch {}
+        if (this.hasVideo) { try { pc.addTransceiver("video", { direction: "recvonly" }); } catch {} }
+      }
 
       pc.ontrack = (e) => {
         if (e.streams[0]) {
@@ -163,6 +150,33 @@ export class WebRTCService {
     } catch (e: any) {
       console.error(`[WEBRTC] ERROR in src/lib/webrtcService.ts:start - ${e.message}`, e);
     }
+  }
+
+  /**
+   * Get local media with graceful degradation. Returns `null` (never throws)
+   * when no usable mic/cam exists, so the call can still proceed receive-only.
+   */
+  private async acquireLocalMedia(wantVideo: boolean): Promise<MediaStream | null> {
+    // 1) audio + video (if a camera was requested and found)
+    if (wantVideo) {
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({ audio: true, video: { facingMode: "user" } });
+        console.log("[WEBRTC] getUserMedia(audio+video) success");
+        return s;
+      } catch (e: any) {
+        console.warn(`[WEBRTC] getUserMedia(audio+video) failed: ${e?.name || e}. Trying audio-only.`);
+      }
+    }
+    // 2) audio only
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      console.log("[WEBRTC] getUserMedia(audio-only) success");
+      return s;
+    } catch (e: any) {
+      console.warn(`[WEBRTC] audio-only getUserMedia failed: ${e?.name || e}. Proceeding with NO local media (recvonly).`);
+    }
+    // 3) nothing available
+    return null;
   }
 
   /** Swap to the next camera (mobile front/back). On single-camera desktops this is a no-op visually. */
