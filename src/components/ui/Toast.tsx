@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
  *   toast.success("Report submitted");
  *   toast.show("Author muted", { action: { label: "Undo", onClick: ... } });
  */
-const ToastCtx = createContext(null);
+const ToastCtx = createContext<any>(null);
 export const useToast = () => useContext(ToastCtx);
 
 const ICONS = { success: CheckCircle2, error: AlertCircle, info: Info };

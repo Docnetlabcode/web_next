@@ -2,7 +2,7 @@
 import { NavLink, useNavigate, Link, useLocation, Navigate } from "@/lib/router";
 import {
   Home, Clapperboard, Stethoscope, Users, MessageSquare,
-  Bell, Bookmark, Search, Plus, LogOut, Settings,
+  Bell, Bookmark, Search, Plus, LogOut, Settings, Video,
 } from "lucide-react";
 import { Avatar, Logo, Verified, Spinner } from "@/components/ui/Primitives";
 import NavArrows from "@/components/ui/NavArrows";
@@ -15,6 +15,7 @@ const NAV = [
   { to: "/app", icon: Home, label: "Home", end: true },
   { to: "/app/reels", icon: Clapperboard, label: "Pulse" },
   { to: "/app/cases", icon: Stethoscope, label: "Cases" },
+  { to: "/app/consults", icon: Video, label: "Consults" },
   { to: "/app/network", icon: Users, label: "Network" },
   { to: "/app/messages", icon: MessageSquare, label: "Messages" },
   { to: "/app/notifications", icon: Bell, label: "Notifications" },

@@ -34,6 +34,12 @@ describe("routeFor — notification deep-link routing", () => {
     expect(routeFor({ type: "verification_rejected" })).toBe("/app/profile/edit");
   });
 
+  it("routes consultation notifications to the request detail", () => {
+    expect(routeFor({ type: "consultation_approved", meta: { requestId: "r1" } })).toBe("/app/consults/r1");
+    expect(routeFor({ type: "consultation_completed", meta: { consultationId: "c9" } })).toBe("/app/consults/c9");
+    expect(routeFor({ type: "consultation_prescription", meta: {} })).toBe("/app/consults");
+  });
+
   it("falls back by meta/sender, then null", () => {
     expect(routeFor({ type: "unknown", meta: { postId: "p9" } })).toBe("/app/post/p9");
     expect(routeFor({ type: "unknown", sender: { id: "u9" } })).toBe("/app/profile/u9");

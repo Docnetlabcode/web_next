@@ -2,7 +2,7 @@
 import { cn, initials, avatarColor } from "@/lib/utils";
 import { BadgeCheck } from "lucide-react";
 
-export function Avatar({ user, size = 40, className }) {
+export function Avatar({ user, size = 40, className = "" }: { user?: any; size?: number; className?: string }) {
   const s = { width: size, height: size, fontSize: size * 0.38 };
   if (user?.profilePhoto) {
     return (
@@ -24,7 +24,7 @@ export function Avatar({ user, size = 40, className }) {
   );
 }
 
-export function Verified({ size = 15, className }) {
+export function Verified({ size = 15, className = "" }: { size?: number; className?: string }) {
   return <BadgeCheck size={size} className={cn("inline-block text-brand-600 fill-brand-100", className)} />;
 }
 
@@ -46,7 +46,7 @@ export function Logo({ size = 30, withText = true, light = false }) {
   );
 }
 
-export function Spinner({ className }) {
+export function Spinner({ className = "" }: { className?: string }) {
   return (
     <span
       className={cn("inline-block h-5 w-5 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600", className)}
@@ -54,7 +54,7 @@ export function Spinner({ className }) {
   );
 }
 
-export function Skeleton({ className }) {
+export function Skeleton({ className = "" }: { className?: string }) {
   return (
     <div className={cn("relative overflow-hidden rounded-lg bg-ink-900/[.06]", className)}>
       <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent" />
