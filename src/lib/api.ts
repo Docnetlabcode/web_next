@@ -302,6 +302,63 @@ export const dok = {
     preferences: () => unwrap(api.get("/notifications/preferences")),
     updatePreferences: (b) => unwrap(api.put("/notifications/preferences", b)),
   },
+  // Consultation V2 — mirrors docnet/lib/features/calls/calls_repository.dart.
+  // Base: /api/v2/consultations (api-service) + /api/chat/consultations (chat-service).
+  // Reuses every existing endpoint; introduces NO new backend logic.
+  consults: {
+    // ── Discovery ──────────────────────────────────────────────────────────
+    discoverDoctors: (q = "") => unwrap(api.get(`/v2/consultations/doctors${q}`)),     // { doctors, nextCursor }
+    getDoctor: (doctorId) => unwrap(api.get(`/v2/consultations/doctors/${doctorId}`)),  // { doctor }
+
+    // ── Requester request flow ─────────────────────────────────────────────
+    createRequest: (b) => unwrap(api.post("/v2/consultations/requests", b)),            // { doctorId, reason?, attachments[] } → { request }
+    createPaymentOrder: (requestId) => unwrap(api.post(`/v2/consultations/requests/${requestId}/payment-order`, {})),
+    confirmPayment: (requestId, b) => unwrap(api.post(`/v2/consultations/requests/${requestId}/payment-callback`, b)), // razorpay_* → { request }
+    cancelRequest: (requestId) => unwrap(api.post(`/v2/consultations/requests/${requestId}/cancel`, {})),
+    getRequest: (requestId) => unwrap(api.get(`/v2/consultations/requests/${requestId}`)),  // { request }
+    listMyRequests: (q = "") => unwrap(api.get(`/v2/consultations/requests/mine${q}`)),      // { requests }
+    myHistory: (q = "") => unwrap(api.get(`/v2/consultations/history/mine${q}`)),            // { history }
+
+    // ── Doctor request flow ────────────────────────────────────────────────
+    listDoctorRequests: (q = "") => unwrap(api.get(`/v2/consultations/doctor/requests${q}`)),  // { requests }
+    getDoctorRequest: (requestId) => unwrap(api.get(`/v2/consultations/doctor/requests/${requestId}`)),
+    approveRequest: (requestId, scheduledAtIso) => unwrap(api.post(`/v2/consultations/doctor/requests/${requestId}/approve`, { scheduled_at: scheduledAtIso })),
+    declineRequest: (requestId, reason) => unwrap(api.post(`/v2/consultations/doctor/requests/${requestId}/decline`, reason ? { reason } : {})),
+    doctorHistory: (q = "") => unwrap(api.get(`/v2/consultations/doctor/history${q}`)),         // { history }
+    lifetimeEarnings: () => unwrap(api.get("/v2/consultations/doctor/earnings/lifetime")),       // { earnings }
+
+    // ── Doctor settings ────────────────────────────────────────────────────
+    getSettings: () => unwrap(api.get("/v2/consultations/doctor/settings")),                     // { settings }
+    updateSettings: (patch) => unwrap(api.put("/v2/consultations/doctor/settings", patch)),      // { settings }
+
+    // ── Doctor bank accounts (RazorpayX) ───────────────────────────────────
+    listBankAccounts: () => unwrap(api.get("/v2/consultations/doctor/bank-accounts")),           // { accounts }
+    addBankAccount: (b) => unwrap(api.post("/v2/consultations/doctor/bank-accounts", b)),        // → { account } (400 if RazorpayX verify fails)
+    updateBankAccount: (accountId, b) => unwrap(api.put(`/v2/consultations/doctor/bank-accounts/${accountId}`, b)),
+    setPrimaryAccount: (accountId) => unwrap(api.put(`/v2/consultations/doctor/bank-accounts/${accountId}/set-primary`, {})),
+    deleteBankAccount: (accountId) => unwrap(api.delete(`/v2/consultations/doctor/bank-accounts/${accountId}`)),
+
+    // ── Call lifecycle ─────────────────────────────────────────────────────
+    joinCall: (requestId) => unwrap(api.post(`/v2/consultations/calls/${requestId}/join`, {})),
+    endCall: (requestId, endReason = "completed") => unwrap(api.post(`/v2/consultations/calls/${requestId}/end`, { end_reason: endReason })),
+    saveNotes: (requestId, notes) => unwrap(api.post(`/v2/consultations/calls/${requestId}/notes`, { notes })),
+    // Finish Consultation: persists clinical summary + COMPLETED + auto-connect + notify.
+    completeConsultation: (requestId, summary) => unwrap(api.post(`/v2/consultations/calls/${requestId}/complete`, summary)),
+
+    // ── Ratings ────────────────────────────────────────────────────────────
+    submitRating: (b) => unwrap(api.post("/v2/consultations/ratings", b)), // { consultationRequestId, stars, comment? }
+
+    // ── Secure payment flow (Razorpay) ─────────────────────────────────────
+    createPaymentIntent: (b) => unwrap(api.post("/v2/consultations/payment/create-order", b)),   // { doctorId, reason? } → { paymentIntentId, order, fees, doctor }
+    verifyPayment: (b) => unwrap(api.post("/v2/consultations/payment/verify", b)),                // razorpay* + attachments[] → { request }
+    uploadAttachment: (file) => { const f = new FormData(); f.append("file", file); return postForm("/v2/consultations/attachments", f); }, // → { attachment: { url, publicId, name } }
+    getInvoice: (requestId) => unwrap(api.get(`/v2/consultations/payment/invoice/${requestId}`)), // { invoice }
+
+    // ── E2EE consult chat (chat-service proxy) ─────────────────────────────
+    getThread: (peerId, q = "") => unwrap(api.get(`/chat/consultations/threads/${peerId}${q}`)),  // { messages }
+    sendThreadMessage: (peerId, b) => unwrap(api.post(`/chat/consultations/threads/${peerId}`, b)),
+    markThreadRead: (peerId) => unwrap(api.post(`/chat/consultations/threads/${peerId}/read`, {})),
+  },
   admin: {
     // These require the x-admin-key header — set it once via setAdminKey().
     stats: () => unwrap(api.get("/admin/verifications/stats")),

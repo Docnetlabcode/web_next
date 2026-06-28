@@ -152,6 +152,16 @@ export default function UserProfile() {
           {/* Follow + Connect — two distinct buttons on the profile (vs. one morphing button on cards) */}
           {!u.isSelf && <ProfileActions user={u} demo={demo} />}
 
+          {/* Request a consultation — ungated entry into the consult booking flow (doctors only) */}
+          {!u.isSelf && u.role === "doctor" && (
+            <button
+              onClick={() => nav(`/app/consults/request/${u._id || u.id}`)}
+              className="btn-primary mt-2.5 w-full justify-center py-2.5 text-sm"
+            >
+              <Stethoscope size={16} /> Request consultation
+            </button>
+          )}
+
           {/* interactive metrics with the private-account visibility gate (§3B) */}
           <div className="mt-4 border-t border-ink-900/[.06] pt-4">
             {!canViewLists && (

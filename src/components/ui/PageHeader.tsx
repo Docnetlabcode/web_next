@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Sticky page header with animated back + forward arrows. */
-export function PageHeader({ title, subtitle, right, back = true, forward = true, className }) {
+export function PageHeader({ title, subtitle, right, back = true, forward = true, className = "" }: { title?: any; subtitle?: any; right?: any; back?: boolean; forward?: boolean; className?: string }) {
   const nav = useNavigate();
   return (
     <header className={cn("mb-5 flex items-center gap-2.5", className)}>

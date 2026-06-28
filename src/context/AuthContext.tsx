@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { dok, TOKENS } from "@/lib/api";
 import { connectSocket, disconnectSocket } from "@/lib/socket";
 
-const AuthCtx = createContext(null);
+const AuthCtx = createContext<any>(null);
 export const useAuth = () => useContext(AuthCtx);
 
 // The backend marks new users isProfileComplete:false; on reload /profile/me may omit the

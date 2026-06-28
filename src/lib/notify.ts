@@ -29,6 +29,13 @@ export function routeFor(n) {
       return "/app/profile/edit";
     default: break;
   }
+  // Consultation notifications (requested/approved/declined/scheduled/started/
+  // completed/prescription/summary/attachments) deep-link to the request detail.
+  // Mirrors Flutter: type.startsWith("consultation_") → ConsultationDetailsScreen.
+  if (typeof n.type === "string" && n.type.startsWith("consultation")) {
+    const id = m.consultationId || m.requestId || m.consultationRequestId;
+    return id ? `/app/consults/${id}` : "/app/consults";
+  }
   if (m.postId) return `/app/post/${m.postId}`;
   if (senderId) return `/app/profile/${senderId}`;
   return null;
