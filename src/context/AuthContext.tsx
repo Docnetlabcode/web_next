@@ -46,6 +46,9 @@ export function AuthProvider({ children }) {
   // Called after verify-otp / google succeed. Web responses carry accessToken + csrfToken + user
   // (the refresh token is in an httpOnly cookie, not in JS).
   const setSession = ({ accessToken, csrfToken, user: u }) => {
+    // TEMPORARY: Print the JWT token to the console for load testing
+    console.log("🚀 MY JWT TOKEN:", accessToken);
+    
     TOKENS.set({ accessToken, csrfToken });
     setUser(u);
     connectSocket(u?._id || u?.id);
