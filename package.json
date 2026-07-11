@@ -1,8 +1,8 @@
 {
-  "name": "doklynk-next",
+  "name": "orovion-next",
   "version": "1.0.0",
   "private": true,
-  "description": "DokLynk — Next.js (App Router) web client for the healthcare social platform",
+  "description": "Orovion — Next.js (App Router) web client for the healthcare social platform",
   "scripts": {
     "dev": "next dev -p 5173",
     "build": "next build",

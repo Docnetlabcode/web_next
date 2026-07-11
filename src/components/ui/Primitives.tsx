@@ -28,21 +28,36 @@ export function Verified({ size = 15, className = "" }: { size?: number; classNa
   return <BadgeCheck size={size} className={cn("inline-block text-brand-600 fill-brand-100", className)} />;
 }
 
+/**
+ * Orovion brand lockup (assets in /public/brand, source: /LOGO).
+ * `light` = rendered on a dark background → primary (white) variant;
+ * default = secondary (ink #0E1213) variant for light backgrounds.
+ * `withText` renders the full wordmark (icon + "orovion" typeface, 5.2:1);
+ * otherwise the square icon alone.
+ */
 export function Logo({ size = 30, withText = true, light = false }) {
+  const variant = light ? "primary" : "secondary";
+  if (!withText) {
+    return (
+      <img
+        src={`/brand/icon-${variant}.svg`}
+        alt="Orovion"
+        width={size}
+        height={size}
+        draggable={false}
+        className="select-none"
+      />
+    );
+  }
   return (
-    <span className="inline-flex items-center gap-2 select-none">
-      <span
-        className="grid place-items-center rounded-[28%] font-display font-extrabold text-white"
-        style={{ width: size, height: size, fontSize: size * 0.5, background: "#1E7B74" }}
-      >
-        d.
-      </span>
-      {withText && (
-        <span className={cn("font-display text-[1.35rem] font-extrabold tracking-tight", light ? "text-white" : "text-ink-900")}>
-          Dok<span className={light ? "text-white" : "text-brand-600"}>Lynk</span>
-        </span>
-      )}
-    </span>
+    <img
+      src={`/brand/wordmark-${variant}.svg`}
+      alt="Orovion"
+      height={size}
+      style={{ height: size, width: "auto" }}
+      draggable={false}
+      className="select-none"
+    />
   );
 }
 

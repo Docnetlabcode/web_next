@@ -347,7 +347,7 @@ function Notifications() {
       <Toggle icon={Bell} label="Comments & replies" desc="Replies on your posts and cases" on={s.comments} onChange={set("comments")} />
       <Toggle icon={User} label="New followers" on={s.followers} onChange={set("followers")} />
       <Toggle icon={User} label="Connection requests" on={s.requests} onChange={set("requests")} />
-      <Toggle icon={Globe} label="Product updates" desc="DokLynk news and tips" on={s.updates} onChange={set("updates")} />
+      <Toggle icon={Globe} label="Product updates" desc="Orovion news and tips" on={s.updates} onChange={set("updates")} />
       <p className="text-xs text-ink-400">Saved on this device.</p>
     </Card>
   );

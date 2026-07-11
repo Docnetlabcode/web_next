@@ -62,7 +62,7 @@ export default function ShareSheet({ open, onClose, post, demo, kind = "post", s
     if (shareUrl) {
       setLink({ webFallback: shareUrl });
     } else if (kind === "reel") {
-      setLink({ webFallback: `${typeof window !== "undefined" ? window.location.origin : "https://doklynk.app"}/reel/${postId || ""}` });
+      setLink({ webFallback: `${typeof window !== "undefined" ? window.location.origin : "https://orovion.app"}/reel/${postId || ""}` });
     } else if (postId) {
       dok.posts.shareLink(postId).then(setLink).catch(() => setLink(null));
     }
@@ -86,7 +86,7 @@ export default function ShareSheet({ open, onClose, post, demo, kind = "post", s
   const toggle = (id) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
 
   const url = link?.webFallback || link?.deepLink || "";
-  const shareText = post?.content ? `${post.content.slice(0, 120)}${post.content.length > 120 ? "…" : ""}` : "Worth a read on DokLynk";
+  const shareText = post?.content ? `${post.content.slice(0, 120)}${post.content.length > 120 ? "…" : ""}` : "Worth a read on Orovion";
 
   const copy = async () => {
     if (!url) { toast?.error("Link isn't ready yet"); return; }
@@ -112,7 +112,7 @@ export default function ShareSheet({ open, onClose, post, demo, kind = "post", s
   const nativeShare = async () => {
     if (!url) return;
     if (navigator.share) {
-      try { await navigator.share({ title: "DokLynk", text: shareText, url }); } catch { /* user dismissed */ }
+      try { await navigator.share({ title: "Orovion", text: shareText, url }); } catch { /* user dismissed */ }
     } else {
       copy();
     }

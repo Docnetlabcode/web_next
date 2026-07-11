@@ -15,15 +15,15 @@ const SECTIONS = [
     title: "Introduction",
     body: (
       <>
-        <p>DokLynk is a healthcare-focused platform designed to support professional networking, communication, collaboration, education, and knowledge sharing among healthcare professionals, medical students, and general users.</p>
-        <p>This Privacy Policy applies to all users of DokLynk, including:</p>
+        <p>Orovion is a healthcare-focused platform designed to support professional networking, communication, collaboration, education, and knowledge sharing among healthcare professionals, medical students, and general users.</p>
+        <p>This Privacy Policy applies to all users of Orovion, including:</p>
         <Bullets items={[
           "Healthcare Professionals",
           "Medical Students",
           "General Users",
           "Visitors interacting with publicly accessible portions of the Platform",
         ]} />
-        <p>The collection, use, storage, and disclosure of information through DokLynk are governed by this Privacy Policy and applicable laws.</p>
+        <p>The collection, use, storage, and disclosure of information through Orovion are governed by this Privacy Policy and applicable laws.</p>
       </>
     ),
   },
@@ -58,8 +58,8 @@ const SECTIONS = [
         <p><strong className="font-semibold text-ink-900">Verification document retention.</strong> Verification documents are collected solely for verification purposes. Following completion of the verification process, verification documents are removed from active verification workflows and are not displayed publicly. Verification status may be publicly displayed through a verified badge where applicable. Medical students and general users are not currently eligible for professional verification badges.</p>
 
         <H3>2.3 Transaction information</H3>
-        <p>When you make payments through DokLynk, we may receive transaction-related information including payment status, transaction identifiers, purchase records, subscription information, consultation-related payment information, refund information, and billing history.</p>
-        <p>DokLynk does not receive or store complete payment authentication credentials such as:</p>
+        <p>When you make payments through Orovion, we may receive transaction-related information including payment status, transaction identifiers, purchase records, subscription information, consultation-related payment information, refund information, and billing history.</p>
+        <p>Orovion does not receive or store complete payment authentication credentials such as:</p>
         <Bullets items={[
           "Debit card PINs",
           "Credit card PINs",
@@ -83,7 +83,7 @@ const SECTIONS = [
         <p><strong className="font-semibold text-ink-900">Improve platform functionality.</strong> Personalize user experiences, recommend content and connections, improve platform performance, and develop new features.</p>
         <p><strong className="font-semibold text-ink-900">Communications.</strong> Deliver OTP verification, send notifications, security alerts and account updates, and respond to support requests.</p>
         <p><strong className="font-semibold text-ink-900">Security.</strong> Detect abuse, prevent fraud, protect platform integrity, investigate suspicious activity, and enforce platform policies.</p>
-        <p><strong className="font-semibold text-ink-900">Legal compliance.</strong> Comply with legal obligations, respond to lawful requests, and protect users and DokLynk.</p>
+        <p><strong className="font-semibold text-ink-900">Legal compliance.</strong> Comply with legal obligations, respond to lawful requests, and protect users and Orovion.</p>
       </>
     ),
   },
@@ -105,7 +105,7 @@ const SECTIONS = [
     title: "Communications and networking features",
     body: (
       <>
-        <p>DokLynk provides features including direct messaging, connection requests, notifications, professional networking interactions, and calling features (where available). We process communication-related information necessary to provide these services.</p>
+        <p>Orovion provides features including direct messaging, connection requests, notifications, professional networking interactions, and calling features (where available). We process communication-related information necessary to provide these services.</p>
         <Note>The Platform's final communication security architecture, including message encryption and call encryption standards, remains under review and may be updated in future versions of this Privacy Policy.</Note>
       </>
     ),
@@ -117,7 +117,7 @@ const SECTIONS = [
     body: (
       <>
         <p>Professional verification is available only to eligible healthcare professionals. Verification may require submission of registration information, qualification details, supporting documents, and identity verification information.</p>
-        <p>Verification confirms only that information submitted through the verification process has been reviewed according to DokLynk procedures. Verification does not constitute:</p>
+        <p>Verification confirms only that information submitted through the verification process has been reviewed according to Orovion procedures. Verification does not constitute:</p>
         <Bullets items={[
           "Medical licensing",
           "Professional accreditation",
@@ -125,7 +125,7 @@ const SECTIONS = [
           "Clinical competency certification",
           "Employment verification",
         ]} />
-        <p>DokLynk reserves the right to approve, reject, suspend, revoke, or request additional information during verification reviews.</p>
+        <p>Orovion reserves the right to approve, reject, suspend, revoke, or request additional information during verification reviews.</p>
       </>
     ),
   },
@@ -135,8 +135,8 @@ const SECTIONS = [
     title: "Payments and transactions",
     body: (
       <>
-        <p>DokLynk may offer paid features, subscriptions, professional services, consultation-related transactions, or other paid offerings through the Platform. To facilitate secure payment processing, DokLynk uses trusted third-party payment service providers, including Razorpay.</p>
-        <p>When you initiate a payment through DokLynk, certain information may be shared with payment processors, including your full name, contact information, transaction amount, billing information, payment status, and transaction identifiers. Payment information is processed directly by payment providers according to their own privacy practices, security controls, and legal obligations. DokLynk does not store complete payment authentication credentials.</p>
+        <p>Orovion may offer paid features, subscriptions, professional services, consultation-related transactions, or other paid offerings through the Platform. To facilitate secure payment processing, Orovion uses trusted third-party payment service providers, including Razorpay.</p>
+        <p>When you initiate a payment through Orovion, certain information may be shared with payment processors, including your full name, contact information, transaction amount, billing information, payment status, and transaction identifiers. Payment information is processed directly by payment providers according to their own privacy practices, security controls, and legal obligations. Orovion does not store complete payment authentication credentials.</p>
         <p><strong className="font-semibold text-ink-900">Payment security.</strong> We work with payment providers that implement industry-standard security controls. Payment processing remains subject to the practices and policies of the applicable payment provider.</p>
         <p><strong className="font-semibold text-ink-900">Refunds and billing.</strong> Refunds, cancellations, subscription charges, consultation fees, service charges, and billing disputes are governed by applicable payment, billing, and refund policies.</p>
         <p><strong className="font-semibold text-ink-900">Third-party payment providers.</strong> Current payment providers may include Razorpay. Payment providers may change from time to time and updates will be reflected in this Privacy Policy where required.</p>
@@ -161,7 +161,7 @@ const SECTIONS = [
     icon: BarChart3,
     title: "Analytics and platform improvement",
     body: (
-      <p>DokLynk may use analytics services and internal monitoring tools to understand platform usage, feature adoption, user engagement, system performance, and product effectiveness. Analytics data helps improve platform quality, reliability, and user experience.</p>
+      <p>Orovion may use analytics services and internal monitoring tools to understand platform usage, feature adoption, user engagement, system performance, and product effectiveness. Analytics data helps improve platform quality, reliability, and user experience.</p>
     ),
   },
   {
@@ -172,9 +172,9 @@ const SECTIONS = [
       <>
         <p>As of the effective date of this Privacy Policy:</p>
         <Bullets items={[
-          "DokLynk does not use user content to train artificial intelligence models.",
-          "DokLynk does not use private messages for AI training.",
-          "DokLynk does not use verification documents for AI training.",
+          "Orovion does not use user content to train artificial intelligence models.",
+          "Orovion does not use private messages for AI training.",
+          "Orovion does not use verification documents for AI training.",
         ]} />
         <p>If this changes in the future, users will be notified through updates to this Privacy Policy.</p>
       </>
@@ -211,7 +211,7 @@ const SECTIONS = [
           "Public visibility is removed where applicable.",
         ]} />
         <p><strong className="font-semibold text-ink-900">Recovery period.</strong> Users may recover their account by signing in using the same credentials within six (6) months.</p>
-        <p><strong className="font-semibold text-ink-900">Permanent deletion.</strong> If no recovery occurs during the six-month recovery period, account data may be permanently deleted according to DokLynk retention procedures.</p>
+        <p><strong className="font-semibold text-ink-900">Permanent deletion.</strong> If no recovery occurs during the six-month recovery period, account data may be permanently deleted according to Orovion retention procedures.</p>
       </>
     ),
   },
@@ -240,7 +240,7 @@ const SECTIONS = [
     title: "Security",
     body: (
       <>
-        <p>DokLynk implements technical, administrative, and organizational safeguards designed to protect information. These measures may include:</p>
+        <p>Orovion implements technical, administrative, and organizational safeguards designed to protect information. These measures may include:</p>
         <Bullets items={[
           "Secure authentication",
           "Access controls",
@@ -258,7 +258,7 @@ const SECTIONS = [
     icon: Globe2,
     title: "Cross-border data transfers",
     body: (
-      <p>DokLynk primarily operates within India. However, some service providers may process information in other jurisdictions. Where such transfers occur, reasonable safeguards will be implemented consistent with applicable legal requirements.</p>
+      <p>Orovion primarily operates within India. However, some service providers may process information in other jurisdictions. Where such transfers occur, reasonable safeguards will be implemented consistent with applicable legal requirements.</p>
     ),
   },
   {
@@ -267,7 +267,7 @@ const SECTIONS = [
     title: "Healthcare content and professional responsibility",
     body: (
       <>
-        <p>DokLynk may support professional discussions, educational content, case studies, research summaries, and healthcare-related knowledge sharing.</p>
+        <p>Orovion may support professional discussions, educational content, case studies, research summaries, and healthcare-related knowledge sharing.</p>
         <Note>The Platform's final policy governing patient-related information, clinical images, medical records, case study publication standards, and de-identification requirements is currently under review. Additional requirements may be introduced through Community Guidelines and future policy updates.</Note>
         <p>Users remain solely responsible for complying with all applicable professional, ethical, confidentiality, and legal obligations.</p>
       </>
@@ -278,7 +278,7 @@ const SECTIONS = [
     icon: Search,
     title: "Search engine visibility",
     body: (
-      <Note>DokLynk is currently evaluating whether publicly available profiles and content may be indexed by search engines. This section will be updated once a final platform decision is implemented.</Note>
+      <Note>Orovion is currently evaluating whether publicly available profiles and content may be indexed by search engines. This section will be updated once a final platform decision is implemented.</Note>
     ),
   },
   {
@@ -286,7 +286,7 @@ const SECTIONS = [
     icon: Baby,
     title: "Children's privacy",
     body: (
-      <p>DokLynk is not intended for individuals under eighteen (18) years of age. We do not knowingly collect personal information from individuals under the minimum age requirement. If we become aware of such collection, appropriate steps may be taken to remove the information.</p>
+      <p>Orovion is not intended for individuals under eighteen (18) years of age. We do not knowingly collect personal information from individuals under the minimum age requirement. If we become aware of such collection, appropriate steps may be taken to remove the information.</p>
     ),
   },
   {
@@ -294,7 +294,7 @@ const SECTIONS = [
     icon: RefreshCcw,
     title: "Changes to this Privacy Policy",
     body: (
-      <p>DokLynk may update this Privacy Policy periodically. Material changes will be communicated through the Platform or other appropriate channels before becoming effective. Continued use of DokLynk after changes become effective constitutes acceptance of the updated Privacy Policy.</p>
+      <p>Orovion may update this Privacy Policy periodically. Material changes will be communicated through the Platform or other appropriate channels before becoming effective. Continued use of Orovion after changes become effective constitutes acceptance of the updated Privacy Policy.</p>
     ),
   },
   {
@@ -305,7 +305,7 @@ const SECTIONS = [
       <>
         <p>For questions, requests, or concerns regarding this Privacy Policy, please contact:</p>
         <p>
-          <strong className="font-semibold text-ink-900">DokLynk Support</strong><br />
+          <strong className="font-semibold text-ink-900">Orovion Support</strong><br />
           Email: <a href="mailto:legal@docnet.health" className="font-semibold text-brand-700 hover:underline">legal@docnet.health</a>
         </p>
       </>
@@ -317,14 +317,14 @@ export default function PrivacyPolicy() {
   return (
     <LegalShell
       eyebrow="Legal"
-      title="DokLynk Privacy Policy"
+      title="Orovion Privacy Policy"
       updated="Effective date: to be announced"
       intro={
         <>
           <p className="font-display text-lg font-extrabold text-ink-900">Your privacy matters</p>
-          <p>DokLynk is committed to protecting the privacy, confidentiality, and security of its users. As a healthcare-focused networking and professional collaboration platform, we recognize the importance of handling personal information responsibly and transparently.</p>
-          <p>This Privacy Policy explains how DokLynk collects, uses, stores, shares, and protects information when you use our website, mobile applications, and related services (collectively, the "Platform").</p>
-          <p>By accessing or using DokLynk, you acknowledge that you have read and understood this Privacy Policy.</p>
+          <p>Orovion is committed to protecting the privacy, confidentiality, and security of its users. As a healthcare-focused networking and professional collaboration platform, we recognize the importance of handling personal information responsibly and transparently.</p>
+          <p>This Privacy Policy explains how Orovion collects, uses, stores, shares, and protects information when you use our website, mobile applications, and related services (collectively, the "Platform").</p>
+          <p>By accessing or using Orovion, you acknowledge that you have read and understood this Privacy Policy.</p>
         </>
       }
       sections={SECTIONS}

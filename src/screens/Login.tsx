@@ -135,7 +135,7 @@ export default function Login() {
         </div>
 
         {/* mb lifts the footer clear above the fixed bottom-left NavArrows pill (bottom-5, ~48px tall) */}
-        <p className="relative mb-16 text-xs text-white/55">© 2026 DokLynk · A trusted network for clinicians, students &amp; patients.</p>
+        <p className="relative mb-16 text-xs text-white/55">© 2026 Orovion · A trusted network for clinicians, students &amp; patients.</p>
       </aside>
 
       {/* Form panel */}

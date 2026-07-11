@@ -154,12 +154,12 @@ function Hero() {
             A trusted network <br /> of <span className="text-gradient">clinicians.</span>
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink-500">
-            DokLynk brings cases, research, reels and real-time consults into one
+            Orovion brings cases, research, reels and real-time consults into one
             professional home for doctors, medical students and patients.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link to="/login" className="btn-primary group px-6 py-3.5 text-base">
-              Join the DokLynk <ArrowRight size={18} className="transition group-hover:translate-x-1" />
+              Join the Orovion <ArrowRight size={18} className="transition group-hover:translate-x-1" />
             </Link>
             <Link to="/app" className="btn-outline px-6 py-3.5 text-base">Explore as guest</Link>
           </div>
@@ -266,7 +266,7 @@ function Roles() {
     <section id="roles" className="container-x py-24">
       <div className="reveal mx-auto max-w-2xl text-center">
         <h2 className="font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">One network, three journeys</h2>
-        <p className="mt-4 text-lg text-ink-500">Whether you treat, study or seek care — DokLynk meets you where you are.</p>
+        <p className="mt-4 text-lg text-ink-500">Whether you treat, study or seek care — Orovion meets you where you are.</p>
       </div>
       <div className="mt-14 grid gap-6 lg:grid-cols-3">
         {ROLES.map((r, i) => (
@@ -332,7 +332,7 @@ function Showcase() {
 
 // TODO: replace these placeholders with the real founding team (names, roles, bios).
 const TEAM = [
-  { name: "Aarav Mehta", role: "Founder & CEO", bio: "Built DokLynk to give clinicians a trusted, license-verified home for clinical knowledge.", color: "from-brand-600 to-brand-800", photo: "/team/member-1.png" },
+  { name: "Aarav Mehta", role: "Founder & CEO", bio: "Built Orovion to give clinicians a trusted, license-verified home for clinical knowledge.", color: "from-brand-600 to-brand-800", photo: "/team/member-1.png" },
   { name: "Dr. Riya Sharma", role: "Co-founder & Chief Medical Officer", bio: "Practising physician shaping the clinical safety, verification and consult experience.", color: "from-amber-500 to-amber-700", photo: "/team/member-2.png" },
   { name: "Karan Patel", role: "Co-founder & CTO", bio: "Leads the real-time platform — feed, chat and consults built for speed and privacy.", color: "from-teal-600 to-emerald-700", photo: "/team/member-3.png" },
 ];
@@ -353,7 +353,7 @@ function Team() {
   return (
     <section id="team" className="container-x py-24">
       <div className="reveal mx-auto max-w-2xl text-center">
-        <span className="chip bg-brand-50 text-brand-700"><Users size={14} /> The people behind DokLynk</span>
+        <span className="chip bg-brand-50 text-brand-700"><Users size={14} /> The people behind Orovion</span>
         <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Meet the team</h2>
         <p className="mt-4 text-lg text-ink-500">Clinicians and engineers building a network the medical community can trust.</p>
       </div>
@@ -384,7 +384,7 @@ function CTA() {
           <h2 className="font-display text-4xl font-extrabold tracking-tight text-white text-balance sm:text-5xl">Join the network built on trust</h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/85">Create your verified profile in minutes. Free for students and general users.</p>
           <div className="mt-8 flex justify-center">
-            <Link to="/login" className="btn px-7 py-3.5 text-base bg-white text-brand-700 hover:bg-white/90">Join the DokLynk</Link>
+            <Link to="/login" className="btn px-7 py-3.5 text-base bg-white text-brand-700 hover:bg-white/90">Join the Orovion</Link>
           </div>
         </div>
       </div>
@@ -457,7 +457,7 @@ function Footer() {
           <div>
             <h4 className="text-sm font-bold uppercase tracking-wide text-white/90">Contact</h4>
             <ul className="mt-4 space-y-3 text-sm text-white/70">
-              <li className="flex items-center gap-2.5"><Mail size={15} className="shrink-0 text-white/50" /> hello@doklynk.com</li>
+              <li className="flex items-center gap-2.5"><Mail size={15} className="shrink-0 text-white/50" /> hello@orovion.com</li>
               <li className="flex items-center gap-2.5"><Phone size={15} className="shrink-0 text-white/50" /> +91 80 4718 2200</li>
               <li className="flex items-start gap-2.5"><MapPin size={15} className="mt-0.5 shrink-0 text-white/50" /> Bengaluru, Karnataka, India</li>
             </ul>
@@ -470,7 +470,7 @@ function Footer() {
         </div>
 
         <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 py-6 text-sm text-white/55 sm:flex-row">
-          <p>© 2026 DokLynk. All rights reserved.</p>
+          <p>© 2026 Orovion. All rights reserved.</p>
           <p>Built for clinicians, students &amp; patients.</p>
         </div>
       </div>

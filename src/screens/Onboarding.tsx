@@ -148,7 +148,7 @@ export default function Onboarding() {
           {err && <p className="mt-4 text-sm font-medium text-danger-700">{err}</p>}
 
           <button onClick={submit} disabled={busy} className="btn-primary mt-7 w-full py-3.5 text-base">
-            {busy ? "Saving…" : <>Enter DokLynk <ArrowRight size={18} /></>}
+            {busy ? "Saving…" : <>Enter Orovion <ArrowRight size={18} /></>}
           </button>
         </div>
 

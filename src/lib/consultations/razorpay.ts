@@ -69,7 +69,7 @@ export function openRazorpayCheckout(opts: CheckoutOptions): Promise<RazorpayRes
       order_id: opts.order.orderId,
       amount: opts.order.amount,
       currency: opts.order.currency || "INR",
-      name: opts.name || "DokLynk",
+      name: opts.name || "Orovion",
       description: opts.description || "Consultation",
       prefill: opts.prefill || {},
       notes: opts.notes || {},

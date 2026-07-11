@@ -1,6 +1,6 @@
-# DokLynk — Web (Next.js)
+# Orovion — Web (Next.js)
 
-Next.js 14 **App Router** port of the DokLynk web client (migrated from the Vite SPA, which still lives in `../DokLynk Frontend`). Same UI, API layer, Firebase auth, and socket.io — re-homed onto Next file-based routing in **TypeScript**.
+Next.js 14 **App Router** port of the Orovion web client (migrated from the Vite SPA, which still lives in `../DokLynk Frontend`). Same UI, API layer, Firebase auth, and socket.io — re-homed onto Next file-based routing in **TypeScript**.
 
 ## Quick start
 
@@ -26,6 +26,31 @@ npm run dev                    # http://localhost:5173
 
 - `/` , `/login`, `/onboarding` render statically; everything under `/app/*` is `force-dynamic` (auth-gated, client-driven).
 - All interactive code is marked `"use client"`.
+
+## Admin console (secret path)
+
+A standalone operator console (`src/screens/Admin.tsx`) is completely separate from the
+product app — no link points to it, and it's `robots: noindex`. To keep it from being
+guessed, it is **not** served at `/admin`:
+
+- `src/middleware.ts` serves the console only at **`/<ADMIN_PANEL_SLUG>`** (a server-only env
+  var — set it to a long random value per deployment; the real path never ships to the
+  client). The literal `/admin` path is made to **404**.
+- Local example: `http://localhost:5173/<your-slug>`. The default fallback slug is only for
+  local dev — **override `ADMIN_PANEL_SLUG` in production.**
+
+It has its own identity, **not** a Orovion user account:
+
+- **Login** with the backend's `ADMIN_USERNAME` / `ADMIN_PASSWORD` (env). The backend returns
+  an admin JWT pair that the client holds in `sessionStorage` via `ADMIN_TOKENS` (in
+  `src/lib/api.ts`) — separate from the product user session, attached as `Authorization:
+  Bearer` on `/admin/*` calls only, and auto-refreshed on 401.
+- **Sections:** Overview (dashboard metrics + live online count), Users (search, block
+  temporary/permanent, deactivate, permanent delete), Content (super-delete any
+  post/reel/thesis/case), Verifications (doctor + student KYC), Reports, Feedback, Deletions,
+  and the Audit log.
+- All calls go through `dok.admin.*` in `src/lib/api.ts`. The previous `x-admin-key` shared
+  secret has been removed.
 
 ## Notes / TODO to tighten later
 

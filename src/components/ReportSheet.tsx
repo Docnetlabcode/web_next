@@ -83,7 +83,7 @@ export default function ReportSheet({ open, onClose, postId, demo }) {
           />
           <div className="flex items-start gap-2 rounded-2xl bg-ink-900/[.04] p-3 text-xs text-ink-500">
             <ShieldCheck size={15} className="mt-0.5 shrink-0 text-brand-600" />
-            Reported posts go straight to DokLynk moderators, who can remove content network-wide if a violation is confirmed.
+            Reported posts go straight to Orovion moderators, who can remove content network-wide if a violation is confirmed.
           </div>
           <div className="flex gap-2">
             <button onClick={() => setStep("pick")} className="btn-outline flex-1 py-2.5 text-sm">Back</button>
@@ -98,7 +98,7 @@ export default function ReportSheet({ open, onClose, postId, demo }) {
         <div className="anim-pop grid place-items-center gap-3 px-5 pb-10 pt-6 text-center">
           <span className="grid h-14 w-14 place-items-center rounded-full bg-success-50 text-success-500"><ShieldCheck size={26} /></span>
           <p className="font-display text-lg font-extrabold text-ink-900">Report submitted</p>
-          <p className="max-w-xs text-sm text-ink-500">Our team will review it. Thanks for keeping DokLynk trustworthy.</p>
+          <p className="max-w-xs text-sm text-ink-500">Our team will review it. Thanks for keeping Orovion trustworthy.</p>
         </div>
       )}
     </BottomSheet>

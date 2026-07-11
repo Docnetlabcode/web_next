@@ -100,7 +100,7 @@ export default function RequestForm() {
       const order = intent.order || {};
       const result = await openRazorpayCheckout({
         order: { orderId: order.orderId, amount: order.amount ?? fees.totalPaise, currency: order.currency, keyId: order.keyId },
-        name: "DokLynk Consultation",
+        name: "Orovion Consultation",
         description: `Consultation with ${doctor.fullName}`,
         prefill: { name: user?.fullName, email: user?.email, contact: user?.phone },
       });

@@ -3,9 +3,9 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "DokLynk — A trusted network of clinicians",
+  title: "Orovion — A trusted network of clinicians",
   description:
-    "DokLynk — the professional network for clinicians, students, and patients. Cases, research, reels and real-time consults.",
+    "Orovion — the professional network for clinicians, students, and patients. Cases, research, reels and real-time consults.",
   icons: { icon: "/favicon.svg" },
 };
 

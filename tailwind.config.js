@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // DocNet/DokLynk teal ramp — primary sits at 600 (#1E7B74)
+        // Orovion (ex-DokLynk) teal ramp — primary sits at 600 (#1E7B74)
         brand: {
           50: "#eef7f6", 100: "#d6ece9", 200: "#aed8d3", 300: "#7fc1ba",
           400: "#4ea69e", 500: "#2b8e85", 600: "#1e7b74", 700: "#185f5a",

@@ -54,7 +54,7 @@ export default function RightRail() {
       </div>
 
       <p className="px-2 text-xs leading-relaxed text-ink-400">
-        DokLynk · A trusted network for clinicians, students & patients. © 2026
+        Orovion · A trusted network for clinicians, students & patients. © 2026
       </p>
     </aside>
   );

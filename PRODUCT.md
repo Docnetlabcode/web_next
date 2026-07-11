@@ -6,11 +6,11 @@ product
 
 ## Users
 
-Doctors, surgeons, nurses, therapists, pharmacists, medical students, and patients. Clinicians use DokLynk between consults and on the wards: short sessions, high signal expectations, zero tolerance for ambiguity about who authored what. Patients and students browse to learn from verified professionals.
+Doctors, surgeons, nurses, therapists, pharmacists, medical students, and patients. Clinicians use Orovion between consults and on the wards: short sessions, high signal expectations, zero tolerance for ambiguity about who authored what. Patients and students browse to learn from verified professionals.
 
 ## Product Purpose
 
-DokLynk is a healthcare social platform: a verified professional network plus a clinical content feed (posts, case studies, research papers, theses, reels), real-time chat, and consultations. The feed is the core surface; trust signals (verification, credentials, specialty) are first-class data, not decoration. Success: a clinician can scan the feed, judge source credibility instantly, engage (react, discuss, save, share), and grow their professional graph without friction.
+Orovion is a healthcare social platform: a verified professional network plus a clinical content feed (posts, case studies, research papers, theses, reels), real-time chat, and consultations. The feed is the core surface; trust signals (verification, credentials, specialty) are first-class data, not decoration. Success: a clinician can scan the feed, judge source credibility instantly, engage (react, discuss, save, share), and grow their professional graph without friction.
 
 ## Brand Personality
 

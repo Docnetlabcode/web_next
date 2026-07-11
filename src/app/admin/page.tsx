@@ -3,7 +3,7 @@ import Admin from "@/screens/Admin";
 
 // Operator-only console: never indexed, never linked from the product UI.
 export const metadata: Metadata = {
-  title: "Admin console — DokLynk",
+  title: "Admin console — Orovion",
   robots: { index: false, follow: false, nocache: true },
 };
 

@@ -218,7 +218,7 @@ export default function UserProfile() {
         onClose={() => setShare(false)}
         kind="profile"
         demo={demo}
-        shareUrl={u.uniqueUsername ? `${typeof window !== "undefined" ? window.location.origin : "https://doklynk.app"}/u/${u.uniqueUsername}` : undefined}
+        shareUrl={u.uniqueUsername ? `${typeof window !== "undefined" ? window.location.origin : "https://orovion.app"}/u/${u.uniqueUsername}` : undefined}
       />
     </div>
   );

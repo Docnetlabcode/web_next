@@ -1,4 +1,4 @@
-# DokLynk API — Module Docs
+# Orovion API — Module Docs
 
 One file per module. Each file lists its endpoints, the request/response **JSON**,
 and a short **frontend** snippet. Read this index first — it covers the setup every

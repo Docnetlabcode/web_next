@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-DokLynk — Next.js 14 **App Router** web client for a healthcare social platform, ported from a Vite SPA (which still lives in `../DokLynk Frontend`). TypeScript, Tailwind, Firebase auth, socket.io. Unit tests run on **Vitest** (`npm test`); they cover pure logic only (`src/lib/__tests__/`) — there are no component/DOM or E2E tests yet. Keep testable logic framework-free (e.g. `src/lib/relationships.ts`, `src/lib/notify.ts`) so it can be unit-tested without the React tree.
+Orovion — Next.js 14 **App Router** web client for a healthcare social platform, ported from a Vite SPA (which still lives in `../DokLynk Frontend`). TypeScript, Tailwind, Firebase auth, socket.io. Unit tests run on **Vitest** (`npm test`); they cover pure logic only (`src/lib/__tests__/`) — there are no component/DOM or E2E tests yet. Keep testable logic framework-free (e.g. `src/lib/relationships.ts`, `src/lib/notify.ts`) so it can be unit-tested without the React tree.
 
 ## Commands
 

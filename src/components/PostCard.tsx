@@ -127,7 +127,7 @@ export default function PostCard({ post, demo, onRemoved, onSavedChange }) {
   const copyLink = async () => {
     setMoreOpen(false);
     try {
-      const d = demo ? { webFallback: `https://doklynk.app/post/${post._id}` } : await dok.posts.shareLink(post._id || post.id);
+      const d = demo ? { webFallback: `https://orovion.app/post/${post._id}` } : await dok.posts.shareLink(post._id || post.id);
       await navigator.clipboard.writeText(d.webFallback || d.deepLink);
       toast?.success("Link copied — safe to share publicly");
     } catch {

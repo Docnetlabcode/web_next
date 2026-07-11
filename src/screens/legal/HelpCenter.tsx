@@ -64,7 +64,7 @@ const SECTIONS = [
     title: "Consultations & payments",
     body: (
       <Faq items={[
-        ["How do I book a consultation?", "Open a doctor's profile and tap Request consultation, pick a slot from their availability, and pay to confirm. The video call happens inside DokLynk."],
+        ["How do I book a consultation?", "Open a doctor's profile and tap Request consultation, pick a slot from their availability, and pay to confirm. The video call happens inside Orovion."],
         ["What if my consultation fails or is missed?", "If a doctor cancels or doesn't join, the payment is automatically refunded to the original method within 5–7 business days."],
         ["Where are my prescriptions?", "Prescriptions and reports shared during a consultation stay in that consultation's history — only you and your doctor can open them."],
       ]} />

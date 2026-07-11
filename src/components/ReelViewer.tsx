@@ -143,7 +143,7 @@ export default function ReelViewer({ reels, index, onClose, onRemoved, onReachEn
   const copyLink = async () => {
     setMore(false);
     try {
-      const url = `${typeof window !== "undefined" ? window.location.origin : "https://doklynk.app"}/reel/${id}`;
+      const url = `${typeof window !== "undefined" ? window.location.origin : "https://orovion.app"}/reel/${id}`;
       await navigator.clipboard.writeText(url);
       toast?.success("Link copied — safe to share publicly");
     } catch { toast?.error("Couldn't copy the link"); }

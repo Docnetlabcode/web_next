@@ -269,7 +269,7 @@ function PayPanel({ req, busy, setBusy, onChanged, user }: { req: ConsultationRe
       const o = order.order || order;
       const result = await openRazorpayCheckout({
         order: { orderId: o.orderId || o.id, amount: o.amount ?? req.totalPaise, currency: o.currency, keyId: o.keyId },
-        name: "DokLynk Consultation", description: `Consultation with ${req.doctor?.fullName || "doctor"}`,
+        name: "Orovion Consultation", description: `Consultation with ${req.doctor?.fullName || "doctor"}`,
         prefill: { name: user?.fullName, email: user?.email, contact: user?.phone },
       });
       await dok.consults.confirmPayment(req.id, {

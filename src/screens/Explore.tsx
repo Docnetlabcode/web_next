@@ -16,7 +16,7 @@ export default function Explore() {
       <div className="mx-auto w-full max-w-xl pb-24">
         <header className="mb-5">
           <h1 className="font-display text-2xl font-extrabold text-ink-900">Explore</h1>
-          <p className="text-sm text-ink-500">Trending posts & reels from across DokLynk.</p>
+          <p className="text-sm text-ink-500">Trending posts & reels from across Orovion.</p>
         </header>
         <div className="space-y-5">{(posts || []).map((p) => <PostCard key={p._id || p.id} post={p} demo={demo} />)}</div>
       </div>

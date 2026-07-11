@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 // Built-in royalty-free music options for the editor's "music" tool.
 const TRACKS = [
-  { id: "t1", title: "Calm Pulse", artist: "DokLynk Audio", dur: "0:30", mood: "Calm" },
+  { id: "t1", title: "Calm Pulse", artist: "Orovion Audio", dur: "0:30", mood: "Calm" },
   { id: "t2", title: "Clinical Focus", artist: "Ambient Lab", dur: "0:45", mood: "Focus" },
   { id: "t3", title: "Bright Rounds", artist: "Studio Health", dur: "0:28", mood: "Upbeat" },
   { id: "t4", title: "Slow Recovery", artist: "Lo-Fi Med", dur: "0:52", mood: "Chill" },

@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import { ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Reactions from the DokLynk design: Helpful, Insightful, Heart, Clinical. */
+/** Reactions from the Orovion design: Helpful, Insightful, Heart, Clinical. */
 export const REACTIONS = [
   { key: "helpful", emoji: "👍", label: "Helpful", color: "#1E7B74" },
   { key: "insightful", emoji: "🔥", label: "Insightful", color: "#E07A4D" },

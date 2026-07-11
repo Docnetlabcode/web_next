@@ -39,7 +39,7 @@ Web clients also send a CSRF token in `X-CSRF-Token` and receive a `httpOnly` re
 > **Phone auth is Firebase-driven.** The actual SMS OTP is sent by the **Firebase Phone Auth SDK on the client**, not by this API. The flow is:
 > 1. `POST /send-otp` — registers intent (sets `role` for new accounts, applies a 60s resend cooldown). Does **not** send an SMS.
 > 2. Client calls Firebase `signInWithPhoneNumber(...)` → user enters the code → Firebase returns an ID token via `user.getIdToken()`.
-> 3. `POST /verify-otp` with that `firebaseIdToken` — the server verifies it and issues DokLynk tokens.
+> 3. `POST /verify-otp` with that `firebaseIdToken` — the server verifies it and issues Orovion tokens.
 
 ### POST `/send-otp`
 ```json

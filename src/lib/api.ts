@@ -26,17 +26,53 @@ export const TOKENS = {
   },
 };
 
+// --- Admin console token transport (separate from the product user session) ---
+// The admin logs in with env credentials and gets its own JWT pair. Kept in
+// sessionStorage so the operator's session survives a tab reload but not a new
+// tab / browser restart. Attached as Authorization on /admin/* calls only.
+let adminAccess: string | null = null;
+export const ADMIN_TOKENS = {
+  get access() {
+    if (adminAccess) return adminAccess;
+    if (typeof window !== "undefined") return sessionStorage.getItem("dl_admin_at");
+    return null;
+  },
+  get refresh() {
+    return typeof window !== "undefined" ? sessionStorage.getItem("dl_admin_rt") : null;
+  },
+  set(at, rt) {
+    adminAccess = at || null;
+    if (typeof window !== "undefined") {
+      if (at) sessionStorage.setItem("dl_admin_at", at);
+      if (rt) sessionStorage.setItem("dl_admin_rt", rt);
+    }
+  },
+  clear() {
+    adminAccess = null;
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("dl_admin_at");
+      sessionStorage.removeItem("dl_admin_rt");
+    }
+  },
+};
+
 export const api = axios.create({
   baseURL: `${BASE}/api`,
   withCredentials: true, // send/receive the httpOnly refresh + csrf cookies
   headers: { "Content-Type": "application/json", "X-Client-Type": "web" },
 });
 
-// Attach the in-memory access token, plus the CSRF header on cookie-authenticated auth calls.
+// Attach the right bearer token. /admin/* calls use the admin JWT; everything
+// else uses the product user access token (+ CSRF on cookie-auth calls).
 api.interceptors.request.use((cfg) => {
+  const url = cfg.url || "";
+  if (url.startsWith("/admin")) {
+    const at = ADMIN_TOKENS.access;
+    if (at) cfg.headers.Authorization = `Bearer ${at}`;
+    return cfg;
+  }
   const t = TOKENS.access;
   if (t) cfg.headers.Authorization = `Bearer ${t}`;
-  const url = cfg.url || "";
   if (url.includes("/auth/refresh-token") || url.includes("/auth/logout")) {
     const csrf = TOKENS.csrf;
     if (csrf) cfg.headers["X-CSRF-Token"] = csrf;
@@ -59,6 +95,35 @@ api.interceptors.response.use(
   async (error) => {
     const { config, response } = error;
     const url = config?.url || "";
+
+    // Admin calls are self-contained: never fall through to the product user
+    // refresh path. Refresh the admin JWT once on 401 (except on auth endpoints,
+    // so a bad login doesn't loop), otherwise reject as-is.
+    if (url.startsWith("/admin")) {
+      const isAdminAuthCall = url.startsWith("/admin/auth/");
+      if (!isAdminAuthCall && response?.status === 401 && config && !config._retry) {
+        config._retry = true;
+        try {
+          const rt = ADMIN_TOKENS.refresh;
+          if (!rt) throw new Error("no admin refresh token");
+          const { data } = await axios.post(
+            `${BASE}/api/admin/auth/refresh`,
+            { refreshToken: rt },
+            { headers: { "Content-Type": "application/json" } }
+          );
+          const p = data?.data ?? data;
+          ADMIN_TOKENS.set(p.accessToken, p.refreshToken);
+          config.headers.Authorization = `Bearer ${p.accessToken}`;
+          return api(config);
+        } catch (e) {
+          ADMIN_TOKENS.clear();
+          if (typeof window !== "undefined")
+            window.dispatchEvent(new CustomEvent("dl:admin-expired"));
+        }
+      }
+      return Promise.reject(error);
+    }
+
     const isRefreshCall = url.includes("/auth/refresh-token");
     if (response?.status === 401 && config && !config._retry && !isRefreshCall) {
       config._retry = true;
@@ -99,7 +164,7 @@ const profileList = (base) => ({
   remove: (id) => unwrap(api.delete(`${base}/${id}`)),        // "Entry deleted."
 });
 
-/** Thin endpoint map mirroring the DokLynk backend. */
+/** Thin endpoint map mirroring the Orovion backend. */
 export const dok = {
   auth: {
     google: (b) => unwrap(api.post("/auth/google", b)),
@@ -360,26 +425,56 @@ export const dok = {
     markThreadRead: (peerId) => unwrap(api.post(`/chat/consultations/threads/${peerId}/read`, {})),
   },
   admin: {
-    // These require the x-admin-key header — set it once via setAdminKey().
-    stats: () => unwrap(api.get("/admin/verifications/stats")),
-    list: (status = "pending") => unwrap(api.get(`/admin/verifications?status=${status}&limit=50`)),
-    detail: (userId) => unwrap(api.get(`/admin/verifications/${userId}`)),
-    review: (userId, b) => unwrap(api.put(`/admin/verifications/${userId}/review`, b)),
-    approve: (userId, b) => unwrap(api.put(`/admin/verifications/${userId}/approve`, b)),
-    reject: (userId, b) => unwrap(api.put(`/admin/verifications/${userId}/reject`, b)),
-    reset: (userId, b) => unwrap(api.put(`/admin/verifications/${userId}/reset`, b)),
+    // ── Auth (env username/password → admin JWT stored in ADMIN_TOKENS) ──
+    login: async (username, password) => {
+      const { data } = await api.post("/admin/auth/login", { username, password });
+      const p = data?.data ?? data;
+      ADMIN_TOKENS.set(p.accessToken, p.refreshToken);
+      return p; // { admin, accessToken, refreshToken }
+    },
+    me: () => unwrap(api.get("/admin/auth/me")),
+    logout: async () => {
+      try { await api.post("/admin/auth/logout", {}); } catch { /* ignore */ }
+      ADMIN_TOKENS.clear();
+    },
+
+    // ── Dashboard ──
+    overview: (refresh = false) => unwrap(api.get(`/admin/overview${refresh ? "?refresh=true" : ""}`)),
+
+    // ── User administration ──
+    users: (params = {}) => unwrap(api.get("/admin/users", { params })),
+    user: (id) => unwrap(api.get(`/admin/users/${id}`)),
+    suspendUser: (id, b) => unwrap(api.post(`/admin/users/${id}/suspend`, b || {})),
+    unsuspendUser: (id) => unwrap(api.post(`/admin/users/${id}/unsuspend`, {})),
+    deactivateUser: (id, b) => unwrap(api.post(`/admin/users/${id}/deactivate`, b || {})),
+    deleteUser: (id, b) => unwrap(api.delete(`/admin/users/${id}`, { data: b || {} })),
+
+    // ── Content moderation (post|research|thesis|case_study|reel|clinical_case) ──
+    content: (params = {}) => unwrap(api.get("/admin/content", { params })),
+    deleteContent: (type, id, b) => unwrap(api.delete(`/admin/content/${type}/${id}`, { data: b || {} })),
+
+    // ── Doctor verifications ──
+    vStats: () => unwrap(api.get("/admin/verifications/stats")),
+    vList: (status = "SUBMITTED") => unwrap(api.get("/admin/verifications", { params: { status, limit: 50 } })),
+    vDetail: (userId) => unwrap(api.get(`/admin/verifications/${userId}`)),
+    vInReview: (userId) => unwrap(api.post(`/admin/verifications/${userId}/in-review`, {})),
+    vApprove: (userId) => unwrap(api.post(`/admin/verifications/${userId}/approve`, {})),
+    vReject: (userId, reason) => unwrap(api.post(`/admin/verifications/${userId}/reject`, { reason })),
+    vReset: (userId) => unwrap(api.post(`/admin/verifications/${userId}/reset`, {})),
+
+    // ── Student verifications ──
+    svList: () => unwrap(api.get("/admin/student-verifications", { params: { limit: 50 } })),
+    svApprove: (userId) => unwrap(api.post(`/admin/student-verifications/${userId}/approve`, {})),
+    svReject: (userId, reason) => unwrap(api.post(`/admin/student-verifications/${userId}/reject`, { reason })),
+
+    // ── Reported content ──
+    reports: (status = "pending") => unwrap(api.get("/admin/reports", { params: { status, limit: 50 } })),
+    dismissReport: (id) => unwrap(api.post(`/admin/reports/${id}/dismiss`, {})),
+    deletePost: (id) => unwrap(api.delete(`/admin/posts/${id}`)),
+
+    // ── Feedback / deletion queue / audit ──
+    feedback: (params = {}) => unwrap(api.get("/admin/feedback", { params })),
+    deletions: (params = {}) => unwrap(api.get("/admin/deletions", { params })),
+    audit: (params = {}) => unwrap(api.get("/admin/audit", { params })),
   },
 };
-
-/** Store the admin secret key locally; attached as x-admin-key on /admin/* calls. */
-export function setAdminKey(key) {
-  if (key) localStorage.setItem("dl_admin_key", key);
-  else localStorage.removeItem("dl_admin_key");
-}
-api.interceptors.request.use((cfg) => {
-  if (cfg.url?.startsWith("/admin")) {
-    const k = localStorage.getItem("dl_admin_key");
-    if (k) cfg.headers["x-admin-key"] = k;
-  }
-  return cfg;
-});
