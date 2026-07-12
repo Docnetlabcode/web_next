@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "@/lib/router";
-import { Send, Check, CheckCheck, Phone, Video, Search, MessageSquare } from "lucide-react";
+import { Send, Check, CheckCheck, Phone, Video, Search, MessageSquare, ArrowLeft } from "lucide-react";
 import { Avatar, Verified } from "@/components/ui/Primitives";
 import { RowsSkeleton, ChatThreadSkeleton } from "@/components/ui/Skeletons";
 import { useAppearance } from "@/context/AppearanceContext";
@@ -30,6 +30,10 @@ export default function Messages() {
 
   const [convos, setConvos] = useState(null); // null = loading
   const [active, setActive] = useState(null);
+  // Below md the list and the thread share the screen (master–detail): tapping
+  // a conversation slides to the thread, the header back button returns. On
+  // md+ both panes are always visible and this flag has no effect.
+  const [mobileThread, setMobileThread] = useState(false);
   const [msgs, setMsgs] = useState(null);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -83,6 +87,7 @@ export default function Messages() {
     if (!convos) return;
     const wanted = sp?.get("c");
     const match = wanted ? convos.find((c) => String(cidOf(c)) === String(wanted)) : null;
+    if (match) setMobileThread(true); // deep link opens the thread on small screens too
     setActive((a) => a || match || convos[0] || null);
   }, [convos, sp]);
 
@@ -275,14 +280,17 @@ export default function Messages() {
   });
 
   return (
-    <div className="grid h-[calc(100vh-9rem)] grid-cols-1 overflow-hidden rounded-2xl border border-ink-900/[.06] bg-surface shadow-card md:grid-cols-[320px_1fr]">
-      {/* List */}
-      <div className="border-r border-ink-900/[.06]">
+    // Height: 9rem = topbar (4rem) + page padding + breathing room. Below lg
+    // the fixed bottom nav (~3.5rem) also eats viewport, or the composer ends
+    // up underneath it — hence the smaller mobile height.
+    <div className="grid h-[calc(100vh-12.5rem)] grid-cols-1 grid-rows-1 overflow-hidden rounded-2xl border border-ink-900/[.06] bg-surface shadow-card md:grid-cols-[320px_1fr] lg:h-[calc(100vh-9rem)]">
+      {/* List — on small screens hidden while a thread is open */}
+      <div className={cn("min-h-0 flex-col border-r border-ink-900/[.06]", mobileThread && active ? "hidden md:flex" : "flex")}>
         <div className="border-b border-ink-900/[.06] p-4">
           <h2 className="font-display text-lg font-extrabold">Messages</h2>
           <div className="relative mt-3"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search" className="w-full rounded-full bg-ink-900/[.04] py-2 pl-9 pr-3 text-sm outline-none" /></div>
         </div>
-        <div className="overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {convos === null ? (
             <RowsSkeleton count={5} className="p-1.5" />
           ) : shown.length === 0 ? (
@@ -291,7 +299,7 @@ export default function Messages() {
             const p = peer(c);
             const lm = c.lastMessage || {};
             return (
-              <button key={cidOf(c)} onClick={() => setActive(c)}
+              <button key={cidOf(c)} onClick={() => { setActive(c); setMobileThread(true); }}
                 className={cn("flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-ink-900/[.03]", cidOf(active) === cidOf(c) && "bg-brand-50")}>
                 <div className="relative"><Avatar user={p} size={46} />{c.isOnline && <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-surface bg-emerald-500" />}</div>
                 <div className="min-w-0 flex-1">
@@ -308,29 +316,31 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* Thread */}
-      <div className="hidden flex-col bg-ink-50 md:flex">
+      {/* Thread — full-screen on small screens once a conversation is opened */}
+      <div className={cn("min-h-0 flex-col bg-ink-50", mobileThread && active ? "flex" : "hidden md:flex")}>
         {!active ? (
           <div className="grid flex-1 place-items-center text-center text-ink-400">
             <div><MessageSquare size={40} className="mx-auto mb-2 text-ink-300" /><p className="text-sm">Select a conversation to start messaging.</p></div>
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-3 border-b border-ink-900/[.06] bg-surface px-5 py-3">
+            <div className="flex items-center gap-3 border-b border-ink-900/[.06] bg-surface px-3 py-3 md:px-5">
+              <button onClick={() => setMobileThread(false)} aria-label="Back to conversations"
+                className="-mr-1 shrink-0 rounded-full p-1.5 text-ink-500 hover:bg-ink-900/5 md:hidden"><ArrowLeft size={20} /></button>
               <Avatar user={peer(active)} size={40} />
-              <div className="flex-1">
-                <p className="flex items-center gap-1 font-semibold">{peer(active).fullName} {peer(active).isVerified && <Verified size={12} />}</p>
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-1 truncate font-semibold">{peer(active).fullName} {peer(active).isVerified && <Verified size={12} />}</p>
                 <p className="text-xs text-emerald-600">{peerTyping ? "typing…" : active.isOnline ? "Online" : "last seen recently"}</p>
               </div>
               <button
                 onClick={() => { const p = peer(active); startCall(p.id || p._id, p.fullName || "User", p.profilePhoto || p.avatar || null, "audio"); }}
-                className="rounded-full p-2 text-ink-500 hover:bg-ink-900/5" title="Audio call"><Phone size={18} /></button>
+                className="shrink-0 rounded-full p-2 text-ink-500 hover:bg-ink-900/5" title="Audio call"><Phone size={18} /></button>
               <button
                 onClick={() => { const p = peer(active); startCall(p.id || p._id, p.fullName || "User", p.profilePhoto || p.avatar || null, "video"); }}
-                className="rounded-full p-2 text-brand-600 hover:bg-brand-50" title="Video call"><Video size={18} /></button>
+                className="shrink-0 rounded-full p-2 text-brand-600 hover:bg-brand-50" title="Video call"><Video size={18} /></button>
             </div>
 
-            <div className={cn("flex-1 space-y-3 overflow-y-auto p-5", wallpaper)}>
+            <div className={cn("min-h-0 flex-1 space-y-3 overflow-y-auto p-4 md:p-5", wallpaper)}>
               {msgs === null ? (
                 <ChatThreadSkeleton />
               ) : msgs.length === 0 ? (

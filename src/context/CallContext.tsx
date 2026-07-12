@@ -37,6 +37,10 @@ interface CallCtx {
   callStatus: string;
   debug: CallDebug;
   myId: string | undefined;
+  /** WhatsApp-style floating call: the call surface collapses to a draggable
+   *  tile so the rest of the app is usable mid-call. */
+  minimized: boolean;
+  setMinimized: (v: boolean) => void;
   startCall: (peerId: string, peerName: string, peerPhoto: string | null, type: CallType) => void;
   acceptCall: () => void;
   rejectCall: () => void;
@@ -62,6 +66,11 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const [phase, setPhase] = useState<CallPhase>("idle");
   const [call, setCall] = useState<ActiveCall | null>(null);
+  const [minimized, setMinimized] = useState(false);
+  // A new/ended call always opens full-screen — never inherit a stale tile.
+  useEffect(() => {
+    if (phase !== "connected" && phase !== "connecting") setMinimized(false);
+  }, [phase]);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [micOn, setMicOn] = useState(true);
@@ -302,7 +311,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   return (
     <Ctx.Provider value={{
       phase, call, localStream, remoteStream, micOn, camOn, logs, socketConnected,
-      connectionState, callStatus, debug, myId,
+      connectionState, callStatus, debug, myId, minimized, setMinimized,
       startCall, acceptCall, rejectCall, endCall, toggleMic, toggleCam, switchCamera,
     }}>
       {children}
