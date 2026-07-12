@@ -103,8 +103,8 @@ function AddAccountSheet({ onClose, onAdded }: { onClose: () => void; onAdded: (
 
   return (
     <div className="fixed inset-0 z-[80] grid place-items-end sm:place-items-center" role="dialog" aria-modal>
-      <div className="absolute inset-0 bg-ink-900/40" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md animate-[fade-up_.3s_ease-out_both] rounded-t-3xl bg-white p-5 shadow-card sm:rounded-3xl">
+      <div className="absolute inset-0 bg-ink-950/40" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-md animate-[fade-up_.3s_ease-out_both] rounded-t-3xl bg-surface p-5 shadow-card sm:rounded-3xl">
         <div className="mb-3 flex items-center justify-between"><p className="text-base font-bold text-ink-900">Add bank account</p><button onClick={onClose} className="text-ink-400"><X size={18} /></button></div>
         <Input label="Account holder name" value={f.accountHolderName} onChange={(v) => up({ accountHolderName: v })} />
         <Input label="Bank name" value={f.bankName} onChange={(v) => up({ bankName: v })} />
@@ -112,7 +112,7 @@ function AddAccountSheet({ onClose, onAdded }: { onClose: () => void; onAdded: (
         <Input label="IFSC code" value={f.ifscCode} onChange={(v) => up({ ifscCode: v.toUpperCase() })} />
         <label className="mb-2 block">
           <span className="mb-1 block text-xs font-semibold text-ink-600">Account type</span>
-          <select value={f.accountType} onChange={(e) => up({ accountType: e.target.value })} className="w-full rounded-xl border border-ink-900/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-400">
+          <select value={f.accountType} onChange={(e) => up({ accountType: e.target.value })} className="w-full rounded-xl border border-ink-900/10 bg-surface px-3 py-2.5 text-sm outline-none focus:border-brand-400">
             <option value="SAVINGS">Savings</option><option value="CURRENT">Current</option>
           </select>
         </label>
@@ -130,7 +130,7 @@ function Input({ label, value, onChange }: { label: string; value: string; onCha
   return (
     <label className="mb-2 block">
       <span className="mb-1 block text-xs font-semibold text-ink-600">{label}</span>
-      <input value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-xl border border-ink-900/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
+      <input value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-xl border border-ink-900/10 bg-surface px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
     </label>
   );
 }

@@ -12,7 +12,7 @@ export default function PullToRefreshIndicator({ pull, refreshing, threshold = 7
       className="pointer-events-none fixed inset-x-0 top-16 z-40 flex justify-center"
       style={{ transform: `translateY(${y}px)`, opacity: refreshing ? 1 : progress }}
     >
-      <span className="grid h-9 w-9 place-items-center rounded-full bg-white text-brand-600 shadow-card ring-1 ring-ink-900/[.06]">
+      <span className="grid h-9 w-9 place-items-center rounded-full bg-surface text-brand-600 shadow-card ring-1 ring-ink-900/[.06]">
         <RefreshCw
           size={18}
           className={cn(refreshing && "animate-spin")}

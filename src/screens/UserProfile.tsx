@@ -123,11 +123,11 @@ export default function UserProfile() {
           {/* relative z-10 lifts the DP + action above the absolutely-positioned cover image */}
           <div className="relative z-10 -mt-14">
             {u.profilePhoto ? (
-              <button type="button" onClick={() => setViewer(u.profilePhoto)} aria-label="View profile photo" className="press inline-block cursor-zoom-in rounded-full ring-4 ring-white">
+              <button type="button" onClick={() => setViewer(u.profilePhoto)} aria-label="View profile photo" className="press inline-block cursor-zoom-in rounded-full ring-4 ring-surface">
                 <Avatar user={u} size={104} />
               </button>
             ) : (
-              <span className="inline-block rounded-full ring-4 ring-white"><Avatar user={u} size={104} /></span>
+              <span className="inline-block rounded-full ring-4 ring-surface"><Avatar user={u} size={104} /></span>
             )}
           </div>
 
@@ -262,7 +262,7 @@ function ProfileMenu({ user, demo, onChanged }) {
         <MoreHorizontal size={18} />
       </button>
       {open && (
-        <div role="menu" className="anim-pop absolute right-0 top-11 z-30 w-48 overflow-hidden rounded-2xl border border-ink-900/[.06] bg-white p-1.5 shadow-card">
+        <div role="menu" className="anim-pop absolute right-0 top-11 z-30 w-48 overflow-hidden rounded-2xl border border-ink-900/[.06] bg-surface p-1.5 shadow-card">
           {user.isFollowing && (
             <button role="menuitem" onClick={unfollow} className="flex w-full items-center gap-3 rounded-xl p-2.5 text-left text-sm font-medium text-ink-700 hover:bg-ink-900/[.04]">
               <UserMinus size={17} className="text-ink-400" /> Unfollow
@@ -535,7 +535,7 @@ function ProfileSkeleton() {
       <div className="card overflow-hidden">
         <Skeleton className="h-40 w-full rounded-none" />
         <div className="space-y-3 px-5 pb-5">
-          <div className="-mt-14"><Skeleton className="h-[104px] w-[104px] rounded-full ring-4 ring-white" /></div>
+          <div className="-mt-14"><Skeleton className="h-[104px] w-[104px] rounded-full ring-4 ring-surface" /></div>
           <Skeleton className="h-5 w-48" />
           <Skeleton className="h-4 w-64" />
           <Skeleton className="h-4 w-40" />

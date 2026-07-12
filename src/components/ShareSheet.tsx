@@ -159,10 +159,10 @@ export default function ShareSheet({ open, onClose, post, demo, kind = "post", s
               const isPicked = picked.includes(id);
               return (
                 <button key={id} onClick={() => toggle(id)} aria-pressed={isPicked} className="press relative flex w-16 shrink-0 flex-col items-center gap-1.5">
-                  <span className={cn("relative rounded-full ring-2 ring-offset-2 transition", isPicked ? "ring-brand-500" : "ring-transparent")}>
+                  <span className={cn("relative rounded-full ring-2 ring-offset-2 ring-offset-surface transition", isPicked ? "ring-brand-500" : "ring-transparent")}>
                     <Avatar user={u} size={56} />
                     {isPicked && (
-                      <span className="anim-pop absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full border-2 border-white bg-brand-600 text-white"><Check size={13} /></span>
+                      <span className="anim-pop absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full border-2 border-surface bg-brand-600 text-white"><Check size={13} /></span>
                     )}
                   </span>
                   <span className="flex max-w-full items-center gap-0.5 text-xs font-medium">

@@ -28,7 +28,7 @@ export default function PostMediaViewer({ media = [], index = 0, onClose }) {
   const isDoc = item.type === "pdf" || item.type === "document";
 
   return createPortal(
-    <div className="fixed inset-0 z-[96] flex flex-col bg-ink-900/95 backdrop-blur animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-[96] flex flex-col bg-ink-950/95 backdrop-blur animate-fade-in" onClick={onClose}>
       <div className="flex items-center justify-between p-4 text-white">
         <span className="text-sm tabular-nums text-white/70">{list.length > 1 ? `${i + 1} / ${list.length}` : ""}</span>
         <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="press rounded-full p-2 hover:bg-white/10"><X size={24} /></button>

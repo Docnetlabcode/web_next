@@ -74,7 +74,7 @@ function Text({ value, onChange, placeholder }) {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded-xl border border-ink-900/10 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100 placeholder:text-ink-400"
+      className="w-full rounded-xl border border-ink-900/10 bg-surface px-3 py-2.5 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100 placeholder:text-ink-400"
     />
   );
 }
@@ -83,7 +83,7 @@ function Chip({ active, onClick, children }) {
     <button
       onClick={onClick}
       className={cn("press shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition",
-        active ? "bg-brand-600 text-white shadow-glow" : "bg-white text-ink-600 ring-1 ring-ink-900/[.08] hover:bg-brand-50")}
+        active ? "bg-brand-600 text-white shadow-glow" : "bg-surface text-ink-600 ring-1 ring-ink-900/[.08] hover:bg-brand-50")}
     >
       {children}
     </button>

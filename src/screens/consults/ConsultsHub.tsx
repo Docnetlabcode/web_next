@@ -34,14 +34,14 @@ export default function ConsultsHub() {
         subtitle={isDoctor ? "Manage requests, history and settings" : "Find a doctor and book a consultation"}
         right={isDoctor ? (
           <div className="flex items-center gap-2">
-            <button onClick={() => nav("/app/consults/payout")} className="press grid h-10 w-10 place-items-center rounded-full border border-ink-900/[.08] bg-white text-ink-700 transition hover:border-brand-300 hover:text-brand-700" aria-label="Payout settings"><Wallet size={18} /></button>
-            <button onClick={() => nav("/app/consults/settings")} className="press grid h-10 w-10 place-items-center rounded-full border border-ink-900/[.08] bg-white text-ink-700 transition hover:border-brand-300 hover:text-brand-700" aria-label="Consultation settings"><Settings size={18} /></button>
+            <button onClick={() => nav("/app/consults/payout")} className="press grid h-10 w-10 place-items-center rounded-full border border-ink-900/[.08] bg-surface text-ink-700 transition hover:border-brand-300 hover:text-brand-700" aria-label="Payout settings"><Wallet size={18} /></button>
+            <button onClick={() => nav("/app/consults/settings")} className="press grid h-10 w-10 place-items-center rounded-full border border-ink-900/[.08] bg-surface text-ink-700 transition hover:border-brand-300 hover:text-brand-700" aria-label="Consultation settings"><Settings size={18} /></button>
           </div>
         ) : undefined}
       />
 
       {/* Tabs */}
-      <div className="mb-5 flex gap-1 rounded-2xl border border-ink-900/[.06] bg-white p-1">
+      <div className="mb-5 flex gap-1 rounded-2xl border border-ink-900/[.06] bg-surface p-1">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -92,7 +92,7 @@ function DiscoverTab() {
       <div className="relative mb-4">
         <Search size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search doctors by name or specialty…"
-          className="w-full rounded-full border border-ink-900/10 bg-white py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
+          className="w-full rounded-full border border-ink-900/10 bg-surface py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
       </div>
       {doctors === null ? (
         <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>
@@ -103,7 +103,7 @@ function DiscoverTab() {
           {filtered.map((d) => <DoctorCard key={d.id} doctor={d} />)}
           {cursor && !q && (
             <button onClick={() => { setLoadingMore(true); load(false).finally(() => setLoadingMore(false)); }}
-              className="press mx-auto mt-2 flex items-center gap-2 rounded-full border border-ink-900/10 bg-white px-5 py-2.5 text-sm font-semibold text-ink-700 hover:border-brand-300">
+              className="press mx-auto mt-2 flex items-center gap-2 rounded-full border border-ink-900/10 bg-surface px-5 py-2.5 text-sm font-semibold text-ink-700 hover:border-brand-300">
               {loadingMore ? <Loader2 size={15} className="animate-spin" /> : null} Load more
             </button>
           )}

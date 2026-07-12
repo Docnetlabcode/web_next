@@ -372,10 +372,10 @@ const Composer = forwardRef(function Composer({ user, demo, replyTo, onCancelRep
   };
 
   return (
-    <div className="relative border-t border-ink-900/[.06] bg-white p-3">
+    <div className="relative border-t border-ink-900/[.06] bg-surface p-3">
       {/* mention suggestions */}
       {mentions?.length > 0 && (
-        <div className="anim-pop absolute bottom-full left-3 right-3 z-10 mb-1 overflow-hidden rounded-2xl border border-ink-900/[.08] bg-white shadow-card">
+        <div className="anim-pop absolute bottom-full left-3 right-3 z-10 mb-1 overflow-hidden rounded-2xl border border-ink-900/[.08] bg-surface shadow-card">
           {mentions.map((u) => (
             <button key={uid(u)} onClick={() => pickMention(u)} className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition hover:bg-brand-50">
               <Avatar user={u} size={30} />

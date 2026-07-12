@@ -107,8 +107,8 @@ export default function EditProfile() {
         <div className="px-5 pb-4">
           <div className="-mt-10 flex items-end gap-3">
             <div className="relative">
-              <Avatar user={user} size={84} className="ring-4 ring-white" />
-              <button onClick={() => setUploader("avatar")} className="press absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-white ring-2 ring-white hover:bg-brand-700"><Camera size={14} /></button>
+              <Avatar user={user} size={84} className="ring-4 ring-surface" />
+              <button onClick={() => setUploader("avatar")} className="press absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-white ring-2 ring-surface hover:bg-brand-700"><Camera size={14} /></button>
             </div>
             <div className="pb-1">
               <p className="font-display text-lg font-bold text-ink-900">{user.fullName || "Your name"}</p>

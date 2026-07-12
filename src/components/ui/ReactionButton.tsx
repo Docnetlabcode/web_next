@@ -36,14 +36,14 @@ export default function ReactionButton({ current, count, onReact }) {
   return (
     <div className="relative" onMouseEnter={show} onMouseLeave={hide}>
       {open && (
-        <div className="absolute -top-14 left-0 z-20 flex items-center gap-1 rounded-full border border-ink-900/[.06] bg-white px-2 py-1.5 shadow-card anim-pop"
+        <div className="absolute -top-14 left-0 z-20 flex items-center gap-1 rounded-full border border-ink-900/[.06] bg-surface px-2 py-1.5 shadow-card anim-pop"
              onMouseEnter={show} onMouseLeave={hide}>
           {REACTIONS.map((r, i) => (
             <button key={r.key} onClick={() => pick(r.key)} title={r.label}
               style={{ animationDelay: `${i * 35}ms` }}
               className="press group/r relative grid h-9 w-9 place-items-center rounded-full text-xl transition hover:-translate-y-1 hover:scale-125 anim-pop">
               {r.emoji}
-              <span className="pointer-events-none absolute -top-7 whitespace-nowrap rounded-md bg-ink-900 px-2 py-0.5 text-[10px] font-semibold text-white opacity-0 transition group-hover/r:opacity-100">{r.label}</span>
+              <span className="pointer-events-none absolute -top-7 whitespace-nowrap rounded-md bg-ink-900 px-2 py-0.5 text-[10px] font-semibold text-ink-0 opacity-0 transition group-hover/r:opacity-100">{r.label}</span>
             </button>
           ))}
         </div>

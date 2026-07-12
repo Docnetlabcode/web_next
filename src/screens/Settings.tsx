@@ -3,10 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import {
   User, Bell, Lock, Smartphone, Palette, ChevronRight,
   LogOut, Globe, Eye, Trash2, ArrowUpRight, ShieldOff, Loader2, Check, X,
+  Sun, Moon, Monitor,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Avatar, Spinner } from "@/components/ui/Primitives";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { useNavigate } from "@/lib/router";
 import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -214,7 +216,7 @@ function UsernameCard() {
   return (
     <Card title="Username">
       <span className="block text-sm font-semibold text-ink-700">Unique username</span>
-      <div className="flex items-center rounded-xl border border-ink-900/[.12] bg-white px-3 transition focus-within:border-brand-400 focus-within:ring-4 focus-within:ring-brand-100">
+      <div className="flex items-center rounded-xl border border-ink-900/[.12] bg-surface px-3 transition focus-within:border-brand-400 focus-within:ring-4 focus-within:ring-brand-100">
         <span className="text-sm font-semibold text-ink-400">@</span>
         <input value={value} onChange={(e) => setValue(norm(e.target.value))} placeholder="username" className="flex-1 bg-transparent px-1.5 py-3 text-sm outline-none" />
         {checking && <Loader2 size={15} className="animate-spin text-ink-400" />}
@@ -352,13 +354,65 @@ function Notifications() {
     </Card>
   );
 }
-function Appearance() {
-  const [s, setS] = useState({ reduceMotion: false, compact: false });
-  const set = (k) => (v) => setS((x) => ({ ...x, [k]: v }));
+const THEME_OPTIONS = [
+  { value: "light", label: "Light", icon: Sun, desc: "Bright, clinical white" },
+  { value: "dark", label: "Dark", icon: Moon, desc: "Dimmed for low light" },
+  { value: "system", label: "System", icon: Monitor, desc: "Follows your device" },
+] as const;
+
+/** Miniature UI mock rendered in fixed colors — a preview must not flip with the theme. */
+function ThemeSwatch({ mode }: { mode: "light" | "dark" | "system" }) {
+  const Pane = ({ dark }: { dark: boolean }) => (
+    <div className={cn("flex h-full flex-1 flex-col gap-1 p-2", dark ? "bg-[#101617]" : "bg-[#f4f6f6]")}>
+      <div className="flex items-center gap-1">
+        <span className={cn("h-2 w-2 rounded-full", dark ? "bg-[#4fb3a9]" : "bg-[#1e7b74]")} />
+        <span className={cn("h-1 w-7 rounded-full", dark ? "bg-[#3c4a4d]" : "bg-[#d7dcdd]")} />
+      </div>
+      <div className={cn("flex-1 rounded-md border p-1.5", dark ? "border-white/[.06] bg-[#161e20]" : "border-black/[.06] bg-white")}>
+        <span className={cn("block h-1 w-8 rounded-full", dark ? "bg-[#9fb0b2]" : "bg-[#8a9295]")} />
+        <span className={cn("mt-1 block h-1 w-5 rounded-full", dark ? "bg-[#263033]" : "bg-[#eaedee]")} />
+      </div>
+    </div>
+  );
   return (
-    <Card title="Display">
-      <Toggle icon={Palette} label="Reduce motion" desc="Minimise animations" on={s.reduceMotion} onChange={set("reduceMotion")} />
-      <Toggle icon={Eye} label="Compact feed" desc="Tighter spacing in lists" on={s.compact} onChange={set("compact")} />
+    <div aria-hidden className="flex h-16 w-full overflow-hidden rounded-lg border border-ink-900/10">
+      {mode !== "dark" && <Pane dark={false} />}
+      {mode !== "light" && <Pane dark />}
+    </div>
+  );
+}
+
+function Appearance() {
+  const { theme, setTheme } = useTheme();
+  return (
+    <Card title="Theme">
+      <div role="radiogroup" aria-label="Theme" className="grid gap-3 sm:grid-cols-3">
+        {THEME_OPTIONS.map((o) => {
+          const active = theme === o.value;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setTheme(o.value)}
+              className={cn(
+                "rounded-xl border-2 p-2 pb-2.5 text-left transition",
+                active ? "border-brand-600" : "border-ink-900/10 hover:border-brand-300"
+              )}
+            >
+              <ThemeSwatch mode={o.value} />
+              <span className="mt-2 flex items-center gap-1.5 px-0.5">
+                <o.icon size={14} className={active ? "text-brand-600" : "text-ink-400"} />
+                <span className="flex-1 text-sm font-semibold text-ink-900">{o.label}</span>
+                {active && <Check size={14} className="anim-pop text-brand-600" />}
+              </span>
+              <span className="block px-0.5 text-xs text-ink-500">{o.desc}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-xs text-ink-400">Applies instantly on this device. System follows your OS light/dark setting.</p>
     </Card>
   );
 }

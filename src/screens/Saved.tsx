@@ -65,7 +65,7 @@ export default function Saved() {
             onClick={() => setTab(t.key)}
             className={cn(
               "press whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold transition",
-              tab === t.key ? "bg-brand-600 text-white shadow-glow" : "bg-white text-ink-600 ring-1 ring-ink-900/[.06] hover:bg-brand-50"
+              tab === t.key ? "bg-brand-600 text-white shadow-glow" : "bg-surface text-ink-600 ring-1 ring-ink-900/[.06] hover:bg-brand-50"
             )}
           >
             {t.label}
@@ -89,11 +89,11 @@ export default function Saved() {
           {reels.length > 0 && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {reels.map((r) => (
-                <button key={r._id || r.id} onClick={() => nav("/app/reels")} className="press group relative aspect-[3/4] overflow-hidden rounded-2xl bg-ink-900">
+                <button key={r._id || r.id} onClick={() => nav("/app/reels")} className="press group relative aspect-[3/4] overflow-hidden rounded-2xl bg-ink-950">
                   <img src={reelPoster(r)} alt="" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
-                  <span className="absolute inset-0 bg-gradient-to-t from-ink-900/60 via-transparent" />
+                  <span className="absolute inset-0 bg-gradient-to-t from-ink-950/60 via-transparent" />
                   <span className="absolute bottom-2 left-2 right-2 truncate text-left text-xs font-semibold text-white">{r.caption}</span>
-                  <span className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-ink-900/40 text-white backdrop-blur"><Play size={13} /></span>
+                  <span className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-ink-950/40 text-white backdrop-blur"><Play size={13} /></span>
                 </button>
               ))}
             </div>

@@ -75,14 +75,14 @@ function AdminGate({ onIn }: { onIn: (a: any) => void }) {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-ink-900 px-4 py-10">
+    <div className="grid min-h-screen place-items-center bg-ink-950 px-4 py-10">
       <NavArrows variant="floating" className="" />
       <div className="w-full max-w-sm">
         <div className="mb-6 flex items-center justify-center gap-2">
           <Logo withText={false} size={28} light />
           <span className="font-display text-lg font-extrabold text-white">Orovion <span className="text-brand-300">Admin</span></span>
         </div>
-        <form onSubmit={submit} className="anim-pop rounded-3xl bg-white p-6 shadow-2xl">
+        <form onSubmit={submit} className="anim-pop rounded-3xl bg-surface p-6 shadow-2xl">
           <div className="mb-5 flex items-center gap-3">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-600 text-white shadow-glow"><ShieldCheck size={22} /></span>
             <div>
@@ -142,7 +142,7 @@ function AdminConsole({ admin, onSignOut }: { admin: any; onSignOut: () => void 
           <div className="ml-auto text-right">
             <p className="text-sm font-semibold leading-tight text-ink-900">{admin?.username}</p>
           </div>
-          <button onClick={onSignOut} title="Sign out" className="press ml-2 flex items-center gap-1.5 rounded-full border border-ink-900/[.1] bg-white px-3 py-1.5 text-xs font-bold text-ink-600 transition hover:border-danger-500/40 hover:text-danger-500">
+          <button onClick={onSignOut} title="Sign out" className="press ml-2 flex items-center gap-1.5 rounded-full border border-ink-900/[.1] bg-surface px-3 py-1.5 text-xs font-bold text-ink-600 transition hover:border-danger-500/40 hover:text-danger-500">
             <LogOut size={13} /> Sign out
           </button>
         </div>
@@ -155,7 +155,7 @@ function AdminConsole({ admin, onSignOut }: { admin: any; onSignOut: () => void 
             {NAV.map((n) => (
               <button key={n.key} onClick={() => setTab(n.key)}
                 className={cn("flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition",
-                  tab === n.key ? "bg-brand-600 text-white shadow-glow" : "text-ink-600 hover:bg-white")}>
+                  tab === n.key ? "bg-brand-600 text-white shadow-glow" : "text-ink-600 hover:bg-surface")}>
                 <n.icon size={17} /> {n.label}
               </button>
             ))}
@@ -168,7 +168,7 @@ function AdminConsole({ admin, onSignOut }: { admin: any; onSignOut: () => void 
             {NAV.map((n) => (
               <button key={n.key} onClick={() => setTab(n.key)}
                 className={cn("flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold transition",
-                  tab === n.key ? "bg-brand-600 text-white" : "bg-white text-ink-600")}>
+                  tab === n.key ? "bg-brand-600 text-white" : "bg-surface text-ink-600")}>
                 <n.icon size={14} /> {n.label}
               </button>
             ))}
@@ -381,7 +381,7 @@ function UsersSection() {
           <button key={u.id} onClick={() => setSel(u)} className="flex w-full items-center gap-3 p-3.5 text-left transition hover:bg-ink-900/[.02]">
             <div className="relative">
               <Avatar user={u} size={42} />
-              {u.isOnline && <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" title="Online" />}
+              {u.isOnline && <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-surface bg-emerald-500" title="Online" />}
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold text-ink-900">{u.fullName || "—"} {u.isVerified && <BadgeCheck size={13} className="inline text-brand-500" />}</p>
@@ -427,7 +427,7 @@ function UserDrawer({ userRow, onClose, onChanged }: any) {
   return (
     <Drawer onClose={onClose} title="User details">
       <div className="flex items-center gap-3">
-        <div className="relative"><Avatar user={u} size={56} />{u.isOnline && <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />}</div>
+        <div className="relative"><Avatar user={u} size={56} />{u.isOnline && <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-500" />}</div>
         <div className="min-w-0">
           <p className="truncate font-bold text-ink-900">{u.fullName || "—"} {u.isVerified && <BadgeCheck size={14} className="inline text-brand-500" />}</p>
           <p className="truncate text-xs text-ink-500">{u.email || u.phoneNumber} · @{u.uniqueUsername || "—"}</p>
@@ -489,7 +489,7 @@ function UserDrawer({ userRow, onClose, onChanged }: any) {
             : <button onClick={() => { setReason(""); setHours(""); setMode("suspend"); }} className="btn col-span-2 bg-rose-50 py-2.5 text-sm text-rose-600 hover:bg-rose-100"><Ban size={16} /> Block user</button>}
           {u.accountStatus !== "DEACTIVATED" && u.accountStatus !== "SUSPENDED" &&
             <button disabled={busy} onClick={() => act(() => dok.admin.deactivateUser(u.id, {}))} className="btn-outline col-span-2 py-2.5 text-sm"><UserX size={16} /> Deactivate (reversible)</button>}
-          <button onClick={() => { setReason(""); setConfirmText(""); setMode("delete"); }} className="btn col-span-2 border border-rose-300 bg-white py-2.5 text-sm text-rose-700 hover:bg-rose-50"><Trash2 size={16} /> Permanently delete</button>
+          <button onClick={() => { setReason(""); setConfirmText(""); setMode("delete"); }} className="btn col-span-2 border border-rose-300 bg-surface py-2.5 text-sm text-rose-700 hover:bg-rose-50"><Trash2 size={16} /> Permanently delete</button>
         </div>
       )}
     </Drawer>
@@ -540,7 +540,7 @@ function ContentSection() {
       <SectionHead title="Content" subtitle="Remove any post, reel, thesis, case study, or clinical case." />
       <div className="mb-4 flex gap-2 overflow-x-auto">
         {CONTENT_TABS.map((t) => (
-          <button key={t.key} onClick={() => setType(t.key)} className={cn("flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold transition", type === t.key ? "bg-brand-600 text-white shadow-glow" : "bg-white text-ink-600 hover:bg-brand-50")}>
+          <button key={t.key} onClick={() => setType(t.key)} className={cn("flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold transition", type === t.key ? "bg-brand-600 text-white shadow-glow" : "bg-surface text-ink-600 hover:bg-brand-50")}>
             <t.icon size={14} /> {t.label}
           </button>
         ))}
@@ -584,8 +584,8 @@ function VerificationsSection() {
     <div>
       <SectionHead title="Verifications" subtitle="Review health-professional and student KYC submissions." />
       <div className="mb-4 flex gap-2">
-        <button onClick={() => setKind("doctor")} className={cn("flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold", kind === "doctor" ? "bg-brand-600 text-white" : "bg-white text-ink-600")}><Stethoscope size={15} /> Doctors</button>
-        <button onClick={() => setKind("student")} className={cn("flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold", kind === "student" ? "bg-brand-600 text-white" : "bg-white text-ink-600")}><GraduationCap size={15} /> Students</button>
+        <button onClick={() => setKind("doctor")} className={cn("flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold", kind === "doctor" ? "bg-brand-600 text-white" : "bg-surface text-ink-600")}><Stethoscope size={15} /> Doctors</button>
+        <button onClick={() => setKind("student")} className={cn("flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold", kind === "student" ? "bg-brand-600 text-white" : "bg-surface text-ink-600")}><GraduationCap size={15} /> Students</button>
       </div>
       {kind === "doctor" ? <DoctorVerifications /> : <StudentVerifications />}
     </div>
@@ -625,7 +625,7 @@ function DoctorVerifications() {
         </div>
       )}
       <div className="mb-4 flex gap-2 overflow-x-auto">
-        {KYC_TABS.map((t) => <button key={t} onClick={() => setTab(t)} className={cn("whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold capitalize", tab === t ? "bg-brand-600 text-white" : "bg-white text-ink-600")}>{t.replace("_", " ").toLowerCase()}</button>)}
+        {KYC_TABS.map((t) => <button key={t} onClick={() => setTab(t)} className={cn("whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold capitalize", tab === t ? "bg-brand-600 text-white" : "bg-surface text-ink-600")}>{t.replace("_", " ").toLowerCase()}</button>)}
       </div>
       <div className="card divide-y divide-ink-900/[.05]">
         {loading ? <div className="grid h-40 place-items-center"><Spinner className="h-6 w-6" /></div>
@@ -799,7 +799,7 @@ function FeedbackSection() {
     <div>
       <SectionHead title="Feedback" subtitle="What users submitted through the app." />
       <div className="mb-4 flex gap-2 overflow-x-auto">
-        {FB_CATS.map((c) => <button key={c} onClick={() => setCat(c)} className={cn("whitespace-nowrap rounded-full px-3.5 py-2 text-xs font-semibold", cat === c ? "bg-brand-600 text-white" : "bg-white text-ink-600")}>{c ? c.replace("_", " ").toLowerCase() : "all"}</button>)}
+        {FB_CATS.map((c) => <button key={c} onClick={() => setCat(c)} className={cn("whitespace-nowrap rounded-full px-3.5 py-2 text-xs font-semibold", cat === c ? "bg-brand-600 text-white" : "bg-surface text-ink-600")}>{c ? c.replace("_", " ").toLowerCase() : "all"}</button>)}
       </div>
       <div className="card divide-y divide-ink-900/[.05]">
         {loading && rows.length === 0 ? <div className="grid h-40 place-items-center"><Spinner className="h-6 w-6" /></div>
@@ -898,8 +898,8 @@ function AuditSection() {
 function Drawer({ children, onClose, title }: any) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 animate-fade-in bg-ink-900/40" onClick={onClose} />
-      <div className="relative ml-auto flex h-full w-full max-w-md animate-[scale-in_.3s_cubic-bezier(.21,.65,.36,1)_both] flex-col bg-white shadow-2xl">
+      <div className="absolute inset-0 animate-fade-in bg-ink-950/40" onClick={onClose} />
+      <div className="relative ml-auto flex h-full w-full max-w-md animate-[scale-in_.3s_cubic-bezier(.21,.65,.36,1)_both] flex-col bg-surface shadow-2xl">
         <div className="flex items-center justify-between border-b border-ink-900/[.06] p-5">
           <h3 className="font-display text-lg font-extrabold">{title}</h3>
           <button onClick={onClose} className="rounded-full p-1.5 hover:bg-ink-900/5"><X size={18} /></button>

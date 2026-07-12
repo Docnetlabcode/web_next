@@ -165,7 +165,7 @@ export default function Login() {
                         style={{ animationDelay: `${i * 70}ms` }}
                         className={cn(
                           "press lift anim-pop flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-colors duration-200",
-                          active ? "border-brand-600 bg-brand-50 shadow-glow" : "border-ink-900/10 bg-white hover:border-brand-300"
+                          active ? "border-brand-600 bg-brand-50 shadow-glow" : "border-ink-900/10 bg-surface hover:border-brand-300"
                         )}
                       >
                         <span className={cn("grid h-12 w-12 shrink-0 place-items-center rounded-xl transition-colors", active ? "bg-brand-600 text-white" : "bg-ink-900/[.05] text-ink-700")}>

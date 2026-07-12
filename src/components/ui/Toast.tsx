@@ -71,7 +71,7 @@ export function ToastProvider({ children }) {
                   key={t.id}
                   role="status"
                   className={cn(
-                    "pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl bg-ink-900/95 px-4 py-3 text-sm font-medium text-white shadow-4 backdrop-blur transition-all duration-200 ease-out",
+                    "pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-2xl bg-ink-900/95 px-4 py-3 text-sm font-medium text-ink-0 shadow-4 backdrop-blur transition-all duration-200 ease-out",
                     t.leaving ? "translate-y-2 opacity-0" : "anim-toast-in"
                   )}
                 >
@@ -80,7 +80,7 @@ export function ToastProvider({ children }) {
                   {t.action && (
                     <button
                       onClick={() => { t.action.onClick?.(); dismiss(t.id); }}
-                      className="press flex shrink-0 items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white transition hover:bg-white/20"
+                      className="press flex shrink-0 items-center gap-1 rounded-full bg-ink-0/10 px-3 py-1 text-xs font-bold text-ink-0 transition hover:bg-ink-0/20"
                     >
                       <Undo2 size={12} /> {t.action.label}
                     </button>

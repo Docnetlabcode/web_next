@@ -69,7 +69,7 @@ export default function LivenessCheck({ onClose, onComplete }) {
   const close = () => { stop(); onClose?.(); };
 
   return createPortal(
-    <div className="fixed inset-0 z-[95] flex flex-col items-center justify-center gap-6 bg-ink-900/95 p-6 text-white backdrop-blur animate-fade-in">
+    <div className="fixed inset-0 z-[95] flex flex-col items-center justify-center gap-6 bg-ink-950/95 p-6 text-white backdrop-blur animate-fade-in">
       <button onClick={close} className="press absolute right-4 top-4 rounded-full p-2 hover:bg-white/10"><X size={22} /></button>
       <div className="text-center">
         <ScanFace size={30} className="mx-auto text-brand-300" />

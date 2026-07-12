@@ -125,7 +125,7 @@ export default function MediaEditor({ item, isReel = false, onSave, onClose }) {
   const apply = () => onSave({ ...item, filter, adjust, crop: { ratio, zoom }, texts, music, trim, cover, _editedCss: filterCss });
 
   return createPortal(
-    <div className="fixed inset-0 z-[90] flex flex-col bg-ink-900 text-white animate-fade-in">
+    <div className="fixed inset-0 z-[90] flex flex-col bg-ink-950 text-white animate-fade-in">
       {/* header */}
       <div className="flex items-center justify-between px-4 py-3">
         <button onClick={onClose} className="press rounded-full p-2 hover:bg-white/10"><X size={22} /></button>

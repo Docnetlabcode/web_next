@@ -82,7 +82,7 @@ export default function AvailabilityEditor() {
         <label className="block">
           <span className="mb-1 block text-xs font-semibold text-ink-600">Timezone</span>
           <select value={sched.timezone} onChange={(e) => update((s) => ({ ...s, timezone: e.target.value }))}
-            className="w-full rounded-xl border border-ink-900/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-400">
+            className="w-full rounded-xl border border-ink-900/10 bg-surface px-3 py-2.5 text-sm outline-none focus:border-brand-400">
             {TIMEZONES.map((tz) => <option key={tz} value={tz}>{tz}</option>)}
           </select>
         </label>
@@ -104,7 +104,7 @@ export default function AvailabilityEditor() {
           {sched.exceptions.length === 0 && <p className="text-xs text-ink-400">No exceptions. Add holidays or one-off available days.</p>}
           <div className="space-y-2">
             {sched.exceptions.map((ex, i) => (
-              <div key={i} className="flex items-center gap-2 rounded-xl border border-ink-900/[.06] bg-white p-2.5">
+              <div key={i} className="flex items-center gap-2 rounded-xl border border-ink-900/[.06] bg-surface p-2.5">
                 <input type="date" value={ex.date} onChange={(e) => update((s) => { s.exceptions[i].date = e.target.value; return s; })}
                   className="rounded-lg border border-ink-900/10 px-2 py-1.5 text-sm outline-none focus:border-brand-400" />
                 <select value={ex.type} onChange={(e) => update((s) => { s.exceptions[i].type = e.target.value as any; return s; })}

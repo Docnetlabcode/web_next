@@ -1,7 +1,7 @@
 "use client";
 import { NavLink, useNavigate, Link, useLocation, Navigate } from "@/lib/router";
 import {
-  Home, Clapperboard, Stethoscope, Users, MessageSquare,
+  Home, Clapperboard, Users, MessageSquare,
   Bell, Bookmark, Search, Plus, LogOut, Settings, Video,
 } from "lucide-react";
 import { Avatar, Logo, Verified, Spinner } from "@/components/ui/Primitives";
@@ -14,7 +14,6 @@ import { useState, useEffect } from "react";
 const NAV = [
   { to: "/app", icon: Home, label: "Home", end: true },
   { to: "/app/reels", icon: Clapperboard, label: "Pulse" },
-  { to: "/app/cases", icon: Stethoscope, label: "Cases" },
   { to: "/app/consults", icon: Video, label: "Consults" },
   { to: "/app/network", icon: Users, label: "Network" },
   { to: "/app/messages", icon: MessageSquare, label: "Messages" },
@@ -34,7 +33,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!demo && !isProfileComplete) return <Navigate to="/onboarding" replace />;
 
   return (
-    <div className="min-h-screen bg-[#f4f6f6]">
+    <div className="min-h-screen bg-ink-50">
       <RouteProgress trigger={location.pathname} />
       {/* Topbar */}
       <header className="sticky top-0 z-40 border-b border-ink-900/[.06] glass">
@@ -46,7 +45,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             className="relative ml-2 hidden max-w-md flex-1 sm:block"
           >
             <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" />
-            <input name="q" placeholder="Search people, specialties, papers…" className="w-full rounded-full border border-ink-900/10 bg-white/80 py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
+            <input name="q" placeholder="Search people, specialties, papers…" className="w-full rounded-full border border-ink-900/10 bg-surface/80 py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
           </form>
           <div className="flex-1 sm:hidden" />
           <button onClick={() => nav("/app/create")} className="btn-primary hidden px-4 py-2 text-sm sm:inline-flex">
@@ -58,7 +57,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Avatar user={user} size={38} />
             </button>
             {menu && (
-              <div onMouseLeave={() => setMenu(false)} className="absolute right-0 mt-2 w-56 animate-scale-in rounded-2xl border border-ink-900/[.06] bg-white p-2 shadow-card">
+              <div onMouseLeave={() => setMenu(false)} className="absolute right-0 mt-2 w-56 animate-scale-in rounded-2xl border border-ink-900/[.06] bg-surface p-2 shadow-card">
                 <Link to="/app/profile" className="flex items-center gap-3 rounded-xl p-2.5 hover:bg-ink-900/5">
                   <Avatar user={user} size={36} />
                   <div className="min-w-0">
@@ -92,7 +91,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="mt-6 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 p-4 text-white shadow-glow">
             <p className="text-sm font-semibold">Verified by license.</p>
             <p className="mt-1 text-xs text-white/80">Get your MD badge and unlock consults.</p>
-            <button onClick={() => nav("/app/profile")} className="mt-3 w-full rounded-full bg-white py-2 text-xs font-bold text-brand-700">Start verification</button>
+            <button onClick={() => nav("/app/profile")} className="mt-3 w-full rounded-full bg-surface py-2 text-xs font-bold text-brand-700">Start verification</button>
           </div>
         </aside>
 
@@ -105,7 +104,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-ink-900/[.06] bg-white/90 py-2 backdrop-blur lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-ink-900/[.06] bg-surface/90 py-2 backdrop-blur lg:hidden">
         {NAV.slice(0, 5).map((n) => (
           <NavLink key={n.to} to={n.to} end={n.end}
             className={({ isActive }) => cn("rounded-xl p-2.5", isActive ? "text-brand-600" : "text-ink-400")}>

@@ -44,7 +44,11 @@ Setup: `cp .env.example .env.local` and set the backend URL + Firebase keys. If 
 
 **No mock/demo data:** the app is fully backed by the live API — there is no `src/data/mock.ts`, no demo mode, and no offline tour. Screens fetch from `dok` and render loading skeletons then empty states when there's nothing (never fake content). `useAuth()` still exposes a `demo` flag that is permanently `false` (legacy guards are harmless no-ops); don't reintroduce mock fallbacks.
 
-**Sockets (`src/lib/socket.ts`):** singleton socket.io client authenticated with the in-memory access token; connected/disconnected by `AuthProvider` on login/logout.
+**Theming (light/dark).** `darkMode: "class"`; themed tokens are CSS variables in `src/app/globals.css` (`:root` = light, `.dark` = dark) consumed by `tailwind.config.js`. Rules when writing UI:
+- Cards/sheets/inputs/dropdowns use `bg-surface`, **never `bg-white`** (literal white is only for content sitting on media or solid brand color).
+- The `ink` ramp *flips* in dark mode (`ink-50` page bg ↔ near-black, `ink-900` text ↔ near-white) — alpha fills like `bg-ink-900/[.06]` theme automatically. For always-dark contexts (lightboxes, reel posters, image scrims, modal backdrops) use the static `ink-950`.
+- `text-brand-600`, `text-danger-700`, `text-rose-600` etc. are *text-only* overrides that brighten in dark mode; the same shades as `bg-*` stay fixed (buttons keep white text). Tint steps (`*-50`, `rose-100/200/300`, …) flip to deep tints.
+- Preference lives in localStorage `dl_theme` (`light|dark|system`): pure logic in `src/lib/theme.ts` (unit-tested), DOM side in `src/context/ThemeContext.tsx` (`useTheme()`), pre-paint no-flash script inline in `src/app/layout.tsx`. UI: `ThemeToggle` in the landing navbar, radio picker in Settings → Appearance. `Logo` swaps to `/brand/wordmark-dark.svg` via `dark:` classes.
 
 **Env vars:** all client-side config is `NEXT_PUBLIC_*` (the Vite `import.meta.env.VITE_*` equivalents).
 

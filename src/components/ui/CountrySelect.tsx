@@ -27,7 +27,7 @@ export default function CountrySelect({ value, onChange }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "press flex h-[50px] items-center gap-1.5 rounded-xl border bg-white px-3 text-sm font-semibold text-ink-800 transition",
+          "press flex h-[50px] items-center gap-1.5 rounded-xl border bg-surface px-3 text-sm font-semibold text-ink-800 transition",
           open ? "border-brand-400 ring-4 ring-brand-100" : "border-ink-900/[.12] hover:border-brand-300"
         )}
       >
@@ -37,7 +37,7 @@ export default function CountrySelect({ value, onChange }) {
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-ink-900/[.08] bg-white shadow-card anim-pop">
+        <div className="absolute z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-ink-900/[.08] bg-surface shadow-card anim-pop">
           <div className="border-b border-ink-900/[.06] p-2">
             <div className="relative">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />

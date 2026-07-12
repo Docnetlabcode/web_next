@@ -61,7 +61,7 @@ export default function HashtagWorkspace() {
       </div>
 
       {/* sticky tabs */}
-      <div className="no-scrollbar sticky top-16 z-20 -mx-1 flex gap-1 overflow-x-auto border-b border-ink-900/[.06] bg-[#f4f6f6]/90 px-1 backdrop-blur">
+      <div className="no-scrollbar sticky top-16 z-20 -mx-1 flex gap-1 overflow-x-auto border-b border-ink-900/[.06] bg-ink-50/90 px-1 backdrop-blur">
         {TABS.map((t) => (
           <button key={t.key} onClick={() => setType(t.key)} className={cn("press relative shrink-0 px-4 py-3 text-sm font-semibold transition", type === t.key ? "text-brand-700" : "text-ink-400 hover:text-ink-700")}>
             {t.label}{type === t.key && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-brand-600 anim-pop" />}
@@ -103,7 +103,7 @@ function ReelRow({ reel, onOpen }) {
   const poster = reelPoster(reel);
   return (
     <button onClick={onOpen} className="card lift flex w-full items-center gap-3 p-3 text-left">
-      <span className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl bg-ink-900">
+      <span className="relative h-20 w-14 shrink-0 overflow-hidden rounded-xl bg-ink-950">
         {poster && <img src={poster} alt="" className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} />}
         <span className="absolute inset-0 grid place-items-center text-white"><Play size={18} className="fill-white" /></span>
       </span>

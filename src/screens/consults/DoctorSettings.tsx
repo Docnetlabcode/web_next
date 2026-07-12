@@ -104,7 +104,7 @@ export default function DoctorSettings() {
                 onChange={(e) => setFeeText(e.target.value)}
                 onBlur={() => commitFee(parseInt(feeText, 10) || MIN_RUPEES)}
                 onKeyDown={(e) => { if (e.key === "Enter") commitFee(parseInt(feeText, 10) || MIN_RUPEES); }}
-                className="w-32 rounded-xl border border-ink-900/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
+                className="w-32 rounded-xl border border-ink-900/10 bg-surface px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
             </div>
             <input
               type="range" min={MIN_RUPEES} max={MAX_RUPEES} step={STEP_RUPEES} value={feeRupees}

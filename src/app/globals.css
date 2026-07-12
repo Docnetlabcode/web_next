@@ -2,8 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────────────────────
+   Theme tokens (space-separated RGB triplets, consumed by
+   tailwind.config.js as rgb(var(--x) / <alpha-value>)).
+   :root = light, .dark = dark. Values that don't change per
+   theme stay as plain hex in tailwind.config.js.
+   ───────────────────────────────────────────────────────────── */
 :root {
+  color-scheme: light;
   --brand: #1e7b74;
+
+  /* content surface (cards, sheets, inputs) */
+  --surface: 255 255 255;
+
+  /* warm-slate neutrals */
+  --ink-0: 255 255 255;
+  --ink-25: 250 251 251;
+  --ink-50: 244 246 246;
+  --ink-100: 234 237 238;
+  --ink-200: 215 220 221;
+  --ink-300: 182 189 191;
+  --ink-400: 138 146 149;
+  --ink-500: 100 107 109;
+  --ink-600: 71 77 79;
+  --ink-700: 47 53 55;
+  --ink-800: 28 33 35;
+  --ink-900: 14 18 19;
+
+  /* brand tints (50–300) */
+  --brand-50: 238 247 246;
+  --brand-100: 214 236 233;
+  --brand-200: 174 216 211;
+  --brand-300: 127 193 186;
+  /* brand text shades (match solid ramp in light) */
+  --tx-brand-500: 43 142 133;
+  --tx-brand-600: 30 123 116;
+  --tx-brand-700: 24 95 90;
+  --tx-brand-800: 19 73 69;
+
+  /* semantic tints + text shades */
+  --success-50: 236 247 238;
+  --warning-50: 255 245 224;
+  --danger-50: 253 236 236;
+  --info-50: 232 241 251;
+  --tx-success-500: 46 157 74;   --tx-success-700: 31 111 52;
+  --tx-warning-500: 214 138 20;  --tx-warning-700: 148 96 12;
+  --tx-danger-500: 210 58 58;    --tx-danger-700: 150 37 37;
+  --tx-info-500: 46 108 210;     --tx-info-700: 31 77 153;
+
+  /* stock-palette steps in active use (light = Tailwind defaults) */
+  --rose-50: 255 241 242;  --rose-100: 255 228 230;  --rose-200: 254 205 211;  --rose-300: 253 164 175;
+  --amber-50: 255 251 235; --amber-200: 253 230 138;
+  --emerald-50: 236 253 245; --emerald-100: 209 250 229; --emerald-200: 167 243 208; --emerald-300: 110 231 183;
+  --sky-50: 240 249 255;
+  --sky-300: 125 211 252; /* toast info accent: light-blue on the dark toast */
+  --indigo-50: 238 242 255;
+  --tx-rose-500: 244 63 94;   --tx-rose-600: 225 29 72;   --tx-rose-700: 190 18 60;
+  --tx-amber-600: 217 119 6;  --tx-amber-700: 180 83 9;
+  --tx-emerald-600: 5 150 105; --tx-emerald-700: 4 120 87;
+  --tx-sky-600: 2 132 199;    --tx-sky-700: 3 105 161;
+  --tx-indigo-600: 79 70 229;
+
+  /* elevation */
+  --shadow: 14 18 19;
+  --sh-0: 0.03; --sh-1: 0.04; --sh-2: 0.05; --sh-3: 0.07; --sh-4: 0.10;
+  --glass: 255 255 255;
+}
+
+/* Dark: charcoal tinted toward the brand teal, never flat gray.
+   The ink ramp inverts so "distance from the page" keeps meaning;
+   text shades brighten to hold AA contrast on dark surfaces. */
+.dark {
+  color-scheme: dark;
+
+  --surface: 22 30 32;      /* raised card over the page */
+
+  --ink-0: 11 16 17;
+  --ink-25: 14 19 20;
+  --ink-50: 16 22 23;       /* page background */
+  --ink-100: 26 34 36;      /* hover fills */
+  --ink-200: 38 48 51;      /* strong dividers */
+  --ink-300: 60 74 77;
+  --ink-400: 125 140 143;   /* placeholders, muted icons */
+  --ink-500: 159 176 178;   /* secondary text */
+  --ink-600: 188 203 204;
+  --ink-700: 214 225 226;
+  --ink-800: 231 238 238;
+  --ink-900: 242 247 247;   /* body text */
+
+  --brand-50: 16 40 38;
+  --brand-100: 21 55 52;
+  --brand-200: 28 75 71;
+  --brand-300: 43 106 99;
+  --tx-brand-500: 69 169 159;
+  --tx-brand-600: 79 179 169;
+  --tx-brand-700: 124 204 195;
+  --tx-brand-800: 165 222 215;
+
+  --success-50: 16 40 26;
+  --warning-50: 43 33 16;
+  --danger-50: 44 21 21;
+  --info-50: 20 34 56;
+  --tx-success-500: 79 188 107;  --tx-success-700: 127 208 150;
+  --tx-warning-500: 224 163 62;  --tx-warning-700: 236 194 123;
+  --tx-danger-500: 239 111 111;  --tx-danger-700: 243 155 155;
+  --tx-info-500: 107 161 232;    --tx-info-700: 157 192 242;
+
+  --rose-50: 43 20 26;  --rose-100: 58 26 35;  --rose-200: 82 36 47;  --rose-300: 108 47 63;
+  --amber-50: 42 32 16; --amber-200: 87 67 18;
+  --emerald-50: 13 39 27; --emerald-100: 20 55 38; --emerald-200: 28 74 51; --emerald-300: 38 96 68;
+  --sky-50: 14 35 52;
+  --sky-300: 26 106 161; /* toast inverts to light in dark mode → deep blue accent */
+  --indigo-50: 25 31 61;
+  --tx-rose-500: 251 113 133;  --tx-rose-600: 251 113 133;  --tx-rose-700: 253 164 175;
+  --tx-amber-600: 242 174 46;  --tx-amber-700: 247 200 93;
+  --tx-emerald-600: 52 211 153; --tx-emerald-700: 110 231 183;
+  --tx-sky-600: 56 189 248;    --tx-sky-700: 125 211 252;
+  --tx-indigo-600: 129 140 248;
+
+  --shadow: 0 0 0;
+  --sh-0: 0.25; --sh-1: 0.30; --sh-2: 0.35; --sh-3: 0.45; --sh-4: 0.55;
+  --glass: 16 22 23;
 }
 
 * { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
@@ -15,11 +134,14 @@ body {
 }
 
 ::selection { background: rgba(30, 123, 116, 0.18); }
+.dark ::selection { background: rgba(79, 179, 169, 0.35); }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #cdd8d5; border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
 ::-webkit-scrollbar-thumb:hover { background: #9fb1ac; background-clip: content-box; }
+.dark ::-webkit-scrollbar-thumb { background: #34413f; background-clip: content-box; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #4a5a58; background-clip: content-box; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -28,10 +150,10 @@ body {
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none; }
   .btn-primary { @apply btn bg-brand-600 text-white hover:bg-brand-700 active:scale-[.98] shadow-glow; }
   .btn-ghost { @apply btn bg-brand-50 text-brand-700 hover:bg-brand-100; }
-  .btn-outline { @apply btn border border-ink-900/[.12] text-ink-900 hover:border-brand-300 hover:text-brand-700 bg-white; }
+  .btn-outline { @apply btn border border-ink-900/[.12] text-ink-900 hover:border-brand-300 hover:text-brand-700 bg-surface; }
   .chip { @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold; }
-  .card { @apply rounded-2xl border border-ink-900/[.06] bg-white shadow-card; }
-  .input { @apply w-full rounded-xl border border-ink-900/[.12] bg-white px-4 py-3 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100; }
+  .card { @apply rounded-2xl border border-ink-900/[.06] bg-surface shadow-card; }
+  .input { @apply w-full rounded-xl border border-ink-900/[.12] bg-surface px-4 py-3 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100; }
 }
 
 /* Scroll-reveal */
@@ -40,11 +162,18 @@ body {
 
 /* Gradient text + mesh */
 .text-gradient { background: linear-gradient(100deg, #1e7b74, #2a9085 50%, #48ac9f); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.dark .text-gradient { background: linear-gradient(100deg, #4fb3a9, #63c0b4 50%, #85d4c8); -webkit-background-clip: text; background-clip: text; }
 .mesh {
   background:
     radial-gradient(40% 50% at 15% 20%, rgba(30,123,116,.20), transparent 60%),
     radial-gradient(45% 55% at 85% 15%, rgba(72,172,159,.18), transparent 60%),
     radial-gradient(50% 60% at 70% 90%, rgba(30,123,116,.12), transparent 60%);
+}
+.dark .mesh {
+  background:
+    radial-gradient(40% 50% at 15% 20%, rgba(79,179,169,.16), transparent 60%),
+    radial-gradient(45% 55% at 85% 15%, rgba(52,140,130,.14), transparent 60%),
+    radial-gradient(50% 60% at 70% 90%, rgba(79,179,169,.09), transparent 60%);
 }
 .grid-bg {
   background-image: linear-gradient(rgba(30,123,116,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(30,123,116,.07) 1px, transparent 1px);
@@ -52,7 +181,10 @@ body {
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 75%);
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 75%);
 }
-.glass { background: rgba(255,255,255,.72); backdrop-filter: blur(14px); }
+.dark .grid-bg {
+  background-image: linear-gradient(rgba(79,179,169,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(79,179,169,.09) 1px, transparent 1px);
+}
+.glass { background: rgb(var(--glass) / .72); backdrop-filter: blur(14px); }
 
 /* ---- Premium interaction animations ---- */
 @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -82,9 +214,14 @@ body {
 /* Deep-linked comment highlight (mention notifications auto-scroll here) */
 @keyframes comment-flash { 0%, 55% { background: rgba(30,123,116,.14); box-shadow: 0 0 0 2px rgba(30,123,116,.25); } 100% { background: transparent; box-shadow: none; } }
 .anim-comment-flash { animation: comment-flash 2.4s ease-out both; border-radius: 16px; }
+.dark .anim-comment-flash { animation-name: comment-flash-dark; }
+@keyframes comment-flash-dark { 0%, 55% { background: rgba(79,179,169,.16); box-shadow: 0 0 0 2px rgba(79,179,169,.30); } 100% { background: transparent; box-shadow: none; } }
 
 /* Filter chip count tick */
 .anim-count-tick { animation: count-tick .3s ease; }
+
+/* Theme switch: crossfade the whole page (View Transitions API; no-op elsewhere) */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .28s; animation-timing-function: cubic-bezier(.2,0,0,1); }
 
 /* Reduced motion: collapse every animation to a fast crossfade / instant state */
 @media (prefers-reduced-motion: reduce) {

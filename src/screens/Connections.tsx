@@ -71,7 +71,7 @@ export default function Connections() {
       </div>
 
       {/* tabs */}
-      <div className="sticky top-16 z-20 mb-5 flex gap-1 border-b border-ink-900/[.06] bg-[#f4f6f6]/90 backdrop-blur">
+      <div className="sticky top-16 z-20 mb-5 flex gap-1 border-b border-ink-900/[.06] bg-ink-50/90 backdrop-blur">
         {tabs.map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)} className={cn("press relative px-4 py-3 text-sm font-semibold transition", tab === t.key ? "text-brand-700" : "text-ink-400 hover:text-ink-700")}>
             {t.label}{counts[t.key] != null && <span className="ml-1.5 text-xs font-bold text-ink-400">{compact(counts[t.key])}</span>}
@@ -83,7 +83,7 @@ export default function Connections() {
       {people === null ? (
         <div className="space-y-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-3 rounded-2xl border border-ink-900/[.06] bg-white p-3">
+            <div key={i} className="flex items-center gap-3 rounded-2xl border border-ink-900/[.06] bg-surface p-3">
               <Skeleton className="h-12 w-12 rounded-full" />
               <div className="flex-1 space-y-2"><Skeleton className="h-3.5 w-40" /><Skeleton className="h-3 w-24" /></div>
               <Skeleton className="h-8 w-20 rounded-full" />
@@ -115,7 +115,7 @@ function PersonRow({ user, demo }) {
   const nav = useNavigate();
   const id = user.id || user._id;
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-ink-900/[.06] bg-white p-3 transition hover:border-brand-200">
+    <div className="flex items-center gap-3 rounded-2xl border border-ink-900/[.06] bg-surface p-3 transition hover:border-brand-200">
       <button onClick={() => nav(`/app/profile/${id}`)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
         <Avatar user={user} size={48} />
         <div className="min-w-0">

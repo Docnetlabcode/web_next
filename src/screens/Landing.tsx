@@ -8,6 +8,7 @@ import {
   ChevronDown, LifeBuoy, Menu, X,
 } from "lucide-react";
 import { Logo, Avatar, Verified } from "@/components/ui/Primitives";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import NavArrows from "@/components/ui/NavArrows";
 import { useScrollReveal, cn } from "@/lib/utils";
 
@@ -22,7 +23,7 @@ const SAMPLE = [
 export default function Landing() {
   useScrollReveal();
   return (
-    <div className="overflow-x-clip bg-white">
+    <div className="overflow-x-clip bg-surface">
       <NavArrows variant="floating" />
       <Nav />
       <Hero />
@@ -85,7 +86,7 @@ function Nav() {
             </button>
             {/* pt bridges the gap so the menu stays open while moving the cursor down */}
             <div className="invisible absolute right-0 top-full z-50 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
-              <div className="w-72 overflow-hidden rounded-2xl border border-ink-900/[.06] bg-white p-2 shadow-card">
+              <div className="w-72 overflow-hidden rounded-2xl border border-ink-900/[.06] bg-surface p-2 shadow-card">
                 {NAV_RESOURCES.map((r) => (
                   <Link key={r.to} to={r.to} className="flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-brand-50">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600"><r.icon size={17} /></span>
@@ -101,6 +102,7 @@ function Nav() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Link to="/login" className="btn-primary group hidden px-5 py-2.5 text-sm sm:inline-flex">
             Get started <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
           </Link>
@@ -174,12 +176,12 @@ function HeroVisual() {
   return (
     <div className="relative mx-auto w-full max-w-md animate-fade-up">
       {/* floating verified pill */}
-      <div className="absolute -left-6 top-12 z-20 hidden animate-float rounded-2xl bg-white p-3 shadow-card sm:flex sm:items-center sm:gap-2" style={{ animationDelay: ".4s" }}>
+      <div className="absolute -left-6 top-12 z-20 hidden animate-float rounded-2xl bg-surface p-3 shadow-card sm:flex sm:items-center sm:gap-2" style={{ animationDelay: ".4s" }}>
         <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-50"><BadgeCheck size={18} className="text-brand-600" /></span>
         <div><p className="text-xs font-bold">License verified</p><p className="text-[10px] text-ink-400">MD · MGH</p></div>
       </div>
       {/* floating reaction pill */}
-      <div className="absolute -right-4 bottom-24 z-20 hidden animate-float rounded-2xl bg-white px-3 py-2 shadow-card sm:flex sm:items-center sm:gap-2" style={{ animationDelay: "1.2s" }}>
+      <div className="absolute -right-4 bottom-24 z-20 hidden animate-float rounded-2xl bg-surface px-3 py-2 shadow-card sm:flex sm:items-center sm:gap-2" style={{ animationDelay: "1.2s" }}>
         <Heart size={16} className="fill-rose-500 text-rose-500" />
         <span className="text-xs font-bold">+248</span>
         <MessageCircle size={16} className="ml-1 text-ink-400" />
@@ -187,7 +189,7 @@ function HeroVisual() {
       </div>
 
       {/* main card — image-free, fully on-brand (no external media) */}
-      <div className="relative z-10 rounded-3xl border border-ink-900/[.06] bg-white p-5 shadow-card">
+      <div className="relative z-10 rounded-3xl border border-ink-900/[.06] bg-surface p-5 shadow-card">
         <div className="flex items-center gap-3">
           <Avatar user={SAMPLE[1]} size={46} />
           <div className="flex-1">
@@ -230,7 +232,7 @@ const FEATURES = [
 function Features() {
   useScrollReveal();
   return (
-    <section id="features" className="bg-[#f4f6f6] py-24">
+    <section id="features" className="bg-ink-50 py-24">
       <div className="container-x">
         <div className="reveal mx-auto max-w-2xl text-center">
           <span className="chip bg-brand-50 text-brand-700"><Sparkles size={14} /> Everything in one place</span>
@@ -270,7 +272,7 @@ function Roles() {
       </div>
       <div className="mt-14 grid gap-6 lg:grid-cols-3">
         {ROLES.map((r, i) => (
-          <div key={r.tag} className="reveal overflow-hidden rounded-3xl border border-ink-900/[.06] bg-white shadow-card" style={{ transitionDelay: `${i * 80}ms` }}>
+          <div key={r.tag} className="reveal overflow-hidden rounded-3xl border border-ink-900/[.06] bg-surface shadow-card" style={{ transitionDelay: `${i * 80}ms` }}>
             <div className={`bg-gradient-to-br ${r.color} p-6 text-white`}>
               <p className="text-sm font-semibold uppercase tracking-wide text-white/80">{r.tag}</p>
               <h3 className="mt-1 font-display text-2xl font-bold">{r.title}</h3>
@@ -292,7 +294,7 @@ function Roles() {
 function Showcase() {
   useScrollReveal();
   return (
-    <section id="showcase" className="bg-[#f4f6f6] py-24">
+    <section id="showcase" className="bg-ink-50 py-24">
       <div className="container-x grid items-center gap-14 lg:grid-cols-2">
         <div className="reveal">
           <span className="chip bg-brand-50 text-brand-700"><Activity size={14} /> Real-time everything</span>
@@ -319,7 +321,7 @@ function Showcase() {
                 </div>
               ))}
               <div className="rounded-xl bg-brand-50 p-3">
-                <span className="chip bg-white text-brand-700 text-[10px] uppercase">Trending</span>
+                <span className="chip bg-surface text-brand-700 text-[10px] uppercase">Trending</span>
                 <p className="mt-1.5 text-sm font-semibold text-ink-900">#SCAD · +312 posts this week</p>
               </div>
             </div>
@@ -341,7 +343,7 @@ const TEAM = [
 function TeamAvatar({ member }) {
   const [broken, setBroken] = useState(false);
   const initials = member.name.replace(/^Dr\.?\s*/i, "").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
-  const frame = "h-20 w-20 rounded-full ring-4 ring-white shadow-card";
+  const frame = "h-20 w-20 rounded-full ring-4 ring-surface shadow-card";
   if (member.photo && !broken) {
     return <img src={member.photo} alt={member.name} onError={() => setBroken(true)} className={`${frame} object-cover`} />;
   }
@@ -359,7 +361,7 @@ function Team() {
       </div>
       <div className="mt-14 grid gap-6 lg:grid-cols-3">
         {TEAM.map((m, i) => (
-          <div key={m.name} className="reveal overflow-hidden rounded-3xl border border-ink-900/[.06] bg-white shadow-card transition hover:-translate-y-1 hover:shadow-glow" style={{ transitionDelay: `${i * 80}ms` }}>
+          <div key={m.name} className="reveal overflow-hidden rounded-3xl border border-ink-900/[.06] bg-surface shadow-card transition hover:-translate-y-1 hover:shadow-glow" style={{ transitionDelay: `${i * 80}ms` }}>
             <div className={`bg-gradient-to-br ${m.color} p-6 text-white`}>
               <p className="text-sm font-semibold uppercase tracking-wide text-white/80">{m.role}</p>
               <h3 className="mt-1 font-display text-2xl font-bold">{m.name}</h3>
@@ -384,7 +386,7 @@ function CTA() {
           <h2 className="font-display text-4xl font-extrabold tracking-tight text-white text-balance sm:text-5xl">Join the network built on trust</h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/85">Create your verified profile in minutes. Free for students and general users.</p>
           <div className="mt-8 flex justify-center">
-            <Link to="/login" className="btn px-7 py-3.5 text-base bg-white text-brand-700 hover:bg-white/90">Join the Orovion</Link>
+            <Link to="/login" className="btn px-7 py-3.5 text-base bg-surface text-brand-700 hover:bg-surface/90">Join the Orovion</Link>
           </div>
         </div>
       </div>

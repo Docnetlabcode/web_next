@@ -224,7 +224,7 @@ export default function Create() {
                 <curVis.icon size={12} /> {curVis.label} <ChevronDown size={12} />
               </button>
               {visOpen && (
-                <div className="absolute z-10 mt-1 w-40 overflow-hidden rounded-xl border border-ink-900/[.08] bg-white shadow-card anim-pop">
+                <div className="absolute z-10 mt-1 w-40 overflow-hidden rounded-xl border border-ink-900/[.08] bg-surface shadow-card anim-pop">
                   {VIS.map((v) => <button key={v.key} onClick={() => { setVis(v.key); setVisOpen(false); }} className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-brand-50"><v.icon size={14} /> {v.label}</button>)}
                 </div>
               )}
@@ -247,7 +247,7 @@ export default function Create() {
         {suggest && menuPos && createPortal(
           <div
             style={{ position: "fixed", left: menuPos.left, top: menuPos.top, width: menuPos.width }}
-            className="anim-pop z-[80] max-h-72 overflow-y-auto overscroll-contain rounded-2xl border border-ink-900/[.08] bg-white shadow-card"
+            className="anim-pop z-[80] max-h-72 overflow-y-auto overscroll-contain rounded-2xl border border-ink-900/[.08] bg-surface shadow-card"
           >
             {suggest.items === null ? (
               <div className="grid place-items-center py-4"><Loader2 size={16} className="animate-spin text-ink-400" /></div>
@@ -298,9 +298,9 @@ export default function Create() {
                     {m.texts?.length > 0 && <Badge icon={Type} />}
                     {m.trim && m.trim.start > 0 && <Badge icon={Scissors} />}
                   </div>
-                  <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-ink-900/40 opacity-0 transition group-hover:opacity-100">
-                    <button onClick={() => setEditing(i)} className="press grid h-9 w-9 place-items-center rounded-full bg-white/90 text-ink-900"><Wand2 size={16} /></button>
-                    <button onClick={() => setMedia((mm) => mm.filter((_, idx) => idx !== i))} className="press grid h-9 w-9 place-items-center rounded-full bg-white/90 text-danger-500"><X size={16} /></button>
+                  <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-ink-950/40 opacity-0 transition group-hover:opacity-100">
+                    <button onClick={() => setEditing(i)} className="press grid h-9 w-9 place-items-center rounded-full bg-white/90 text-ink-950"><Wand2 size={16} /></button>
+                    <button onClick={() => setMedia((mm) => mm.filter((_, idx) => idx !== i))} className="press grid h-9 w-9 place-items-center rounded-full bg-white/90 text-[#d23a3a]"><X size={16} /></button>
                   </div>
                 </div>
               ))}

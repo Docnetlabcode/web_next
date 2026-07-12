@@ -124,7 +124,7 @@ export default function RequestDetail() {
 
       {/* Invoice (paid) */}
       {req.totalPaise > 0 && (isCompleted(req.status) || isApproved(req.status)) && (
-        <button onClick={() => nav(`/app/consults/${req.id}/invoice`)} className="mb-3 flex w-full items-center gap-3 rounded-xl border border-ink-900/[.08] bg-white p-3.5 text-left text-sm font-medium text-ink-700 transition hover:border-brand-300">
+        <button onClick={() => nav(`/app/consults/${req.id}/invoice`)} className="mb-3 flex w-full items-center gap-3 rounded-xl border border-ink-900/[.08] bg-surface p-3.5 text-left text-sm font-medium text-ink-700 transition hover:border-brand-300">
           <Receipt size={17} className="text-brand-600" /> View invoice
         </button>
       )}
@@ -177,7 +177,7 @@ function DoctorReviewPanel({ req, busy, setBusy, onChanged }: { req: Consultatio
     <div className="card mb-4 p-4">
       <p className="mb-2 flex items-center gap-2 text-sm font-bold text-ink-900"><CalendarClock size={16} className="text-brand-600" /> Schedule the consultation</p>
       <input type="datetime-local" min={minLocal} value={when} onChange={(e) => setWhen(e.target.value)}
-        className="mb-3 w-full rounded-xl border border-ink-900/10 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
+        className="mb-3 w-full rounded-xl border border-ink-900/10 bg-surface px-3.5 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
       <div className="flex gap-2">
         <button onClick={approve} disabled={!!busy} className="btn-primary flex-1 justify-center py-2.5 text-sm disabled:opacity-50">
           {busy === "approve" ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />} Approve
@@ -189,7 +189,7 @@ function DoctorReviewPanel({ req, busy, setBusy, onChanged }: { req: Consultatio
       {declining && (
         <div className="mt-3 rounded-xl border border-ink-900/[.06] bg-ink-900/[.02] p-3">
           <textarea value={declineReason} onChange={(e) => setDeclineReason(e.target.value)} rows={2} placeholder="Reason (optional, shared with the patient)"
-            className="mb-2 w-full resize-none rounded-lg border border-ink-900/10 bg-white p-2.5 text-sm outline-none focus:border-brand-400" />
+            className="mb-2 w-full resize-none rounded-lg border border-ink-900/10 bg-surface p-2.5 text-sm outline-none focus:border-brand-400" />
           <button onClick={decline} disabled={!!busy} className="w-full rounded-full bg-rose-600 py-2.5 text-sm font-semibold text-white disabled:opacity-50">
             {busy === "decline" ? "Declining…" : "Confirm decline"}
           </button>
@@ -324,7 +324,7 @@ function RatePanel({ req, onRated }: { req: ConsultationRequest; onRated: () => 
         ))}
       </div>
       <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={2} placeholder="Add a comment (optional)"
-        className="mb-2 w-full resize-none rounded-xl border border-ink-900/10 bg-white p-2.5 text-sm outline-none focus:border-brand-400" />
+        className="mb-2 w-full resize-none rounded-xl border border-ink-900/10 bg-surface p-2.5 text-sm outline-none focus:border-brand-400" />
       <button onClick={submit} disabled={busy} className="btn-primary w-full justify-center py-2.5 text-sm disabled:opacity-50">{busy ? "Submitting…" : "Submit rating"}</button>
     </div>
   );
@@ -345,7 +345,7 @@ function MessageButton({ otherId }: { otherId: string }) {
     finally { setBusy(false); }
   };
   return (
-    <button onClick={open} disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-full border border-ink-900/10 bg-white py-3 text-sm font-semibold text-ink-700 transition hover:border-brand-300 disabled:opacity-50">
+    <button onClick={open} disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-full border border-ink-900/10 bg-surface py-3 text-sm font-semibold text-ink-700 transition hover:border-brand-300 disabled:opacity-50">
       {busy ? <Loader2 size={16} className="animate-spin" /> : <MessageSquare size={16} />} Message
     </button>
   );
@@ -367,7 +367,7 @@ export function ClinicalSummaryView({ req }: { req: ConsultationRequest }) {
           <p className="mb-1.5 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-ink-400"><Pill size={13} /> Prescription</p>
           <div className="space-y-2">
             {cs.medicines.map((m, i) => (
-              <div key={i} className="rounded-xl border border-ink-900/[.06] bg-white p-3">
+              <div key={i} className="rounded-xl border border-ink-900/[.06] bg-surface p-3">
                 <p className="text-sm font-semibold text-ink-900">{m.name} {m.strength && <span className="font-normal text-ink-500">· {m.strength}</span>}</p>
                 <p className="mt-0.5 text-xs text-ink-500">
                   {dosagePattern(m)} · {m.beforeFood ? "Before food" : "After food"}{m.duration ? ` · ${m.duration}` : ""}

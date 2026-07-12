@@ -268,7 +268,7 @@ export default function Messages() {
   });
 
   return (
-    <div className="grid h-[calc(100vh-9rem)] grid-cols-1 overflow-hidden rounded-2xl border border-ink-900/[.06] bg-white shadow-card md:grid-cols-[320px_1fr]">
+    <div className="grid h-[calc(100vh-9rem)] grid-cols-1 overflow-hidden rounded-2xl border border-ink-900/[.06] bg-surface shadow-card md:grid-cols-[320px_1fr]">
       {/* List */}
       <div className="border-r border-ink-900/[.06]">
         <div className="border-b border-ink-900/[.06] p-4">
@@ -286,7 +286,7 @@ export default function Messages() {
             return (
               <button key={cidOf(c)} onClick={() => setActive(c)}
                 className={cn("flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-ink-900/[.03]", cidOf(active) === cidOf(c) && "bg-brand-50")}>
-                <div className="relative"><Avatar user={p} size={46} />{c.isOnline && <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />}</div>
+                <div className="relative"><Avatar user={p} size={46} />{c.isOnline && <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-surface bg-emerald-500" />}</div>
                 <div className="min-w-0 flex-1">
                   <p className="flex items-center gap-1 truncate text-sm font-semibold">{p.fullName} {p.isVerified && <Verified size={11} />}</p>
                   <p className="truncate text-xs text-ink-500">{lm.content || ""}</p>
@@ -302,14 +302,14 @@ export default function Messages() {
       </div>
 
       {/* Thread */}
-      <div className="hidden flex-col bg-[#f4f6f6] md:flex">
+      <div className="hidden flex-col bg-ink-50 md:flex">
         {!active ? (
           <div className="grid flex-1 place-items-center text-center text-ink-400">
             <div><MessageSquare size={40} className="mx-auto mb-2 text-ink-300" /><p className="text-sm">Select a conversation to start messaging.</p></div>
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-3 border-b border-ink-900/[.06] bg-white px-5 py-3">
+            <div className="flex items-center gap-3 border-b border-ink-900/[.06] bg-surface px-5 py-3">
               <Avatar user={peer(active)} size={40} />
               <div className="flex-1">
                 <p className="flex items-center gap-1 font-semibold">{peer(active).fullName} {peer(active).isVerified && <Verified size={12} />}</p>
@@ -332,7 +332,7 @@ export default function Messages() {
                 const mine = isMine(m);
                 return (
                   <div key={midOf(m)} className={cn("flex", mine ? "justify-end" : "justify-start")}>
-                    <div className={cn("max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-soft", mine ? "rounded-br-md bg-brand-600 text-white" : "rounded-bl-md bg-white text-ink-900")}>
+                    <div className={cn("max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-soft", mine ? "rounded-br-md bg-brand-600 text-white" : "rounded-bl-md bg-surface text-ink-900")}>
                       <p className={cn(m.isDeleted && "italic opacity-70")}>{m.content}</p>
                       <p className={cn("mt-1 flex items-center justify-end gap-1 text-[10px]", mine ? "text-white/70" : "text-ink-400")}>
                         {timeAgo(m.createdAt)}
@@ -345,7 +345,7 @@ export default function Messages() {
               <div ref={endRef} />
             </div>
 
-            <div className="flex items-center gap-2 border-t border-ink-900/[.06] bg-white p-3">
+            <div className="flex items-center gap-2 border-t border-ink-900/[.06] bg-surface p-3">
               <input value={text} onChange={onInputChange} onKeyDown={(e) => e.key === "Enter" && send()} placeholder="Type a message…" className="flex-1 rounded-full bg-ink-900/[.04] px-4 py-3 text-sm outline-none" />
               <button onClick={send} disabled={sending || !text.trim()} className="grid h-11 w-11 place-items-center rounded-full bg-brand-600 text-white shadow-glow disabled:opacity-50"><Send size={18} /></button>
             </div>

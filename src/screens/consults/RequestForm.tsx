@@ -158,7 +158,7 @@ export default function RequestForm() {
         maxLength={1000}
         rows={5}
         placeholder="Describe your concern, question, or the support you're seeking."
-        className="mb-5 w-full resize-none rounded-xl border border-ink-900/10 bg-white p-3.5 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
+        className="mb-5 w-full resize-none rounded-xl border border-ink-900/10 bg-surface p-3.5 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100"
       />
 
       {/* Attachments */}
@@ -178,8 +178,8 @@ export default function RequestForm() {
                 ? <img src={URL.createObjectURL(a.file)} alt={a.name} className="h-full w-full rounded-lg object-cover" />
                 : (<>{a.failed ? <RefreshCw size={20} className="text-rose-500" /> : <FileText size={20} className="text-brand-600" />}<span className={cn("line-clamp-1 px-0.5 text-[10px] font-semibold", a.failed ? "text-rose-600" : "text-brand-700")}>{a.failed ? "Retry" : a.name}</span></>)}
             </button>
-            {a.uploading && <div className="absolute inset-0 grid place-items-center rounded-xl bg-ink-900/35"><Loader2 size={18} className="animate-spin text-white" /></div>}
-            <button onClick={() => remove(a.id)} className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-ink-900 text-white"><X size={12} /></button>
+            {a.uploading && <div className="absolute inset-0 grid place-items-center rounded-xl bg-ink-950/35"><Loader2 size={18} className="animate-spin text-white" /></div>}
+            <button onClick={() => remove(a.id)} className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-ink-950 text-white"><X size={12} /></button>
           </div>
         ))}
       </div>

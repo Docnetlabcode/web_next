@@ -84,7 +84,7 @@ export default function LegalShell({ eyebrow, title, updated, intro, sections, c
             {sections?.length > 0 && (
               <div className="no-scrollbar -mx-1 mb-8 flex gap-2 overflow-x-auto px-1 lg:hidden">
                 {sections.map((s) => (
-                  <a key={s.id} href={`#${s.id}`} className="chip shrink-0 bg-white text-ink-600 ring-1 ring-ink-900/[.06]">{s.title}</a>
+                  <a key={s.id} href={`#${s.id}`} className="chip shrink-0 bg-surface text-ink-600 ring-1 ring-ink-900/[.06]">{s.title}</a>
                 ))}
               </div>
             )}
@@ -106,7 +106,7 @@ export default function LegalShell({ eyebrow, title, updated, intro, sections, c
             </div>
 
             {contact && (
-              <div className="mt-12 flex flex-col items-start gap-3 rounded-2xl border border-ink-900/[.06] bg-white p-5 shadow-card sm:flex-row sm:items-center">
+              <div className="mt-12 flex flex-col items-start gap-3 rounded-2xl border border-ink-900/[.06] bg-surface p-5 shadow-card sm:flex-row sm:items-center">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600"><Mail size={20} /></span>
                 <div className="flex-1">
                   <p className="font-semibold text-ink-900">Questions about these terms?</p>

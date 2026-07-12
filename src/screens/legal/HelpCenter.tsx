@@ -6,7 +6,7 @@ import LegalShell from "@/components/legal/LegalShell";
 /** Native-details FAQ accordion — keyboard accessible out of the box. */
 function Faq({ items }) {
   return (
-    <div className="divide-y divide-ink-900/[.05] overflow-hidden rounded-2xl border border-ink-900/[.06] bg-white shadow-card">
+    <div className="divide-y divide-ink-900/[.05] overflow-hidden rounded-2xl border border-ink-900/[.06] bg-surface shadow-card">
       {items.map(([q, a], i) => (
         <details key={i} className="group">
           <summary className="flex cursor-pointer items-center gap-3 px-4 py-3.5 text-[15px] font-semibold text-ink-900 transition hover:bg-ink-900/[.02] [&::-webkit-details-marker]:hidden">

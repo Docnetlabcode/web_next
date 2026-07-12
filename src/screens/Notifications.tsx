@@ -123,7 +123,7 @@ export default function Notifications() {
       </div>
       <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto">
         {FILTERS.map((f) => (
-          <button key={f.key} onClick={() => setTab(f.key)} className={cn("shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold", tab === f.key ? "bg-brand-600 text-white" : "bg-white text-ink-600 hover:bg-brand-50")}>{f.key}</button>
+          <button key={f.key} onClick={() => setTab(f.key)} className={cn("shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold", tab === f.key ? "bg-brand-600 text-white" : "bg-surface text-ink-600 hover:bg-brand-50")}>{f.key}</button>
         ))}
       </div>
 
@@ -165,7 +165,7 @@ function Row({ n, onOpen, onAct, acted, busy }) {
     <div onClick={() => onOpen(n)} className={cn("flex cursor-pointer items-start gap-3 p-4 transition hover:bg-ink-900/[.02]", !n.isRead && "bg-brand-50/40")}>
       <div className="relative shrink-0">
         <Avatar user={n.sender} size={44} />
-        <span className={cn("absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full ring-2 ring-white", meta.c)}><Icon size={12} className={n.type.includes("like") ? "fill-current" : ""} /></span>
+        <span className={cn("absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full ring-2 ring-surface", meta.c)}><Icon size={12} className={n.type.includes("like") ? "fill-current" : ""} /></span>
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm text-ink-900"><span className="font-semibold">{n.sender?.fullName}</span> {n.sender?.isVerified && <Verified size={11} />} <span className="text-ink-600">{n.body || n.title}</span></p>

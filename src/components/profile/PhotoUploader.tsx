@@ -137,7 +137,7 @@ export default function PhotoUploader({ kind = "avatar", onClose, onUploaded }) 
   const close = () => { stopCam(); onClose?.(); };
 
   return createPortal(
-    <div className="fixed inset-0 z-[95] flex flex-col bg-ink-900/90 text-white backdrop-blur animate-fade-in">
+    <div className="fixed inset-0 z-[95] flex flex-col bg-ink-950/90 text-white backdrop-blur animate-fade-in">
       <div className="flex items-center justify-between px-4 py-3">
         <button onClick={close} className="press rounded-full p-2 hover:bg-white/10"><X size={22} /></button>
         <p className="font-display text-sm font-bold">{spec.title}</p>

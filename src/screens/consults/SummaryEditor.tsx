@@ -110,7 +110,7 @@ export default function SummaryEditor() {
       <div className="mb-5 space-y-2">
         {medicines.length === 0 && <p className="rounded-xl border border-dashed border-ink-900/10 p-4 text-center text-xs text-ink-400">No medicines added.</p>}
         {medicines.map((m, i) => (
-          <div key={i} className="flex items-start gap-2 rounded-xl border border-ink-900/[.06] bg-white p-3">
+          <div key={i} className="flex items-start gap-2 rounded-xl border border-ink-900/[.06] bg-surface p-3">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-ink-900">{m.name || "Medicine"} {m.strength && <span className="font-normal text-ink-500">· {m.strength}</span>}</p>
               <p className="mt-0.5 text-xs text-ink-500">{dosagePattern(m)} · {m.beforeFood ? "Before food" : "After food"}{m.duration ? ` · ${m.duration}` : ""}</p>
@@ -130,7 +130,7 @@ export default function SummaryEditor() {
           {uploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />} Upload
         </button>
         {atts.map((a, i) => (
-          <span key={i} className="inline-flex items-center gap-2 rounded-xl border border-ink-900/[.08] bg-white px-3 py-2 text-sm">
+          <span key={i} className="inline-flex items-center gap-2 rounded-xl border border-ink-900/[.08] bg-surface px-3 py-2 text-sm">
             <FileText size={14} className="text-brand-600" /><span className="max-w-[140px] truncate">{a.name}</span>
             <button onClick={() => setAtts((p) => p.filter((_, j) => j !== i))} className="text-ink-400 hover:text-rose-500"><X size={13} /></button>
           </span>
@@ -162,7 +162,7 @@ function Field({ label, value, onChange, placeholder, rows }: { label: string; v
     <div className="mb-4">
       <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-ink-700">{label}</p>
       <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows} placeholder={placeholder}
-        className="w-full resize-none rounded-xl border border-ink-900/10 bg-white p-3 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
+        className="w-full resize-none rounded-xl border border-ink-900/10 bg-surface p-3 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
     </div>
   );
 }
@@ -172,8 +172,8 @@ function MedicineSheet({ med, onSave, onCancel }: { med: Medicine; onSave: (m: M
   const up = (patch: Partial<Medicine>) => setM((x) => ({ ...x, ...patch }));
   return (
     <div className="fixed inset-0 z-[80] grid place-items-end sm:place-items-center" role="dialog" aria-modal>
-      <div className="absolute inset-0 bg-ink-900/40" onClick={onCancel} />
-      <div className="relative z-10 w-full max-w-md animate-[fade-up_.3s_ease-out_both] rounded-t-3xl bg-white p-5 shadow-card sm:rounded-3xl">
+      <div className="absolute inset-0 bg-ink-950/40" onClick={onCancel} />
+      <div className="relative z-10 w-full max-w-md animate-[fade-up_.3s_ease-out_both] rounded-t-3xl bg-surface p-5 shadow-card sm:rounded-3xl">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-base font-bold text-ink-900">{med.name ? "Edit medicine" : "Add medicine"}</p>
           <button onClick={onCancel} className="text-ink-400"><X size={18} /></button>
@@ -209,7 +209,7 @@ function Input({ label, value, onChange, placeholder }: { label: string; value: 
     <label className="mb-2 block">
       <span className="mb-1 block text-xs font-semibold text-ink-600">{label}</span>
       <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full rounded-xl border border-ink-900/10 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
+        className="w-full rounded-xl border border-ink-900/10 bg-surface px-3 py-2.5 text-sm outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
     </label>
   );
 }

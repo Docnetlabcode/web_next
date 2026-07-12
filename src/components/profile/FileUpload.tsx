@@ -47,7 +47,7 @@ export default function FileUpload({ value, onChange, label, accept = "image/*,a
   return (
     <>
       <div className="flex items-center gap-3 rounded-xl border-2 border-emerald-300 bg-emerald-50 p-3">
-        <button type="button" onClick={() => setViewer(true)} className="press grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-white">
+        <button type="button" onClick={() => setViewer(true)} className="press grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-surface">
           {kind === "image" && src ? <img src={src} alt="" className="h-full w-full object-cover" /> : <FileText size={20} className="text-ink-500" />}
         </button>
         <span className="min-w-0 flex-1">
@@ -56,9 +56,9 @@ export default function FileUpload({ value, onChange, label, accept = "image/*,a
         </span>
         {!disabled && (
           <div className="flex shrink-0 items-center gap-1">
-            <button type="button" onClick={() => ref.current?.click()} title="Replace" className="press grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-white"><RefreshCw size={15} /></button>
+            <button type="button" onClick={() => ref.current?.click()} title="Replace" className="press grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-surface"><RefreshCw size={15} /></button>
             {value instanceof Blob && (
-              <button type="button" onClick={() => onChange(null)} title="Remove" className="press grid h-8 w-8 place-items-center rounded-lg text-rose-500 hover:bg-white"><Trash2 size={15} /></button>
+              <button type="button" onClick={() => onChange(null)} title="Remove" className="press grid h-8 w-8 place-items-center rounded-lg text-rose-500 hover:bg-surface"><Trash2 size={15} /></button>
             )}
           </div>
         )}

@@ -59,7 +59,7 @@ export function AttachmentChip({ att, onOpen }: { att: ConsultAttachment; onOpen
     <button
       type="button"
       onClick={() => (onOpen ? onOpen(att) : window.open(att.url, "_blank", "noopener"))}
-      className="press inline-flex max-w-[200px] items-center gap-2 rounded-xl border border-ink-900/[.08] bg-white px-3 py-2 text-left text-sm transition hover:border-brand-300 hover:bg-brand-50"
+      className="press inline-flex max-w-[200px] items-center gap-2 rounded-xl border border-ink-900/[.08] bg-surface px-3 py-2 text-left text-sm transition hover:border-brand-300 hover:bg-brand-50"
     >
       <Icon size={16} className="shrink-0 text-brand-600" />
       <span className="truncate">{att.name || "Attachment"}</span>
@@ -133,7 +133,7 @@ export function FeeTable({ req }: { req: { consultationFeePaise: number; platfor
     </div>
   );
   return (
-    <div className="rounded-xl border border-ink-900/[.08] bg-white p-4">
+    <div className="rounded-xl border border-ink-900/[.08] bg-surface p-4">
       <Row label="Consultation fee" paise={req.consultationFeePaise} />
       <Row label="Platform fee" paise={req.platformFeePaise} />
       <Row label="GST" paise={req.gstPaise} />

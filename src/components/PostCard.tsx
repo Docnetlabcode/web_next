@@ -269,7 +269,7 @@ export default function PostCard({ post, demo, onRemoved, onSavedChange }) {
                 <button onClick={() => setLikesOpen(true)} className="press flex items-center gap-2 hover:text-ink-900 hover:underline">
                   <span className="flex -space-x-1">
                     {REACTIONS.slice(0, 3).map((r) => (
-                      <span key={r.key} className="grid h-5 w-5 place-items-center rounded-full bg-white text-[11px] ring-1 ring-ink-900/[.06]">{r.emoji}</span>
+                      <span key={r.key} className="grid h-5 w-5 place-items-center rounded-full bg-surface text-[11px] ring-1 ring-ink-900/[.06]">{r.emoji}</span>
                     ))}
                   </span>
                   {compact(count)} reactions
@@ -377,7 +377,7 @@ function MediaTile({ m, onOpen, onLike, wrap, media, overlay }) {
           <span className="grid h-11 w-11 place-items-center rounded-full bg-black/50 text-white backdrop-blur"><Play size={20} className="ml-0.5 fill-white text-white" /></span>
         </span>
       )}
-      {overlay && <span className="pointer-events-none absolute inset-0 grid place-items-center bg-ink-900/50 text-xl font-bold text-white">{overlay}</span>}
+      {overlay && <span className="pointer-events-none absolute inset-0 grid place-items-center bg-ink-950/50 text-xl font-bold text-white">{overlay}</span>}
     </div>
   );
 }

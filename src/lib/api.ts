@@ -355,11 +355,6 @@ export const dok = {
     clearHistory: () => unwrap(api.delete("/search/history")),
     popular: () => unwrap(api.get("/search/popular")),                                  // { terms:[{query,count}] } — distinct from #trending
   },
-  cases: {
-    feed: (q = "") => unwrap(api.get(`/cases/feed${q}`)),
-    get: (id) => unwrap(api.get(`/cases/${id}`)),
-    create: (b) => unwrap(api.post("/cases", b)),
-  },
   network: {
     connections: (q = "") => unwrap(api.get(`/network/connections${q}`)),
     requests: (q = "") => unwrap(api.get(`/network/requests${q}`)),

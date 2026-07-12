@@ -68,7 +68,7 @@ export default function NavArrows({ variant = "inline", className }) {
     nav(1);
   };
 
-  const btn = "press group grid place-items-center rounded-full border border-ink-900/[.08] bg-white text-ink-700 transition hover:border-brand-300 hover:text-brand-700 disabled:pointer-events-none disabled:opacity-35";
+  const btn = "press group grid place-items-center rounded-full border border-ink-900/[.08] bg-surface text-ink-700 transition hover:border-brand-300 hover:text-brand-700 disabled:pointer-events-none disabled:opacity-35";
   const size = variant === "floating" ? "h-10 w-10" : "h-8 w-8 sm:h-9 sm:w-9";
 
   return (

@@ -62,11 +62,11 @@ export default function HistoryView({ viewerIsDoctor }: { viewerIsDoctor: boolea
           <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" />
           <input value={query.search} onChange={(e) => setQuery((q) => ({ ...q, search: e.target.value }))}
             placeholder="Search name, diagnosis, medicine…"
-            className="w-full rounded-full border border-ink-900/10 bg-white py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
+            className="w-full rounded-full border border-ink-900/10 bg-surface py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
         </div>
         <div className="relative">
           <button onClick={() => { setShowFilters((s) => !s); setShowSort(false); }}
-            className={cn("press relative grid h-11 w-11 place-items-center rounded-full border bg-white transition", filterCount ? "border-brand-400 text-brand-600" : "border-ink-900/10 text-ink-600 hover:border-brand-300")}>
+            className={cn("press relative grid h-11 w-11 place-items-center rounded-full border bg-surface transition", filterCount ? "border-brand-400 text-brand-600" : "border-ink-900/10 text-ink-600 hover:border-brand-300")}>
             <SlidersHorizontal size={17} />
             {filterCount > 0 && <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">{filterCount}</span>}
           </button>
@@ -74,9 +74,9 @@ export default function HistoryView({ viewerIsDoctor }: { viewerIsDoctor: boolea
         </div>
         <div className="relative">
           <button onClick={() => { setShowSort((s) => !s); setShowFilters(false); }}
-            className="press grid h-11 w-11 place-items-center rounded-full border border-ink-900/10 bg-white text-ink-600 transition hover:border-brand-300"><ArrowDownUp size={17} /></button>
+            className="press grid h-11 w-11 place-items-center rounded-full border border-ink-900/10 bg-surface text-ink-600 transition hover:border-brand-300"><ArrowDownUp size={17} /></button>
           {showSort && (
-            <div onMouseLeave={() => setShowSort(false)} className="absolute right-0 z-30 mt-2 w-52 animate-scale-in rounded-2xl border border-ink-900/[.06] bg-white p-1.5 shadow-card">
+            <div onMouseLeave={() => setShowSort(false)} className="absolute right-0 z-30 mt-2 w-52 animate-scale-in rounded-2xl border border-ink-900/[.06] bg-surface p-1.5 shadow-card">
               {SORTS.map((s) => (
                 <button key={s.value} onClick={() => { setQuery((q) => ({ ...q, sort: s.value })); setShowSort(false); }}
                   className={cn("flex w-full items-center rounded-xl px-3 py-2 text-sm font-medium transition hover:bg-brand-50", query.sort === s.value ? "text-brand-700" : "text-ink-700")}>
@@ -101,7 +101,7 @@ export default function HistoryView({ viewerIsDoctor }: { viewerIsDoctor: boolea
 
 function Stat({ label, value }: { label: string; value: any }) {
   return (
-    <div className="rounded-2xl border border-ink-900/[.06] bg-white p-3 text-center">
+    <div className="rounded-2xl border border-ink-900/[.06] bg-surface p-3 text-center">
       <p className="text-lg font-extrabold text-ink-900">{value}</p>
       <p className="text-[11px] font-medium text-ink-500">{label}</p>
     </div>
@@ -110,7 +110,7 @@ function Stat({ label, value }: { label: string; value: any }) {
 
 function FilterSheet({ query, setQuery, onClose }: { query: ConsultationHistoryQuery; setQuery: (f: (q: ConsultationHistoryQuery) => ConsultationHistoryQuery) => void; onClose: () => void }) {
   return (
-    <div onMouseLeave={onClose} className="absolute right-0 z-30 mt-2 w-72 animate-scale-in rounded-2xl border border-ink-900/[.06] bg-white p-4 shadow-card">
+    <div onMouseLeave={onClose} className="absolute right-0 z-30 mt-2 w-72 animate-scale-in rounded-2xl border border-ink-900/[.06] bg-surface p-4 shadow-card">
       <Section label="Status">
         <Chips options={STATUSES} value={query.status} onChange={(v) => setQuery((q) => ({ ...q, status: v }))} />
       </Section>

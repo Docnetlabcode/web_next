@@ -110,10 +110,10 @@ export default function Profile() {
             <div className="relative">
               {user.profilePhoto ? (
                 <button type="button" onClick={() => setViewer(user.profilePhoto)} aria-label="View profile photo" className="press rounded-full cursor-zoom-in">
-                  <Avatar user={user} size={104} className="ring-4 ring-white" />
+                  <Avatar user={user} size={104} className="ring-4 ring-surface" />
                 </button>
               ) : (
-                <Avatar user={user} size={104} className="ring-4 ring-white" />
+                <Avatar user={user} size={104} className="ring-4 ring-surface" />
               )}
             </div>
             <div className="relative z-10 mb-1 flex gap-2">
@@ -163,7 +163,7 @@ export default function Profile() {
       </div>
 
       {/* tabs */}
-      <div className="sticky top-16 z-20 mt-5 flex gap-1 border-b border-ink-900/[.06] bg-[#f4f6f6]/90 backdrop-blur">
+      <div className="sticky top-16 z-20 mt-5 flex gap-1 border-b border-ink-900/[.06] bg-ink-50/90 backdrop-blur">
         {TABS.map((t) => (
           <button key={t} onClick={() => setTab(t)} className={cn("press relative px-4 py-3 text-sm font-semibold transition", tab === t ? "text-brand-700" : "text-ink-400 hover:text-ink-700")}>
             {t}{tab === t && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-brand-600 anim-pop" />}
@@ -235,7 +235,7 @@ function ProfileContent({ userId, demo }) {
               "press whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold transition",
               cat === c.key
                 ? "bg-brand-600 text-white shadow-glow"
-                : "bg-white text-ink-600 ring-1 ring-ink-900/[.06] hover:bg-brand-50 hover:text-brand-700"
+                : "bg-surface text-ink-600 ring-1 ring-ink-900/[.06] hover:bg-brand-50 hover:text-brand-700"
             )}
           >
             {c.label}
@@ -255,7 +255,7 @@ function ProfileContent({ userId, demo }) {
               <button
                 key={r._id || r.id}
                 onClick={() => setOpenReel(idx)}
-                className="lift group relative block aspect-[9/16] overflow-hidden rounded-2xl bg-ink-900 text-left shadow-card"
+                className="lift group relative block aspect-[9/16] overflow-hidden rounded-2xl bg-ink-950 text-left shadow-card"
               >
                 <img
                   src={reelPoster(r)}
@@ -412,7 +412,7 @@ function About({ user, doctor, student, general }) {
 
 function MetaPill({ icon: Icon, children }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-900/[.07] bg-white px-3 py-1.5 text-xs font-semibold text-ink-600 shadow-sm">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-900/[.07] bg-surface px-3 py-1.5 text-xs font-semibold text-ink-600 shadow-sm">
       <Icon size={13} className="shrink-0 text-brand-600" /> {children}
     </span>
   );

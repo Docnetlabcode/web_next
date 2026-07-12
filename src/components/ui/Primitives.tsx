@@ -30,34 +30,34 @@ export function Verified({ size = 15, className = "" }: { size?: number; classNa
 
 /**
  * Orovion brand lockup (assets in /public/brand, source: /LOGO).
- * `light` = rendered on a dark background → primary (white) variant;
- * default = secondary (ink #0E1213) variant for light backgrounds.
- * `withText` renders the full wordmark (icon + "orovion" typeface, 5.2:1);
- * otherwise the square icon alone.
+ * `light` = always-dark context (brand panels, admin login) → white variant only.
+ * Default is theme-aware: ink variant in light mode, the white "dark mode primary"
+ * variant in dark mode. Both render and CSS picks one, so the logo is correct on
+ * first paint with no theme-state flash.
+ * `withText` renders the full wordmark; otherwise the square icon alone.
  */
 export function Logo({ size = 30, withText = true, light = false }) {
-  const variant = light ? "primary" : "secondary";
+  const cls = "select-none";
   if (!withText) {
+    if (light) {
+      return <img src="/brand/icon-primary.svg" alt="Orovion" width={size} height={size} draggable={false} className={cls} />;
+    }
     return (
-      <img
-        src={`/brand/icon-${variant}.svg`}
-        alt="Orovion"
-        width={size}
-        height={size}
-        draggable={false}
-        className="select-none"
-      />
+      <>
+        <img src="/brand/icon-secondary.svg" alt="Orovion" width={size} height={size} draggable={false} className={cn(cls, "dark:hidden")} />
+        <img src="/brand/icon-primary.svg" alt="" aria-hidden width={size} height={size} draggable={false} className={cn(cls, "hidden dark:block")} />
+      </>
     );
   }
+  const wordmarkStyle = { height: size, width: "auto" as const };
+  if (light) {
+    return <img src="/brand/wordmark-primary.svg" alt="Orovion" height={size} style={wordmarkStyle} draggable={false} className={cls} />;
+  }
   return (
-    <img
-      src={`/brand/wordmark-${variant}.svg`}
-      alt="Orovion"
-      height={size}
-      style={{ height: size, width: "auto" }}
-      draggable={false}
-      className="select-none"
-    />
+    <>
+      <img src="/brand/wordmark-secondary.svg" alt="Orovion" height={size} style={wordmarkStyle} draggable={false} className={cn(cls, "dark:hidden")} />
+      <img src="/brand/wordmark-dark.svg" alt="" aria-hidden height={size} style={wordmarkStyle} draggable={false} className={cn(cls, "hidden dark:block")} />
+    </>
   );
 }
 
@@ -72,7 +72,7 @@ export function Spinner({ className = "" }: { className?: string }) {
 export function Skeleton({ className = "" }: { className?: string }) {
   return (
     <div className={cn("relative overflow-hidden rounded-lg bg-ink-900/[.06]", className)}>
-      <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+      <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent dark:via-white/10" />
     </div>
   );
 }

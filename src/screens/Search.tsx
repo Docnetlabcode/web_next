@@ -181,7 +181,7 @@ export default function Search() {
         </form>
 
         {showTypeahead && (
-          <div className="anim-pop absolute inset-x-0 top-full z-30 mt-2 max-h-[60vh] overflow-y-auto rounded-2xl border border-ink-900/[.08] bg-white shadow-card">
+          <div className="anim-pop absolute inset-x-0 top-full z-30 mt-2 max-h-[60vh] overflow-y-auto rounded-2xl border border-ink-900/[.08] bg-surface shadow-card">
             {input.trim().length < 3 ? (
               <RecentList recent={recent} onPick={runSearch} onDelete={deleteRecent} onClear={clearRecent} />
             ) : suggest === null ? (
@@ -268,7 +268,7 @@ export default function Search() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {recent.map((r) => (
-                  <button key={r.id || r.label} onClick={() => runSearch(r.label)} className="press rounded-full bg-white px-3.5 py-1.5 text-sm text-ink-600 ring-1 ring-ink-900/[.08] hover:bg-brand-50 hover:text-brand-700">{r.label}</button>
+                  <button key={r.id || r.label} onClick={() => runSearch(r.label)} className="press rounded-full bg-surface px-3.5 py-1.5 text-sm text-ink-600 ring-1 ring-ink-900/[.08] hover:bg-brand-50 hover:text-brand-700">{r.label}</button>
                 ))}
               </div>
             </section>

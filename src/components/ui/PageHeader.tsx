@@ -12,7 +12,7 @@ export function PageHeader({ title, subtitle, right, back = true, forward = true
         <button
           onClick={() => nav(-1)}
           aria-label="Go back"
-          className="press group grid h-10 w-10 shrink-0 place-items-center rounded-full border border-ink-900/[.08] bg-white text-ink-700 transition hover:-translate-x-0.5 hover:border-brand-300 hover:text-brand-700"
+          className="press group grid h-10 w-10 shrink-0 place-items-center rounded-full border border-ink-900/[.08] bg-surface text-ink-700 transition hover:-translate-x-0.5 hover:border-brand-300 hover:text-brand-700"
         >
           <ArrowLeft size={18} className="transition group-hover:-translate-x-0.5" />
         </button>
@@ -21,7 +21,7 @@ export function PageHeader({ title, subtitle, right, back = true, forward = true
         <button
           onClick={() => nav(1)}
           aria-label="Go forward"
-          className="press group hidden h-10 w-10 shrink-0 place-items-center rounded-full border border-ink-900/[.08] bg-white text-ink-700 transition hover:translate-x-0.5 hover:border-brand-300 hover:text-brand-700 sm:grid"
+          className="press group hidden h-10 w-10 shrink-0 place-items-center rounded-full border border-ink-900/[.08] bg-surface text-ink-700 transition hover:translate-x-0.5 hover:border-brand-300 hover:text-brand-700 sm:grid"
         >
           <ArrowRight size={18} className="transition group-hover:translate-x-0.5" />
         </button>

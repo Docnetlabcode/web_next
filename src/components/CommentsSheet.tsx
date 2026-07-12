@@ -23,8 +23,8 @@ export default function CommentsSheet({ open, onClose, post, demo, onCountChange
 
   return createPortal(
     <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center sm:p-4">
-      <div className="absolute inset-0 animate-fade-in bg-ink-900/45 backdrop-blur-sm" onClick={onClose} />
-      <div className="anim-sheet-up relative flex h-[78vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:h-[min(40rem,85vh)] sm:rounded-3xl">
+      <div className="absolute inset-0 animate-fade-in bg-ink-950/45 backdrop-blur-sm" onClick={onClose} />
+      <div className="anim-sheet-up relative flex h-[78vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-surface shadow-2xl sm:h-[min(40rem,85vh)] sm:rounded-3xl">
         <div className="mx-auto mt-3 h-1.5 w-10 shrink-0 rounded-full bg-ink-900/15 sm:hidden" />
         <div className="flex shrink-0 items-center gap-2 border-b border-ink-900/[.06] px-5 py-3.5">
           <MessageCircle size={18} className="text-brand-600" />
