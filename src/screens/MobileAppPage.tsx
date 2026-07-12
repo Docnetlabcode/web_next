@@ -54,12 +54,12 @@ function Hero() {
     <section className="relative">
       <div className="absolute inset-0 mesh" />
       <div className="absolute inset-x-0 top-0 h-[560px] grid-bg" />
-      <div className="container-x relative grid items-center gap-14 pb-20 pt-16 lg:grid-cols-2 lg:pb-28 lg:pt-20">
+      <div className="container-x relative grid items-center gap-10 pb-16 pt-10 sm:gap-14 sm:pb-20 sm:pt-16 lg:grid-cols-2 lg:pb-28 lg:pt-20">
         <div>
           <span className="inline-flex animate-fade-in items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3.5 py-1.5 text-xs font-semibold text-brand-700">
             <Bell size={13} /> Now on the App Store &amp; Google Play
           </span>
-          <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.05] tracking-tight text-ink-900 text-balance sm:text-6xl">
+          <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-ink-900 text-balance sm:text-5xl sm:leading-[1.05] md:text-6xl">
             Orovion, in <span className="text-gradient">your pocket.</span>
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink-500">
@@ -86,13 +86,13 @@ function Hero() {
 
 function Screens() {
   return (
-    <section className="bg-ink-50 py-24">
+    <section className="bg-ink-50 py-16 sm:py-24">
       <div className="container-x">
         <div className="reveal mx-auto max-w-2xl text-center">
           <h2 className="font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Every surface, made for one hand</h2>
           <p className="mt-4 text-lg text-ink-500">The same verified network as the web, rebuilt around the moments between consults.</p>
         </div>
-        <div className="mt-16 grid items-start justify-items-center gap-12 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid items-start justify-items-center gap-12 sm:mt-16 sm:grid-cols-2 lg:grid-cols-3">
           <ScreenDemo caption="The feed" text="Cases, research and updates from clinicians you trust — filtered by specialty.">
             <FeedScreen />
           </ScreenDemo>
@@ -129,12 +129,12 @@ const CAPABILITIES = [
 
 function Capabilities() {
   return (
-    <section className="container-x py-24">
+    <section className="container-x py-16 sm:py-24">
       <div className="reveal mx-auto max-w-2xl text-center">
         <h2 className="font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Nothing left behind</h2>
         <p className="mt-4 text-lg text-ink-500">If you can do it on Orovion, you can do it from the app.</p>
       </div>
-      <div className="mt-14 grid gap-5 sm:grid-cols-2">
+      <div className="mt-10 grid gap-5 sm:mt-14 sm:grid-cols-2">
         {CAPABILITIES.map((c, i) => (
           <div key={c.title} className="reveal card flex items-start gap-4 p-6" style={{ transitionDelay: `${i * 60}ms` }}>
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-600 text-white shadow-glow"><c.icon size={20} /></span>
@@ -151,8 +151,8 @@ function Capabilities() {
 
 function StoresCTA() {
   return (
-    <section className="container-x pb-24">
-      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-8 py-14 text-center shadow-glow sm:px-16">
+    <section className="container-x pb-16 sm:pb-24">
+      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-6 py-12 text-center shadow-glow sm:px-16 sm:py-14">
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="relative">
           <h2 className="font-display text-3xl font-extrabold tracking-tight text-white text-balance sm:text-4xl">We&rsquo;re on both stores</h2>
@@ -172,7 +172,7 @@ function StoresCTA() {
 
 function PhoneFrame({ children, small = false, tilt = "" }: { children: React.ReactNode; small?: boolean; tilt?: string }) {
   return (
-    <div className={cn("relative rounded-[2.6rem] bg-ink-950 p-2.5 shadow-4 ring-1 ring-white/10", small ? "w-60" : "w-72", tilt)} aria-hidden>
+    <div className={cn("relative max-w-full rounded-[2.6rem] bg-ink-950 p-2.5 shadow-4 ring-1 ring-white/10", small ? "w-60" : "w-64 sm:w-72", tilt)} aria-hidden>
       {/* notch */}
       <div className="absolute left-1/2 top-4 z-20 h-5 w-24 -translate-x-1/2 rounded-full bg-ink-950" />
       <div className="relative overflow-hidden rounded-[2rem] bg-ink-50">

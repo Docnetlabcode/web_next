@@ -70,7 +70,7 @@ function Principles() {
 
 function Members() {
   return (
-    <section className="container-x space-y-20 py-20 lg:space-y-28 lg:py-28">
+    <section className="container-x space-y-16 py-16 sm:space-y-20 sm:py-20 lg:space-y-28 lg:py-28">
       {TEAM.map((m, i) => <MemberProfile key={m.slug} member={m} flip={i % 2 === 1} />)}
     </section>
   );
@@ -79,9 +79,9 @@ function Members() {
 function MemberProfile({ member: m, flip }: { member: TeamMember; flip: boolean }) {
   return (
     <article id={m.slug} className="reveal scroll-mt-28">
-      <div className={cn("grid items-start gap-10 lg:grid-cols-[340px_1fr]", flip && "lg:grid-cols-[1fr_340px]")}>
+      <div className={cn("grid items-start gap-8 md:gap-10", flip ? "md:grid-cols-[1fr_300px] lg:grid-cols-[1fr_340px]" : "md:grid-cols-[300px_1fr] lg:grid-cols-[340px_1fr]")}>
         {/* profile card */}
-        <div className={cn("lg:sticky lg:top-28", flip && "lg:order-2")}>
+        <div className={cn("md:sticky md:top-24 lg:top-28", flip && "md:order-2")}>
           <div className="card relative overflow-hidden p-6">
             <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-br from-brand-600 to-brand-800" />
             <div className="absolute inset-x-0 top-0 h-24 grid-bg opacity-40" />
@@ -103,7 +103,7 @@ function MemberProfile({ member: m, flip }: { member: TeamMember; flip: boolean 
         </div>
 
         {/* story */}
-        <div className={cn(flip && "lg:order-1")}>
+        <div className={cn("min-w-0", flip && "md:order-1")}>
           <h2 className="font-display text-3xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-4xl">{m.name}</h2>
           <p className="mt-1 text-base font-semibold text-brand-700">{m.role}</p>
           <div className="mt-6 max-w-2xl space-y-4 text-[15px] leading-relaxed text-ink-600">
@@ -123,7 +123,7 @@ function SocialButton({ href, label, icon: Icon }: { href: string; label: string
     <a
       href={href}
       aria-label={label}
-      className="press grid h-9 w-9 place-items-center rounded-full bg-ink-900/[.05] text-ink-600 transition hover:bg-brand-50 hover:text-brand-700"
+      className="press grid h-10 w-10 place-items-center rounded-full bg-ink-900/[.05] text-ink-600 transition hover:bg-brand-50 hover:text-brand-700"
     >
       <Icon size={16} />
     </a>
@@ -132,8 +132,8 @@ function SocialButton({ href, label, icon: Icon }: { href: string; label: string
 
 function JoinCTA() {
   return (
-    <section className="container-x pb-24">
-      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-8 py-14 text-center shadow-glow sm:px-16">
+    <section className="container-x pb-16 sm:pb-24">
+      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-6 py-12 text-center shadow-glow sm:px-16 sm:py-14">
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="relative">
           <h2 className="font-display text-3xl font-extrabold tracking-tight text-white text-balance sm:text-4xl">Want to build this with us?</h2>

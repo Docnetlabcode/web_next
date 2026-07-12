@@ -45,7 +45,7 @@ export function SiteNav() {
         scrolled || open ? "glass border-b border-ink-900/[.06] shadow-2" : "border-b border-transparent bg-transparent"
       )}
     >
-      <div className="container-x flex h-20 items-center justify-between">
+      <div className="container-x flex h-16 items-center justify-between sm:h-20">
         <Link to="/" aria-label="Orovion home"><Logo /></Link>
 
         {/* desktop links */}
@@ -97,7 +97,7 @@ export function SiteNav() {
 
       {/* mobile menu */}
       {open && (
-        <div className="border-t border-ink-900/[.06] glass lg:hidden">
+        <div className="glass max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-t border-ink-900/[.06] lg:hidden">
           <div className="container-x flex flex-col py-3">
             {NAV_SECTIONS.map((s) => (
               <a key={s.href} href={s.href} onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-ink-700 transition hover:bg-brand-50 hover:text-brand-700">{s.label}</a>
@@ -145,7 +145,7 @@ export function SiteFooter() {
     <footer className="relative overflow-hidden bg-brand-900 text-white">
       <div className="absolute inset-0 grid-bg opacity-[.12]" />
       <div className="container-x relative">
-        <div className="grid gap-10 py-16 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-10 py-12 sm:grid-cols-2 sm:py-16 lg:grid-cols-5">
           {/* brand + socials + app */}
           <div className="lg:col-span-2">
             <Logo light />

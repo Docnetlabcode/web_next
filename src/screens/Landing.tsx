@@ -42,7 +42,7 @@ function Hero() {
     <section className="relative">
       <div className="absolute inset-0 mesh" />
       <div className="absolute inset-x-0 top-0 h-[600px] grid-bg" />
-      <div className="container-x relative grid items-center gap-12 pb-20 pt-16 lg:grid-cols-2 lg:pb-28 lg:pt-20">
+      <div className="container-x relative grid items-center gap-10 pb-16 pt-10 sm:gap-12 sm:pt-16 lg:grid-cols-2 lg:pb-28 lg:pt-20">
         <div>
           <span className="inline-flex animate-fade-in items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3.5 py-1.5 text-xs font-semibold text-brand-700">
             <span className="relative flex h-2 w-2">
@@ -51,8 +51,8 @@ function Hero() {
             </span>
             Verified by license. Always private.
           </span>
-          <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.05] tracking-tight text-ink-900 text-balance sm:text-6xl lg:text-7xl">
-            A trusted network <br /> of <span className="text-gradient">clinicians.</span>
+          <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-ink-900 text-balance sm:text-5xl sm:leading-[1.05] md:text-6xl xl:text-7xl">
+            A trusted network <br className="hidden sm:block" /> of <span className="text-gradient">clinicians.</span>
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink-500">
             Orovion brings cases, research, reels and real-time consults into one
@@ -143,7 +143,7 @@ const FEATURES = [
 function Features() {
   useScrollReveal();
   return (
-    <section id="features" className="bg-ink-50 py-24">
+    <section id="features" className="bg-ink-50 py-16 sm:py-24">
       <div className="container-x">
         <div className="reveal mx-auto max-w-2xl text-center">
           <span className="chip bg-brand-50 text-brand-700"><Sparkles size={14} /> Everything in one place</span>
@@ -152,7 +152,7 @@ function Features() {
           </h2>
           <p className="mt-4 text-lg text-ink-500">From the first case discussion to your next consultation — one platform, zero noise.</p>
         </div>
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-5 sm:mt-14 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f, i) => (
             <div key={f.title} className="reveal card group p-6 transition hover:-translate-y-1 hover:shadow-glow" style={{ transitionDelay: `${i * 60}ms` }}>
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-600 text-white shadow-glow transition group-hover:scale-110">
@@ -176,12 +176,12 @@ const ROLES = [
 function Roles() {
   useScrollReveal();
   return (
-    <section id="roles" className="container-x py-24">
+    <section id="roles" className="container-x py-16 sm:py-24">
       <div className="reveal mx-auto max-w-2xl text-center">
         <h2 className="font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">One network, three journeys</h2>
         <p className="mt-4 text-lg text-ink-500">Whether you treat, study or seek care — Orovion meets you where you are.</p>
       </div>
-      <div className="mt-14 grid gap-6 lg:grid-cols-3">
+      <div className="mt-10 grid gap-6 sm:mt-14 md:grid-cols-3">
         {ROLES.map((r, i) => (
           <div key={r.tag} className="reveal overflow-hidden rounded-3xl border border-ink-900/[.06] bg-surface shadow-card" style={{ transitionDelay: `${i * 80}ms` }}>
             <div className={`bg-gradient-to-br ${r.color} p-6 text-white`}>
@@ -205,8 +205,8 @@ function Roles() {
 function Showcase() {
   useScrollReveal();
   return (
-    <section id="showcase" className="bg-ink-50 py-24">
-      <div className="container-x grid items-center gap-14 lg:grid-cols-2">
+    <section id="showcase" className="bg-ink-50 py-16 sm:py-24">
+      <div className="container-x grid items-center gap-10 md:grid-cols-2 lg:gap-14">
         <div className="reveal">
           <span className="chip bg-brand-50 text-brand-700"><Activity size={14} /> Real-time everything</span>
           <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Search, discover, and connect — instantly</h2>
@@ -227,8 +227,8 @@ function Showcase() {
               {SAMPLE.slice(0, 2).map((u) => (
                 <div key={u._id} className="flex items-center gap-3 rounded-xl border border-ink-900/[.05] p-3">
                   <Avatar user={u} size={40} />
-                  <div className="flex-1"><p className="flex items-center gap-1 text-sm font-semibold">{u.fullName} <Verified size={13} /></p><p className="text-xs text-ink-400">{u.professionalHeadline}</p></div>
-                  <button className="btn-ghost px-3 py-1.5 text-xs">+ Connect</button>
+                  <div className="min-w-0 flex-1"><p className="flex items-center gap-1 truncate text-sm font-semibold">{u.fullName} <Verified size={13} /></p><p className="truncate text-xs text-ink-400">{u.professionalHeadline}</p></div>
+                  <button className="btn-ghost shrink-0 px-3 py-1.5 text-xs">+ Connect</button>
                 </div>
               ))}
               <div className="rounded-xl bg-brand-50 p-3">
@@ -248,13 +248,13 @@ const firstName = (name: string) => name.replace(/^Dr\.?\s*/i, "").split(/\s+/)[
 function Team() {
   useScrollReveal();
   return (
-    <section id="team" className="container-x py-24">
+    <section id="team" className="container-x py-16 sm:py-24">
       <div className="reveal mx-auto max-w-2xl text-center">
         <span className="chip bg-brand-50 text-brand-700"><Users size={14} /> The people behind Orovion</span>
         <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Meet the team</h2>
         <p className="mt-4 text-lg text-ink-500">Clinicians and engineers building a network the medical community can trust.</p>
       </div>
-      <div className="mt-14 grid gap-6 lg:grid-cols-3">
+      <div className="mt-10 grid gap-6 sm:mt-14 md:grid-cols-3">
         {TEAM.map((m, i) => (
           <Link
             key={m.slug}
@@ -290,11 +290,11 @@ function Team() {
 
 function CTA() {
   return (
-    <section className="container-x py-24">
-      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-8 py-16 text-center shadow-glow sm:px-16">
+    <section className="container-x py-16 sm:py-24">
+      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-6 py-12 text-center shadow-glow sm:px-16 sm:py-16">
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="relative">
-          <h2 className="font-display text-4xl font-extrabold tracking-tight text-white text-balance sm:text-5xl">Join the network built on trust</h2>
+          <h2 className="font-display text-3xl font-extrabold tracking-tight text-white text-balance sm:text-4xl lg:text-5xl">Join the network built on trust</h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/85">Create your verified profile in minutes. Free for students and general users.</p>
           <div className="mt-8 flex justify-center">
             <Link to="/login" className="btn px-7 py-3.5 text-base bg-surface text-brand-700 hover:bg-surface/90">Join the Orovion</Link>
