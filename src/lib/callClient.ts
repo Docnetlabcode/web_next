@@ -1,20 +1,31 @@
 import { io, Socket } from "socket.io-client";
 import { dok, TOKENS } from "./api";
+import { chatSocketUrl, onBackendChange } from "./backend";
 
 // The calling signaling lives in chat-service (port 5001), NOT api-service.
-// Point NEXT_PUBLIC_CHAT_SOCKET_URL at the chat-service origin, e.g.
-//   NEXT_PUBLIC_CHAT_SOCKET_URL=http://localhost:5001
-// Falls back to NEXT_PUBLIC_SOCKET_URL, then same-origin.
+// Point NEXT_PUBLIC_CHAT_SOCKET_URL (or the *_RENDER/_AWS pair — see
+// lib/backend.ts) at the chat-service origin, e.g. http://localhost:5001.
+// Falls back to the deployment's socket URL, then same-origin.
 let callSocket: Socket | null = null;
 let refreshing = false;
 
 function chatOrigin(): string | undefined {
-  return (
-    process.env.NEXT_PUBLIC_CHAT_SOCKET_URL ||
-    process.env.NEXT_PUBLIC_SOCKET_URL ||
-    undefined
-  );
+  return chatSocketUrl();
 }
+
+// Dual-deployment failover: follow a Render <-> AWS switch by re-pointing the
+// existing manager (Manager.open() builds the engine from io.uri on every
+// (re)connect, so registered call-event listeners survive; the typings mark
+// uri private, hence the cast).
+onBackendChange((d) => {
+  const next = d.chatSocketUrl || d.socketUrl;
+  if (!callSocket || !next) return;
+  (callSocket.io as { uri?: string }).uri = next;
+  if (callSocket.connected) {
+    callSocket.disconnect();
+    callSocket.connect();
+  }
+});
 
 export function getCallSocket(): Socket {
   if (callSocket) return callSocket;

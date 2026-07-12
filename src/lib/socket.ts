@@ -1,16 +1,31 @@
 import { io } from "socket.io-client";
 import { dok, TOKENS } from "./api";
+import { socketUrl, onBackendChange } from "./backend";
 
 // Main realtime socket (notifications + chat). Lives in chat-service (5001) —
-// api-service has no Socket.IO server, so NEXT_PUBLIC_SOCKET_URL must point at
-// chat-service.
+// api-service has no Socket.IO server, so the socket URL must point at
+// chat-service (NEXT_PUBLIC_SOCKET_URL, or the *_RENDER/_AWS pair when the
+// backend runs on both deployments — see lib/backend.ts).
 let socket = null;
 let myUserId = null;
 let refreshing = false;
 
 function socketOrigin() {
-  return process.env.NEXT_PUBLIC_SOCKET_URL || undefined; // same origin via proxy if unset
+  return socketUrl(); // undefined => same origin via proxy
 }
+
+// Dual-deployment failover: when the app switches between Render and AWS,
+// re-point the existing manager at the new chat-service origin. socket.io
+// reads io.uri on every (re)connect attempt, so all registered event
+// listeners survive the switch.
+onBackendChange((d) => {
+  if (!socket || !d.socketUrl) return;
+  socket.io.uri = d.socketUrl;
+  if (socket.connected) {
+    socket.disconnect();
+    socket.connect();
+  }
+});
 
 export function getSocket() {
   if (socket) return socket;

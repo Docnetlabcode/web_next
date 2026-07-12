@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const BASE = process.env.NEXT_PUBLIC_API_BASE || ""; // "" => use Vite proxy /api
+import { apiBase, resolveBackend, failover } from "./backend";
 
 // --- Web client token transport (see backend docs: "Clients: mobile vs web") ---
 // access token: kept in memory only (re-minted on load via the refresh cookie)
@@ -57,14 +56,18 @@ export const ADMIN_TOKENS = {
 };
 
 export const api = axios.create({
-  baseURL: `${BASE}/api`,
+  baseURL: `${apiBase()}/api`,
   withCredentials: true, // send/receive the httpOnly refresh + csrf cookies
   headers: { "Content-Type": "application/json", "X-Client-Type": "web" },
 });
 
 // Attach the right bearer token. /admin/* calls use the admin JWT; everything
 // else uses the product user access token (+ CSRF on cookie-auth calls).
-api.interceptors.request.use((cfg) => {
+api.interceptors.request.use(async (cfg) => {
+  // Dual deployment (Render + AWS): the first request awaits the /health probe
+  // that picks the live backend; afterwards this is an already-settled promise.
+  await resolveBackend();
+  cfg.baseURL = `${apiBase()}/api`;
   const url = cfg.url || "";
   if (url.startsWith("/admin")) {
     const at = ADMIN_TOKENS.access;
@@ -96,6 +99,17 @@ api.interceptors.response.use(
     const { config, response } = error;
     const url = config?.url || "";
 
+    // Network-level failure (no HTTP response): the active deployment (Render
+    // or AWS) may have gone down. Re-probe both, and if the live one changed,
+    // retry this request once against it.
+    if (!response && config && !config._failover && !axios.isCancel(error)) {
+      config._failover = true;
+      if (await failover()) {
+        config.baseURL = `${apiBase()}/api`;
+        return api(config);
+      }
+    }
+
     // Admin calls are self-contained: never fall through to the product user
     // refresh path. Refresh the admin JWT once on 401 (except on auth endpoints,
     // so a bad login doesn't loop), otherwise reject as-is.
@@ -107,7 +121,7 @@ api.interceptors.response.use(
           const rt = ADMIN_TOKENS.refresh;
           if (!rt) throw new Error("no admin refresh token");
           const { data } = await axios.post(
-            `${BASE}/api/admin/auth/refresh`,
+            `${apiBase()}/api/admin/auth/refresh`,
             { refreshToken: rt },
             { headers: { "Content-Type": "application/json" } }
           );
