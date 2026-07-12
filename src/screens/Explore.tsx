@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import PostCard from "@/components/PostCard";
 import RightRail from "@/components/layout/RightRail";
+import { PostFeedSkeleton } from "@/components/ui/Skeletons";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 
@@ -18,7 +19,11 @@ export default function Explore() {
           <h1 className="font-display text-2xl font-extrabold text-ink-900">Explore</h1>
           <p className="text-sm text-ink-500">Trending posts & reels from across Orovion.</p>
         </header>
-        <div className="space-y-5">{(posts || []).map((p) => <PostCard key={p._id || p.id} post={p} demo={demo} />)}</div>
+        {posts === null ? (
+          <PostFeedSkeleton />
+        ) : (
+          <div className="space-y-5">{posts.map((p) => <PostCard key={p._id || p.id} post={p} demo={demo} />)}</div>
+        )}
       </div>
       <RightRail />
     </div>

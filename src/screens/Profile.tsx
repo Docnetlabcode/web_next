@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { MapPin, Briefcase, GraduationCap, Building2, Share2, ArrowLeft, Settings as SettingsIcon, Stethoscope, Activity, CalendarDays, Mail, Phone, Globe, Award, ExternalLink, Play, Heart, Eye, Clapperboard } from "lucide-react";
 import { useNavigate, Link } from "@/lib/router";
-import { Avatar, Verified, RoleBadge, Spinner } from "@/components/ui/Primitives";
+import { Avatar, Verified, RoleBadge } from "@/components/ui/Primitives";
+import { PostFeedSkeleton, TileGridSkeleton, TextBlockSkeleton } from "@/components/ui/Skeletons";
 import PostCard from "@/components/PostCard";
 import ReelViewer from "@/components/ReelViewer";
 import ShareSheet from "@/components/ShareSheet";
@@ -175,7 +176,7 @@ export default function Profile() {
         {tab === "Posts" && <ProfileContent userId={user._id || user.id} demo={demo} />}
         {tab === "About" && (
           loading
-            ? <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>
+            ? <TextBlockSkeleton lines={5} className="card p-5" />
             : <About user={user} doctor={doctor} student={student} general={general} />
         )}
       </div>
@@ -245,7 +246,7 @@ function ProfileContent({ userId, demo }) {
 
       {/* content */}
       {items == null ? (
-        <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>
+        def.kind === "reel" ? <TileGridSkeleton count={6} /> : <PostFeedSkeleton />
       ) : items.length === 0 ? (
         <Empty icon={def.kind === "reel" ? Clapperboard : Briefcase} text={`No ${def.label.toLowerCase()} yet.`} />
       ) : def.kind === "reel" ? (

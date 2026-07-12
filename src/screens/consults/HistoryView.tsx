@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, ArrowDownUp, History as HistoryIcon } from "lucide-react";
-import { Spinner } from "@/components/ui/Primitives";
+import { CardRowsSkeleton } from "@/components/ui/Skeletons";
 import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { parseRequest, ConsultationRequest } from "@/lib/consultations/types";
@@ -40,7 +40,7 @@ export default function HistoryView({ viewerIsDoctor }: { viewerIsDoctor: boolea
   const stats = useMemo(() => computeHistoryStats(items || []), [items]);
   const filterCount = activeFilterCount(query);
 
-  if (items === null) return <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>;
+  if (items === null) return <CardRowsSkeleton count={4} className="space-y-3" />;
 
   return (
     <div>

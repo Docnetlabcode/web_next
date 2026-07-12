@@ -6,7 +6,8 @@ import {
   Receipt, Star, FileText, Pill, Stethoscope, ClipboardList, X,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Avatar, Verified, Spinner } from "@/components/ui/Primitives";
+import { Avatar, Verified } from "@/components/ui/Primitives";
+import { DetailSkeleton } from "@/components/ui/Skeletons";
 import { useToast } from "@/components/ui/Toast";
 import { useAuth } from "@/context/AuthContext";
 import { useCall } from "@/context/CallContext";
@@ -43,7 +44,7 @@ export default function RequestDetail() {
     <div className="mx-auto w-full max-w-2xl"><PageHeader title="Consultation" />
       <div className="card p-8 text-center"><p className="text-sm text-ink-600">Couldn't load this consultation.</p><button onClick={load} className="btn-primary mx-auto mt-4 px-5 py-2 text-sm">Retry</button></div></div>
   );
-  if (!req) return <div className="grid min-h-[60vh] place-items-center"><Spinner className="h-8 w-8" /></div>;
+  if (!req) return <div className="mx-auto w-full max-w-2xl pb-24 pt-2"><DetailSkeleton blocks={3} /></div>;
 
   const viewerIsDoctor = myId === req.doctorId;
   const other = viewerIsDoctor

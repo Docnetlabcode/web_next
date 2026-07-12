@@ -3,6 +3,7 @@
 import { AuthProvider } from "@/context/AuthContext";
 import { CallProvider } from "@/context/CallContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { AppearanceProvider } from "@/context/AppearanceContext";
 import { ToastProvider } from "@/components/ui/Toast";
 import CallRoot from "@/components/call/CallRoot";
 
@@ -10,14 +11,16 @@ import CallRoot from "@/components/call/CallRoot";
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <ToastProvider>
-        <AuthProvider>
-          <CallProvider>
-            {children}
-            <CallRoot />
-          </CallProvider>
-        </AuthProvider>
-      </ToastProvider>
+      <AppearanceProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <CallProvider>
+              {children}
+              <CallRoot />
+            </CallProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </AppearanceProvider>
     </ThemeProvider>
   );
 }

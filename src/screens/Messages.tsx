@@ -1,8 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "@/lib/router";
-import { Send, Check, CheckCheck, Phone, Video, Search, MessageSquare, Loader2 } from "lucide-react";
+import { Send, Check, CheckCheck, Phone, Video, Search, MessageSquare } from "lucide-react";
 import { Avatar, Verified } from "@/components/ui/Primitives";
+import { RowsSkeleton, ChatThreadSkeleton } from "@/components/ui/Skeletons";
+import { useAppearance } from "@/context/AppearanceContext";
+import { BUBBLES, WALLPAPERS } from "@/lib/appearance";
 import { useAuth } from "@/context/AuthContext";
 import { useCall } from "@/context/CallContext";
 import { useToast } from "@/components/ui/Toast";
@@ -20,6 +23,10 @@ export default function Messages() {
   const toast = useToast();
   const myId = user?._id || user?.id;
   const [sp] = useSearchParams();
+  // Chat customization (Settings → Appearance): bubble shape + wallpaper.
+  const { appearance } = useAppearance();
+  const bubble = BUBBLES[appearance.bubble];
+  const wallpaper = WALLPAPERS[appearance.wallpaper].className;
 
   const [convos, setConvos] = useState(null); // null = loading
   const [active, setActive] = useState(null);
@@ -277,7 +284,7 @@ export default function Messages() {
         </div>
         <div className="overflow-y-auto">
           {convos === null ? (
-            <div className="space-y-1 p-3">{[0, 1, 2, 3].map((i) => <div key={i} className="h-14 animate-pulse rounded-xl bg-ink-900/[.04]" />)}</div>
+            <RowsSkeleton count={5} className="p-1.5" />
           ) : shown.length === 0 ? (
             <p className="px-4 py-10 text-center text-sm text-ink-400">{query ? "No matches" : "No conversations yet. Connect with colleagues to start chatting."}</p>
           ) : shown.map((c) => {
@@ -323,16 +330,16 @@ export default function Messages() {
                 className="rounded-full p-2 text-brand-600 hover:bg-brand-50" title="Video call"><Video size={18} /></button>
             </div>
 
-            <div className="flex-1 space-y-3 overflow-y-auto p-5">
+            <div className={cn("flex-1 space-y-3 overflow-y-auto p-5", wallpaper)}>
               {msgs === null ? (
-                <div className="grid h-full place-items-center"><Loader2 size={22} className="animate-spin text-brand-600" /></div>
+                <ChatThreadSkeleton />
               ) : msgs.length === 0 ? (
                 <p className="mt-6 text-center text-sm text-ink-400">No messages yet — say hello 👋</p>
               ) : msgs.map((m) => {
                 const mine = isMine(m);
                 return (
                   <div key={midOf(m)} className={cn("flex", mine ? "justify-end" : "justify-start")}>
-                    <div className={cn("max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-soft", mine ? "rounded-br-md bg-brand-600 text-white" : "rounded-bl-md bg-surface text-ink-900")}>
+                    <div className={cn("max-w-[75%] px-4 py-2.5 text-sm shadow-soft", mine ? cn(bubble.mine, "bubble-mine text-white") : cn(bubble.theirs, "bg-surface text-ink-900"))}>
                       <p className={cn(m.isDeleted && "italic opacity-70")}>{m.content}</p>
                       <p className={cn("mt-1 flex items-center justify-end gap-1 text-[10px]", mine ? "text-white/70" : "text-ink-400")}>
                         {timeAgo(m.createdAt)}

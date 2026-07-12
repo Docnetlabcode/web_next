@@ -28,7 +28,7 @@ const store = {
   },
 };
 
-export default function NavArrows({ variant = "inline", className }) {
+export default function NavArrows({ variant = "inline", className = "" }) {
   const nav = useNavigate();
   const pathname = usePathname();
   const [canBack, setCanBack] = useState(false);

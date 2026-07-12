@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "@/lib/router";
 import { Stethoscope, Search, Inbox, History as HistoryIcon, Settings, Wallet, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Spinner } from "@/components/ui/Primitives";
+import { CardRowsSkeleton } from "@/components/ui/Skeletons";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -95,7 +95,7 @@ function DiscoverTab() {
           className="w-full rounded-full border border-ink-900/10 bg-surface py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100" />
       </div>
       {doctors === null ? (
-        <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>
+        <CardRowsSkeleton count={5} className="space-y-3" />
       ) : filtered.length === 0 ? (
         <Empty title="No doctors found" hint="Try a different specialty or search term." />
       ) : (
@@ -119,7 +119,7 @@ function MyRequestsTab() {
   useEffect(() => {
     dok.consults.listMyRequests().then((d) => setReqs((d.requests || []).map(parseRequest))).catch(() => setReqs([]));
   }, []);
-  if (reqs === null) return <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>;
+  if (reqs === null) return <CardRowsSkeleton count={4} className="space-y-3" />;
   if (reqs.length === 0) return <Empty icon={Inbox} title="No active requests" hint="Book a consultation from the Discover tab." />;
   return <div className="space-y-3">{reqs.map((r) => <RequestRow key={r.id} req={r} viewerIsDoctor={false} href={`/app/consults/${r.id}`} />)}</div>;
 }
@@ -130,7 +130,7 @@ function DoctorRequestsTab() {
   useEffect(() => {
     dok.consults.listDoctorRequests().then((d) => setReqs((d.requests || []).map(parseRequest))).catch(() => setReqs([]));
   }, []);
-  if (reqs === null) return <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>;
+  if (reqs === null) return <CardRowsSkeleton count={4} className="space-y-3" />;
   if (reqs.length === 0) return <Empty icon={Inbox} title="No pending requests" hint="New consultation requests will appear here." />;
   return <div className="space-y-3">{reqs.map((r) => <RequestRow key={r.id} req={r} viewerIsDoctor href={`/app/consults/${r.id}`} />)}</div>;
 }

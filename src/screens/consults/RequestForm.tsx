@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "@/lib/router";
 import { Lock, Upload, X, FileText, RefreshCw, Loader2, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Avatar, Verified, Spinner } from "@/components/ui/Primitives";
+import { Avatar, Verified } from "@/components/ui/Primitives";
+import { DetailSkeleton } from "@/components/ui/Skeletons";
 import { useToast } from "@/components/ui/Toast";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
@@ -131,7 +132,7 @@ export default function RequestForm() {
       </div>
     );
   }
-  if (!doctor) return <div className="grid min-h-[60vh] place-items-center"><Spinner className="h-8 w-8" /></div>;
+  if (!doctor) return <div className="mx-auto w-full max-w-2xl pb-28 pt-2"><DetailSkeleton blocks={3} /></div>;
 
   const free = doctorIsFree(doctor);
   const available = doctorIsAvailable(doctor);

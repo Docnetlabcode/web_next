@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Play, Heart, Eye, Loader2 } from "lucide-react";
 import { Avatar, Verified } from "@/components/ui/Primitives";
+import { TileGridSkeleton } from "@/components/ui/Skeletons";
 import ReelViewer from "@/components/ReelViewer";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
@@ -81,9 +82,7 @@ export default function Reels() {
         <p className="text-sm text-ink-500">Short-form medical teaching from verified clinicians.</p>
       </header>
       {reels === null ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="aspect-[9/16] animate-pulse rounded-2xl bg-ink-900/[.06]" />)}
-        </div>
+        <TileGridSkeleton count={8} className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" />
       ) : list.length === 0 ? (
         <div className="card grid place-items-center gap-2 py-20 text-center">
           <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-50 text-brand-600"><Play size={24} /></span>

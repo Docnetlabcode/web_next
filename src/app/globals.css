@@ -12,6 +12,24 @@
   color-scheme: light;
   --brand: #1e7b74;
 
+  /* Body font — swapped by Appearance settings (src/lib/appearance.ts). */
+  --font-app: "Inter", "Plus Jakarta Sans", system-ui, sans-serif;
+
+  /* Brand solid anchors (400–950): identical in both themes, so defined once
+     here. Var-driven (not compiled hex) so the accent can be rethemed live. */
+  --brand-400: 78 166 158;
+  --brand-500: 43 142 133;
+  --brand-600: 30 123 116;
+  --brand-700: 24 95 90;
+  --brand-800: 19 73 69;
+  --brand-900: 13 52 49;
+  --brand-950: 13 52 49;
+  --glow: 30 123 116;
+  /* Accent gradient stops (text-gradient, duo chat bubbles). */
+  --grad-from: #1e7b74;
+  --grad-mid: #2a9085;
+  --grad-to: #48ac9f;
+
   /* content surface (cards, sheets, inputs) */
   --surface: 255 255 255;
 
@@ -75,6 +93,10 @@
 .dark {
   color-scheme: dark;
 
+  --grad-from: #4fb3a9;
+  --grad-mid: #63c0b4;
+  --grad-to: #85d4c8;
+
   --surface: 22 30 32;      /* raised card over the page */
 
   --ink-0: 11 16 17;
@@ -133,8 +155,8 @@ body {
   @apply bg-ink-50 text-ink-900 font-sans antialiased;
 }
 
-::selection { background: rgba(30, 123, 116, 0.18); }
-.dark ::selection { background: rgba(79, 179, 169, 0.35); }
+::selection { background: rgb(var(--brand-600) / 0.18); }
+.dark ::selection { background: rgb(var(--tx-brand-600) / 0.35); }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -160,29 +182,28 @@ body {
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.21,.65,.36,1), transform .8s cubic-bezier(.21,.65,.36,1); }
 .reveal.in { opacity: 1; transform: none; }
 
-/* Gradient text + mesh */
-.text-gradient { background: linear-gradient(100deg, #1e7b74, #2a9085 50%, #48ac9f); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.dark .text-gradient { background: linear-gradient(100deg, #4fb3a9, #63c0b4 50%, #85d4c8); -webkit-background-clip: text; background-clip: text; }
+/* Gradient text + mesh (accent-var driven so custom themes recolor them) */
+.text-gradient { background: linear-gradient(100deg, var(--grad-from), var(--grad-mid) 50%, var(--grad-to)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .mesh {
   background:
-    radial-gradient(40% 50% at 15% 20%, rgba(30,123,116,.20), transparent 60%),
-    radial-gradient(45% 55% at 85% 15%, rgba(72,172,159,.18), transparent 60%),
-    radial-gradient(50% 60% at 70% 90%, rgba(30,123,116,.12), transparent 60%);
+    radial-gradient(40% 50% at 15% 20%, rgb(var(--brand-600) / .20), transparent 60%),
+    radial-gradient(45% 55% at 85% 15%, rgb(var(--brand-500) / .18), transparent 60%),
+    radial-gradient(50% 60% at 70% 90%, rgb(var(--brand-600) / .12), transparent 60%);
 }
 .dark .mesh {
   background:
-    radial-gradient(40% 50% at 15% 20%, rgba(79,179,169,.16), transparent 60%),
-    radial-gradient(45% 55% at 85% 15%, rgba(52,140,130,.14), transparent 60%),
-    radial-gradient(50% 60% at 70% 90%, rgba(79,179,169,.09), transparent 60%);
+    radial-gradient(40% 50% at 15% 20%, rgb(var(--tx-brand-600) / .16), transparent 60%),
+    radial-gradient(45% 55% at 85% 15%, rgb(var(--tx-brand-500) / .14), transparent 60%),
+    radial-gradient(50% 60% at 70% 90%, rgb(var(--tx-brand-600) / .09), transparent 60%);
 }
 .grid-bg {
-  background-image: linear-gradient(rgba(30,123,116,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(30,123,116,.07) 1px, transparent 1px);
+  background-image: linear-gradient(rgb(var(--brand-600) / .07) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--brand-600) / .07) 1px, transparent 1px);
   background-size: 44px 44px;
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 75%);
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 75%);
 }
 .dark .grid-bg {
-  background-image: linear-gradient(rgba(79,179,169,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(79,179,169,.09) 1px, transparent 1px);
+  background-image: linear-gradient(rgb(var(--tx-brand-600) / .09) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--tx-brand-600) / .09) 1px, transparent 1px);
 }
 .glass { background: rgb(var(--glass) / .72); backdrop-filter: blur(14px); }
 
@@ -212,13 +233,26 @@ body {
 .collapse-row.collapsed { grid-template-rows: 0fr; opacity: 0; transform: scale(.98); }
 
 /* Deep-linked comment highlight (mention notifications auto-scroll here) */
-@keyframes comment-flash { 0%, 55% { background: rgba(30,123,116,.14); box-shadow: 0 0 0 2px rgba(30,123,116,.25); } 100% { background: transparent; box-shadow: none; } }
+@keyframes comment-flash { 0%, 55% { background: rgb(var(--brand-600) / .14); box-shadow: 0 0 0 2px rgb(var(--brand-600) / .25); } 100% { background: transparent; box-shadow: none; } }
 .anim-comment-flash { animation: comment-flash 2.4s ease-out both; border-radius: 16px; }
 .dark .anim-comment-flash { animation-name: comment-flash-dark; }
-@keyframes comment-flash-dark { 0%, 55% { background: rgba(79,179,169,.16); box-shadow: 0 0 0 2px rgba(79,179,169,.30); } 100% { background: transparent; box-shadow: none; } }
+@keyframes comment-flash-dark { 0%, 55% { background: rgb(var(--tx-brand-600) / .16); box-shadow: 0 0 0 2px rgb(var(--tx-brand-600) / .30); } 100% { background: transparent; box-shadow: none; } }
 
 /* Filter chip count tick */
 .anim-count-tick { animation: count-tick .3s ease; }
+
+/* ---- Chat customization (Appearance settings; src/lib/appearance.ts) ----
+   Wallpapers ride the brand tint vars, so they follow the accent AND the
+   light/dark flip automatically. */
+.chatbg-dots  { background-image: radial-gradient(rgb(var(--brand-300) / .38) 1.2px, transparent 1.6px); background-size: 18px 18px; }
+.chatbg-grid  { background-image: linear-gradient(rgb(var(--brand-300) / .28) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--brand-300) / .28) 1px, transparent 1px); background-size: 26px 26px; }
+.chatbg-lines { background-image: repeating-linear-gradient(45deg, rgb(var(--brand-300) / .22) 0 1px, transparent 1px 14px); }
+.chatbg-weave { background-image: repeating-linear-gradient(45deg, rgb(var(--brand-300) / .16) 0 1px, transparent 1px 12px), repeating-linear-gradient(-45deg, rgb(var(--brand-300) / .16) 0 1px, transparent 1px 12px); }
+.chatbg-glow  { background-image: radial-gradient(60% 50% at 15% 8%, rgb(var(--brand-100) / .75), transparent 60%), radial-gradient(55% 45% at 88% 92%, rgb(var(--brand-100) / .65), transparent 65%); }
+
+/* Own-message bubble: solid accent normally; a two-color gradient in Duo mode. */
+.bubble-mine { background-color: rgb(var(--brand-600)); }
+html[data-duo="1"] .bubble-mine { background-image: linear-gradient(135deg, var(--grad-from), var(--grad-to)); }
 
 /* Theme switch: crossfade the whole page (View Transitions API; no-op elsewhere) */
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .28s; animation-timing-function: cubic-bezier(.2,0,0,1); }

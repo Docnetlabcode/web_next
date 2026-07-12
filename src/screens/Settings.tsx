@@ -3,12 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import {
   User, Bell, Lock, Smartphone, Palette, ChevronRight,
   LogOut, Globe, Eye, Trash2, ArrowUpRight, ShieldOff, Loader2, Check, X,
-  Sun, Moon, Monitor,
 } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Avatar, Spinner } from "@/components/ui/Primitives";
+import { Avatar } from "@/components/ui/Primitives";
+import { RowsSkeleton, TextBlockSkeleton } from "@/components/ui/Skeletons";
+import AppearanceStudio from "@/components/settings/AppearanceStudio";
 import { useAuth } from "@/context/AuthContext";
-import { useTheme } from "@/context/ThemeContext";
 import { useNavigate } from "@/lib/router";
 import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -18,7 +18,7 @@ const SECTIONS = [
   { key: "privacy", icon: Lock, label: "Privacy", desc: "Visibility & calls" },
   { key: "devices", icon: Smartphone, label: "Sessions & devices", desc: "Logged-in devices" },
   { key: "notifications", icon: Bell, label: "Notifications", desc: "What you get pinged about" },
-  { key: "appearance", icon: Palette, label: "Appearance", desc: "Theme & display" },
+  { key: "appearance", icon: Palette, label: "Appearance", desc: "Theme, colors, chat & fonts" },
 ];
 
 export default function Settings() {
@@ -254,7 +254,7 @@ function Privacy() {
   };
 
   if (demo) return <DemoNote />;
-  if (!p) return <Card><div className="grid place-items-center py-6"><Spinner /></div></Card>;
+  if (!p) return <Card><TextBlockSkeleton lines={3} /></Card>;
 
   const CALLS = [{ v: "everyone", l: "Everyone" }, { v: "connections", l: "Connections" }, { v: "nobody", l: "Nobody" }];
   return (
@@ -289,7 +289,7 @@ function Devices() {
   const logoutAll = async () => { setBusy(true); try { await dok.auth.logoutAll(); await load(); } finally { setBusy(false); } };
 
   if (demo) return <DemoNote />;
-  if (!list) return <Card><div className="grid place-items-center py-6"><Spinner /></div></Card>;
+  if (!list) return <Card><RowsSkeleton count={2} /></Card>;
   return (
     <Card title="Logged-in devices">
       {list.length === 0 && <p className="text-sm text-ink-500">No other active sessions.</p>}
@@ -354,65 +354,7 @@ function Notifications() {
     </Card>
   );
 }
-const THEME_OPTIONS = [
-  { value: "light", label: "Light", icon: Sun, desc: "Bright, clinical white" },
-  { value: "dark", label: "Dark", icon: Moon, desc: "Dimmed for low light" },
-  { value: "system", label: "System", icon: Monitor, desc: "Follows your device" },
-] as const;
-
-/** Miniature UI mock rendered in fixed colors — a preview must not flip with the theme. */
-function ThemeSwatch({ mode }: { mode: "light" | "dark" | "system" }) {
-  const Pane = ({ dark }: { dark: boolean }) => (
-    <div className={cn("flex h-full flex-1 flex-col gap-1 p-2", dark ? "bg-[#101617]" : "bg-[#f4f6f6]")}>
-      <div className="flex items-center gap-1">
-        <span className={cn("h-2 w-2 rounded-full", dark ? "bg-[#4fb3a9]" : "bg-[#1e7b74]")} />
-        <span className={cn("h-1 w-7 rounded-full", dark ? "bg-[#3c4a4d]" : "bg-[#d7dcdd]")} />
-      </div>
-      <div className={cn("flex-1 rounded-md border p-1.5", dark ? "border-white/[.06] bg-[#161e20]" : "border-black/[.06] bg-white")}>
-        <span className={cn("block h-1 w-8 rounded-full", dark ? "bg-[#9fb0b2]" : "bg-[#8a9295]")} />
-        <span className={cn("mt-1 block h-1 w-5 rounded-full", dark ? "bg-[#263033]" : "bg-[#eaedee]")} />
-      </div>
-    </div>
-  );
-  return (
-    <div aria-hidden className="flex h-16 w-full overflow-hidden rounded-lg border border-ink-900/10">
-      {mode !== "dark" && <Pane dark={false} />}
-      {mode !== "light" && <Pane dark />}
-    </div>
-  );
-}
-
+/** Appearance moved to its own studio: theme, accent color, typography, chat style. */
 function Appearance() {
-  const { theme, setTheme } = useTheme();
-  return (
-    <Card title="Theme">
-      <div role="radiogroup" aria-label="Theme" className="grid gap-3 sm:grid-cols-3">
-        {THEME_OPTIONS.map((o) => {
-          const active = theme === o.value;
-          return (
-            <button
-              key={o.value}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              onClick={() => setTheme(o.value)}
-              className={cn(
-                "rounded-xl border-2 p-2 pb-2.5 text-left transition",
-                active ? "border-brand-600" : "border-ink-900/10 hover:border-brand-300"
-              )}
-            >
-              <ThemeSwatch mode={o.value} />
-              <span className="mt-2 flex items-center gap-1.5 px-0.5">
-                <o.icon size={14} className={active ? "text-brand-600" : "text-ink-400"} />
-                <span className="flex-1 text-sm font-semibold text-ink-900">{o.label}</span>
-                {active && <Check size={14} className="anim-pop text-brand-600" />}
-              </span>
-              <span className="block px-0.5 text-xs text-ink-500">{o.desc}</span>
-            </button>
-          );
-        })}
-      </div>
-      <p className="text-xs text-ink-400">Applies instantly on this device. System follows your OS light/dark setting.</p>
-    </Card>
-  );
+  return <AppearanceStudio />;
 }

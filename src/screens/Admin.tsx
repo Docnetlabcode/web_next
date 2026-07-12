@@ -8,6 +8,7 @@ import {
   Stethoscope, GraduationCap, User, Film, FileText, BookOpen, Dot,
 } from "lucide-react";
 import { Avatar, Logo, Spinner } from "@/components/ui/Primitives";
+import { RowsSkeleton, StatGridSkeleton } from "@/components/ui/Skeletons";
 import NavArrows from "@/components/ui/NavArrows";
 import { dok, ADMIN_TOKENS } from "@/lib/api";
 import { cn, compact, timeAgo } from "@/lib/utils";
@@ -245,7 +246,7 @@ function Overview() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  if (loading && !o) return <div className="grid h-64 place-items-center"><Spinner className="h-7 w-7" /></div>;
+  if (loading && !o) return <StatGridSkeleton count={6} />;
   if (!o) return <Empty icon={AlertTriangle} title="Couldn't load overview" sub="Try refreshing." />;
 
   const u = o.users, c = o.content;
@@ -374,7 +375,7 @@ function UsersSection() {
 
       <div className="card divide-y divide-ink-900/[.05]">
         {loading && rows.length === 0 ? (
-          <div className="grid h-40 place-items-center"><Spinner className="h-6 w-6" /></div>
+          <RowsSkeleton count={4} />
         ) : rows.length === 0 ? (
           <Empty icon={Users2} title="No users found" sub="Try a different search or filter." />
         ) : rows.map((u) => (
@@ -551,7 +552,7 @@ function ContentSection() {
       </div>
 
       <div className="card divide-y divide-ink-900/[.05]">
-        {loading && items.length === 0 ? <div className="grid h-40 place-items-center"><Spinner className="h-6 w-6" /></div>
+        {loading && items.length === 0 ? <RowsSkeleton count={4} />
           : items.length === 0 ? <Empty icon={FileStack} title="No content" sub="Nothing matches here." />
           : items.map((it) => (
             <div key={it.id} className="flex items-center gap-3 p-3.5">
@@ -628,7 +629,7 @@ function DoctorVerifications() {
         {KYC_TABS.map((t) => <button key={t} onClick={() => setTab(t)} className={cn("whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold capitalize", tab === t ? "bg-brand-600 text-white" : "bg-surface text-ink-600")}>{t.replace("_", " ").toLowerCase()}</button>)}
       </div>
       <div className="card divide-y divide-ink-900/[.05]">
-        {loading ? <div className="grid h-40 place-items-center"><Spinner className="h-6 w-6" /></div>
+        {loading ? <RowsSkeleton count={4} />
           : rows.length === 0 ? <Empty title="Queue is clear" sub={`No ${tab.replace("_", " ").toLowerCase()} submissions.`} />
           : rows.map((v) => (
             <button key={v.userId} onClick={() => setSel(v)} className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-ink-900/[.02]">
@@ -694,7 +695,7 @@ function StudentVerifications() {
   return (
     <>
       <div className="card divide-y divide-ink-900/[.05]">
-        {loading ? <div className="grid h-40 place-items-center"><Spinner className="h-6 w-6" /></div>
+        {loading ? <RowsSkeleton count={4} />
           : rows.length === 0 ? <Empty title="Queue is clear" sub="No student submissions." />
           : rows.map((v) => (
             <button key={v.userId} onClick={() => setSel(v)} className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-ink-900/[.02]">
@@ -747,7 +748,7 @@ function ReportsSection() {
     <div>
       <SectionHead title="Reported content" subtitle="Pending user reports on posts." />
       <div className="card divide-y divide-ink-900/[.05]">
-        {loading ? <div className="grid h-40 place-items-center"><Spinner className="h-6 w-6" /></div>
+        {loading ? <RowsSkeleton count={4} />
           : rows.length === 0 ? <Empty title="No open reports" sub="The queue is clear." />
           : rows.map((r) => (
             <div key={r.id} className="p-4">
@@ -802,7 +803,7 @@ function FeedbackSection() {
         {FB_CATS.map((c) => <button key={c} onClick={() => setCat(c)} className={cn("whitespace-nowrap rounded-full px-3.5 py-2 text-xs font-semibold", cat === c ? "bg-brand-600 text-white" : "bg-surface text-ink-600")}>{c ? c.replace("_", " ").toLowerCase() : "all"}</button>)}
       </div>
       <div className="card divide-y divide-ink-900/[.05]">
-        {loading && rows.length === 0 ? <div className="grid h-40 place-items-center"><Spinner className="h-6 w-6" /></div>
+        {loading && rows.length === 0 ? <RowsSkeleton count={4} />
           : rows.length === 0 ? <Empty icon={MessageSquareText} title="No feedback" />
           : rows.map((f) => (
             <div key={f.id} className="flex gap-3 p-4">
@@ -831,7 +832,7 @@ function DeletionsSection() {
     <div>
       <SectionHead title="Deletion queue" subtitle="Accounts scheduled for deletion (PENDING_DELETION)." />
       <div className="card divide-y divide-ink-900/[.05]">
-        {loading ? <div className="grid h-40 place-items-center"><Spinner className="h-6 w-6" /></div>
+        {loading ? <RowsSkeleton count={4} />
           : rows.length === 0 ? <Empty icon={Trash2} title="Queue is empty" sub="No accounts pending deletion." />
           : rows.map((u) => (
             <div key={u.id} className="flex items-center gap-3 p-3.5">
@@ -871,7 +872,7 @@ function AuditSection() {
     <div>
       <SectionHead title="Audit log" subtitle="Every action taken from this console." />
       <div className="card divide-y divide-ink-900/[.05]">
-        {loading && rows.length === 0 ? <div className="grid h-40 place-items-center"><Spinner className="h-6 w-6" /></div>
+        {loading && rows.length === 0 ? <RowsSkeleton count={4} />
           : rows.length === 0 ? <Empty icon={ScrollText} title="No activity yet" />
           : rows.map((e) => (
             <div key={e.id} className="flex items-start gap-3 p-3.5">

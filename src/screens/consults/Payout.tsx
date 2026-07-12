@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Loader2, CheckCircle2, Star, Trash2, Building2, ShieldCheck, ShieldAlert, X } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Spinner } from "@/components/ui/Primitives";
+import { CardRowsSkeleton } from "@/components/ui/Skeletons";
 import { useToast } from "@/components/ui/Toast";
 import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -43,7 +43,7 @@ export default function Payout() {
         right={<button onClick={() => setAdding(true)} className="btn-primary px-3.5 py-2 text-sm"><Plus size={15} /> Add</button>} />
 
       {accounts === null ? (
-        <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>
+        <CardRowsSkeleton count={2} className="space-y-3" />
       ) : accounts.length === 0 ? (
         <Empty icon={Building2} title="No bank accounts" hint="Add a bank account to receive consultation payouts." />
       ) : (

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@/lib/router";
 import { Loader2, CalendarClock, Wallet, ChevronRight, IndianRupee } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Spinner } from "@/components/ui/Primitives";
+import { DetailSkeleton } from "@/components/ui/Skeletons";
 import { useToast } from "@/components/ui/Toast";
 import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -59,7 +59,7 @@ export default function DoctorSettings() {
   };
 
   if (error) return <div className="mx-auto w-full max-w-xl"><PageHeader title="Consultation settings" /><div className="card p-8 text-center"><p className="text-sm text-ink-600">Couldn't load your settings.</p><button onClick={load} className="btn-primary mx-auto mt-4 px-5 py-2 text-sm">Retry</button></div></div>;
-  if (!s) return <div className="grid min-h-[60vh] place-items-center"><Spinner className="h-8 w-8" /></div>;
+  if (!s) return <div className="mx-auto w-full max-w-xl pb-24 pt-2"><DetailSkeleton blocks={3} /></div>;
 
   const consultEnabled = s.paidCallsEnabled || s.freeConsultationsAllowed;
   const avail = tryParseAvailability(s.availability);

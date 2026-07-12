@@ -4,7 +4,8 @@ import { useNavigate } from "@/lib/router";
 import { FileText, Stethoscope, Clapperboard, PenLine, Loader2, Sparkles, RefreshCw, Search as SearchIcon } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import RightRail from "@/components/layout/RightRail";
-import { Avatar, Skeleton } from "@/components/ui/Primitives";
+import { Avatar } from "@/components/ui/Primitives";
+import { PostFeedSkeleton } from "@/components/ui/Skeletons";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { cn, roleLabel } from "@/lib/utils";
@@ -137,7 +138,7 @@ export default function Feed() {
 
         {/* Posts */}
         {posts === null ? (
-          <FeedSkeleton />
+          <PostFeedSkeleton />
         ) : posts.length === 0 ? (
           <Empty filter={filter} onReset={() => setFilter({ kind: "all", key: "all", label: "All" })} />
         ) : (
@@ -265,22 +266,6 @@ function SuggestionCard({ user, demo }) {
       >
         {done ? "Requested" : "+ Connect"}
       </button>
-    </div>
-  );
-}
-
-function FeedSkeleton() {
-  return (
-    <div className="space-y-5">
-      {[0, 1, 2].map((i) => (
-        <div key={i} className="card space-y-3 p-4">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-11 w-11 rounded-full" />
-            <div className="flex-1 space-y-2"><Skeleton className="h-3.5 w-40" /><Skeleton className="h-3 w-24" /></div>
-          </div>
-          <Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-52 w-full rounded-2xl" />
-        </div>
-      ))}
     </div>
   );
 }

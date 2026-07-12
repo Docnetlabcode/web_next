@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "@/lib/router";
 import { Receipt } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Spinner } from "@/components/ui/Primitives";
+import { DetailSkeleton } from "@/components/ui/Skeletons";
 import { dok } from "@/lib/api";
 import { formatRupees } from "@/lib/consultations/types";
 
@@ -16,7 +16,7 @@ export default function Invoice() {
   }, [requestId]);
 
   if (error) return <div className="mx-auto w-full max-w-xl"><PageHeader title="Invoice" /><div className="card p-8 text-center text-sm text-ink-600">Couldn't load this invoice.</div></div>;
-  if (!inv) return <div className="grid min-h-[60vh] place-items-center"><Spinner className="h-8 w-8" /></div>;
+  if (!inv) return <div className="mx-auto w-full max-w-xl pb-16 pt-2"><DetailSkeleton blocks={2} /></div>;
 
   const num = (v: any) => typeof v === "number" ? v : parseInt(String(v ?? 0), 10) || 0;
   const Row = ({ label, paise, bold }: { label: string; paise: number; bold?: boolean }) => (

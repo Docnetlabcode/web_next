@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Check, X, Loader2, Users } from "lucide-react";
 import { useNavigate } from "@/lib/router";
-import { Avatar, Verified } from "@/components/ui/Primitives";
+import { Avatar, Verified, Skeleton } from "@/components/ui/Primitives";
 import FollowButton from "@/components/ui/FollowButton";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/Toast";
@@ -155,9 +155,9 @@ function ListSkeleton() {
     <div className="space-y-3">
       {[0, 1, 2].map((i) => (
         <div key={i} className="card flex items-center gap-3 p-4">
-          <div className="h-12 w-12 shrink-0 animate-pulse rounded-full bg-ink-900/[.06]" />
-          <div className="flex-1 space-y-2"><div className="h-3.5 w-40 animate-pulse rounded bg-ink-900/[.06]" /><div className="h-3 w-24 animate-pulse rounded bg-ink-900/[.06]" /></div>
-          <div className="h-8 w-20 animate-pulse rounded-full bg-ink-900/[.06]" />
+          <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
+          <div className="flex-1 space-y-2"><Skeleton className="h-3.5 w-40" /><Skeleton className="h-3 w-24" /></div>
+          <Skeleton className="h-8 w-20 rounded-full" />
         </div>
       ))}
     </div>

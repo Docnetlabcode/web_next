@@ -12,11 +12,13 @@ module.exports = {
       colors: {
         // Orovion (ex-DokLynk) teal ramp — primary sits at 600 (#1E7B74).
         // 50–300 are tint roles (chip/ghost/hover fills) and flip with the theme;
-        // 400–950 are stable anchors used for solid fills (buttons keep white text).
+        // 400–950 are solid anchors (identical in both themes — defined once in
+        // :root). Every step is var-driven so the Appearance settings can retheme
+        // the accent at runtime (src/lib/appearance.ts).
         brand: {
           50: v("brand-50"), 100: v("brand-100"), 200: v("brand-200"), 300: v("brand-300"),
-          400: "#4ea69e", 500: "#2b8e85", 600: "#1e7b74", 700: "#185f5a",
-          800: "#134945", 900: "#0d3431", 950: "#0d3431",
+          400: v("brand-400"), 500: v("brand-500"), 600: v("brand-600"), 700: v("brand-700"),
+          800: v("brand-800"), 900: v("brand-900"), 950: v("brand-950"),
         },
         // Elevated content surface: white in light, raised charcoal-teal in dark.
         // Use for cards/sheets/inputs instead of bg-white.
@@ -63,7 +65,10 @@ module.exports = {
         indigo: { 600: v("tx-indigo-600") },
       },
       fontFamily: {
-        sans: ['"Inter"', '"Plus Jakarta Sans"', "system-ui", "sans-serif"],
+        // Body font is var-driven so Appearance settings can swap the family
+        // (--font-app defaults to the Inter stack in globals.css). Headings keep
+        // Plus Jakarta as the brand voice regardless of the body choice.
+        sans: ["var(--font-app)"],
         display: ['"Plus Jakarta Sans"', '"Inter"', "system-ui", "sans-serif"],
         mono: ['"JetBrains Mono"', "ui-monospace", "SF Mono", "Menlo", "monospace"],
       },
@@ -76,7 +81,7 @@ module.exports = {
         4: "0 14px 32px rgb(var(--shadow) / var(--sh-4)), 0 4px 10px rgb(var(--shadow) / var(--sh-2))",
         soft: "0 2px 6px rgb(var(--shadow) / var(--sh-2)), 0 1px 2px rgb(var(--shadow) / var(--sh-1))",
         card: "0 6px 18px rgb(var(--shadow) / var(--sh-3)), 0 2px 6px rgb(var(--shadow) / var(--sh-1))",
-        glow: "0 8px 24px rgba(30,123,116,.22)",
+        glow: "0 8px 24px rgb(var(--glow) / .22)",
       },
       borderRadius: {
         DEFAULT: "12px", xl: "16px", "2xl": "16px", xl2: "20px", "3xl": "24px", pill: "999px",

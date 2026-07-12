@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@/lib/router";
 import { Plus, Trash2, Loader2, Coffee, CalendarX, Save } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Spinner } from "@/components/ui/Primitives";
+import { DetailSkeleton } from "@/components/ui/Skeletons";
 import { useToast } from "@/components/ui/Toast";
 import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -64,7 +64,7 @@ export default function AvailabilityEditor() {
   };
 
   if (error) return <div className="mx-auto w-full max-w-xl"><PageHeader title="Availability" /><div className="card p-8 text-center"><p className="text-sm text-ink-600">Couldn't load availability.</p><button onClick={load} className="btn-primary mx-auto mt-4 px-5 py-2 text-sm">Retry</button></div></div>;
-  if (!sched) return <div className="grid min-h-[60vh] place-items-center"><Spinner className="h-8 w-8" /></div>;
+  if (!sched) return <div className="mx-auto w-full max-w-xl pb-28 pt-2"><DetailSkeleton blocks={4} /></div>;
 
   return (
     <div className="mx-auto w-full max-w-xl pb-28">

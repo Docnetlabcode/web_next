@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@/lib/router";
 import { User, GraduationCap, Briefcase, Stethoscope, BadgeCheck, Heart, ChevronDown, Check, ArrowLeft, Camera } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Spinner, Avatar } from "@/components/ui/Primitives";
+import { Avatar } from "@/components/ui/Primitives";
+import { CardRowsSkeleton } from "@/components/ui/Skeletons";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -131,7 +132,7 @@ export default function EditProfile() {
       </div>
 
       {loading ? (
-        <div className="grid place-items-center py-16"><Spinner className="h-7 w-7" /></div>
+        <CardRowsSkeleton count={5} className="space-y-3" />
       ) : (
         <div className="space-y-3">
           {keys.map((key) => {

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Heart, MessageCircle, UserPlus, AtSign, Bell, Check, X, Loader2, ShieldCheck, Trash2 } from "lucide-react";
 import { useNavigate } from "@/lib/router";
 import { Avatar, Verified } from "@/components/ui/Primitives";
+import { CardRowsSkeleton } from "@/components/ui/Skeletons";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/Toast";
 import { dok } from "@/lib/api";
@@ -128,7 +129,7 @@ export default function Notifications() {
       </div>
 
       {items === null ? (
-        <div className="mt-5 space-y-2">{[0, 1, 2, 3].map((i) => <div key={i} className="card h-20 animate-pulse bg-ink-900/[.03]" />)}</div>
+        <CardRowsSkeleton count={4} className="mt-5 space-y-2" />
       ) : list.length === 0 ? (
         <div className="card mt-6 py-20 text-center">
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand-50 text-brand-600"><Bell size={28} /></span>

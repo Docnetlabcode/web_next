@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "@/lib/router";
 import { Plus, Trash2, Upload, FileText, X, Loader2, Pill, CheckCircle2 } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Spinner } from "@/components/ui/Primitives";
+import { DetailSkeleton } from "@/components/ui/Skeletons";
 import { useToast } from "@/components/ui/Toast";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
@@ -83,7 +83,7 @@ export default function SummaryEditor() {
   };
 
   if (denied) return <div className="mx-auto w-full max-w-2xl"><PageHeader title="Consultation summary" /><div className="card p-8 text-center text-sm text-ink-600">You don't have access to write this summary.</div></div>;
-  if (!req) return <div className="grid min-h-[60vh] place-items-center"><Spinner className="h-8 w-8" /></div>;
+  if (!req) return <div className="mx-auto w-full max-w-2xl pb-28 pt-2"><DetailSkeleton blocks={3} /></div>;
   if (isCompleted(req.status) && req.clinicalSummary) {
     // Already finalized — bounce to the read-only detail.
     nav(`/app/consults/${requestId}`, { replace: true });
