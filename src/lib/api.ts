@@ -99,10 +99,12 @@ api.interceptors.response.use(
     const { config, response } = error;
     const url = config?.url || "";
 
-    // Network-level failure (no HTTP response): the active deployment (Render
-    // or AWS) may have gone down. Re-probe both, and if the live one changed,
-    // retry this request once against it.
-    if (!response && config && !config._failover && !axios.isCancel(error)) {
+    // The active deployment (Render or AWS) may have gone down. A direct
+    // deployment dies as a network error (no response); a proxied one dies as
+    // a 502/503/504 from our own Next server. Re-probe both deployments, and
+    // if the live one changed, retry this request once against it.
+    const gatewayDown = response && [502, 503, 504].includes(response.status);
+    if ((!response || gatewayDown) && config && !config._failover && !axios.isCancel(error)) {
       config._failover = true;
       if (await failover()) {
         config.baseURL = `${apiBase()}/api`;

@@ -16,10 +16,11 @@ function chatOrigin(): string | undefined {
 // Dual-deployment failover: follow a Render <-> AWS switch by re-pointing the
 // existing manager (Manager.open() builds the engine from io.uri on every
 // (re)connect, so registered call-event listeners survive; the typings mark
-// uri private, hence the cast).
+// uri private, hence the cast). Same-origin (proxied deployment) when the
+// deployment has no socket URL.
 onBackendChange((d) => {
-  const next = d.chatSocketUrl || d.socketUrl;
-  if (!callSocket || !next) return;
+  if (!callSocket || typeof window === "undefined") return;
+  const next = d.chatSocketUrl || d.socketUrl || window.location.origin;
   (callSocket.io as { uri?: string }).uri = next;
   if (callSocket.connected) {
     callSocket.disconnect();

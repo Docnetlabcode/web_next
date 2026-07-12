@@ -15,12 +15,12 @@ function socketOrigin() {
 }
 
 // Dual-deployment failover: when the app switches between Render and AWS,
-// re-point the existing manager at the new chat-service origin. socket.io
-// reads io.uri on every (re)connect attempt, so all registered event
-// listeners survive the switch.
+// re-point the existing manager at the new chat-service origin (same-origin
+// for a proxied deployment). socket.io reads io.uri on every (re)connect
+// attempt, so all registered event listeners survive the switch.
 onBackendChange((d) => {
-  if (!socket || !d.socketUrl) return;
-  socket.io.uri = d.socketUrl;
+  if (!socket || typeof window === "undefined") return;
+  socket.io.uri = d.socketUrl || window.location.origin;
   if (socket.connected) {
     socket.disconnect();
     socket.connect();

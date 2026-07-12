@@ -12,6 +12,14 @@
 //   NEXT_PUBLIC_CHAT_SOCKET_URL_RENDER / _AWS                     optional; defaults to SOCKET_URL
 // When neither *_RENDER nor *_AWS is set, the legacy single-URL vars apply
 // unchanged (NEXT_PUBLIC_API_BASE / NEXT_PUBLIC_SOCKET_URL / NEXT_PUBLIC_CHAT_SOCKET_URL).
+//
+// The literal value "proxy" marks a deployment as SAME-ORIGIN: the browser
+// calls this app's own origin and next.config.mjs rewrites forward /api,
+// /health and /socket.io to BACKEND_PROXY_TARGET / CHAT_PROXY_TARGET
+// server-side. That is how an http-only backend (the bare-IP AWS box) stays
+// usable from an https site: the browser never sees the http origin, and the
+// Secure refresh cookie lands first-party on this site's domain. An https
+// deployment (Render) doesn't need it and is called directly.
 
 export type Deployment = {
   name: "render" | "aws" | "default";
@@ -20,29 +28,31 @@ export type Deployment = {
   chatSocketUrl?: string;
 };
 
+// "proxy" => same-origin ("" base, undefined socket => socket.io connects to
+// this app's origin and the /socket.io rewrite forwards it).
+const origin = (v?: string) => (v === "proxy" ? "" : v || undefined);
+
 const candidates: Deployment[] = [];
 // AWS first: it is the preferred deployment whenever its /health answers;
 // Render is the fallback when AWS is not available.
 if (process.env.NEXT_PUBLIC_API_BASE_AWS) {
   candidates.push({
     name: "aws",
-    apiBase: process.env.NEXT_PUBLIC_API_BASE_AWS,
-    socketUrl: process.env.NEXT_PUBLIC_SOCKET_URL_AWS || undefined,
+    apiBase: origin(process.env.NEXT_PUBLIC_API_BASE_AWS) ?? "",
+    socketUrl: origin(process.env.NEXT_PUBLIC_SOCKET_URL_AWS),
     chatSocketUrl:
-      process.env.NEXT_PUBLIC_CHAT_SOCKET_URL_AWS ||
-      process.env.NEXT_PUBLIC_SOCKET_URL_AWS ||
-      undefined,
+      origin(process.env.NEXT_PUBLIC_CHAT_SOCKET_URL_AWS) ||
+      origin(process.env.NEXT_PUBLIC_SOCKET_URL_AWS),
   });
 }
 if (process.env.NEXT_PUBLIC_API_BASE_RENDER) {
   candidates.push({
     name: "render",
-    apiBase: process.env.NEXT_PUBLIC_API_BASE_RENDER,
-    socketUrl: process.env.NEXT_PUBLIC_SOCKET_URL_RENDER || undefined,
+    apiBase: origin(process.env.NEXT_PUBLIC_API_BASE_RENDER) ?? "",
+    socketUrl: origin(process.env.NEXT_PUBLIC_SOCKET_URL_RENDER),
     chatSocketUrl:
-      process.env.NEXT_PUBLIC_CHAT_SOCKET_URL_RENDER ||
-      process.env.NEXT_PUBLIC_SOCKET_URL_RENDER ||
-      undefined,
+      origin(process.env.NEXT_PUBLIC_CHAT_SOCKET_URL_RENDER) ||
+      origin(process.env.NEXT_PUBLIC_SOCKET_URL_RENDER),
   });
 }
 

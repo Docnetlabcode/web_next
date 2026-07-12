@@ -152,6 +152,53 @@ describe("failover — mid-session switch", () => {
   });
 });
 
+describe("proxied deployment (NEXT_PUBLIC_API_BASE_AWS=proxy)", () => {
+  // AWS is plain http on a bare IP, so it is reached same-origin through the
+  // next.config.mjs rewrites; its probe therefore hits the RELATIVE /health.
+  const PROXY_ENV = {
+    NEXT_PUBLIC_API_BASE_AWS: "proxy",
+    NEXT_PUBLIC_API_BASE_RENDER: RENDER_API,
+    NEXT_PUBLIC_SOCKET_URL_RENDER: RENDER_CHAT,
+  };
+
+  it("maps 'proxy' to same-origin: empty api base, no socket URL", async () => {
+    const fetch = fetchWhere(() => true);
+    const b = await load(PROXY_ENV, fetch);
+    await b.resolveBackend();
+    expect(b.apiBase()).toBe(""); // relative /api -> rewritten server-side
+    expect(b.socketUrl()).toBeUndefined(); // socket.io connects same-origin
+    expect(fetch).toHaveBeenCalledWith("/health", expect.anything());
+  });
+
+  it("falls back to Render when the proxied /health fails (e.g. Next returns 502)", async () => {
+    const fetch = vi.fn(async (url: string) =>
+      url === "/health" ? { ok: false } : { ok: true }
+    );
+    const b = await load(PROXY_ENV, fetch);
+    await b.resolveBackend();
+    expect(b.apiBase()).toBe(RENDER_API);
+    expect(b.socketUrl()).toBe(RENDER_CHAT);
+  });
+
+  it("fails over proxied-AWS -> Render mid-session and back", async () => {
+    let awsUp = true;
+    const b = await load(
+      PROXY_ENV,
+      fetchWhere((url) => (url === "/health" ? awsUp : true))
+    );
+    await b.resolveBackend();
+    expect(b.apiBase()).toBe("");
+
+    awsUp = false;
+    await expect(b.failover()).resolves.toBe(true);
+    expect(b.apiBase()).toBe(RENDER_API);
+
+    awsUp = true;
+    await expect(b.failover()).resolves.toBe(true);
+    expect(b.apiBase()).toBe("");
+  });
+});
+
 describe("legacy single-deployment config", () => {
   it("uses the plain vars without probing", async () => {
     const fetch = fetchWhere(() => true);
