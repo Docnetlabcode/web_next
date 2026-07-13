@@ -15,12 +15,12 @@ export type TeamMember = {
   education: string;
   location: string;
   photo?: string;
-  socials: { linkedin?: string; twitter?: string; email?: string };
+  socials: { linkedin?: string; instagram?: string; email?: string };
 };
 
 export const TEAM: TeamMember[] = [
   {
-    slug: "Gupta Pawan",
+    slug: "pawan-gupta",
     name: "Pawan Gupta",
     role: "Founder & CEO",
     tagline: "Every breakthrough begins by bridging a gap. Orovion exists to bridge the gaps in healthcare.",
@@ -30,13 +30,13 @@ export const TEAM: TeamMember[] = [
       "Day to day he works across product and clinical partnerships, and still reads every piece of feedback that comes through the app.",
     ],
     focus: ["Product"],
-    education: "B.Tech, MMMUT, Gorakhpur",
+    education: "B.Tech , MMMUT, Gorakhpur",
     location: "Kanpur, India",
     photo: "/team/member-1.png",
-    socials: { linkedin: "", twitter: "#", email: "pawan.gupta@orovion.com" },
+    socials: { linkedin: "", instagram: "#", email: "pawan.gupta@orovion.com" },
   },
   {
-    slug: "Singh Adarsh ",
+    slug: "adarsh-singh",
     name: "Adarsh Singh",
     role: "Co-founder & Chief Medical Officer",
     tagline: "Practising physician who shapes clinical safety, license verification and the consultation experience.",
@@ -48,7 +48,7 @@ export const TEAM: TeamMember[] = [
     focus: ["Clinical safety", "Verification policy", "Consultations"],
     education: "BTech, MMMUT, Gorakhpur",
     location: "Lucknow, India",
-    photo: "/team/member-2.png",
+    photo: "/team/member2.jpeg",
     socials: { linkedin: "#", email: "adarsh.singh@orovion.com" },
   },
   {
@@ -65,6 +65,6 @@ export const TEAM: TeamMember[] = [
     education: "M.S. Computer Science",
     location: "Bengaluru, India",
     photo: "/team/member-3.png",
-    socials: { linkedin: "#", twitter: "#", email: "hello@orovion.com" },
+    socials: { linkedin: "#", instagram: "#", email: "hello@orovion.com" },
   },
 ];

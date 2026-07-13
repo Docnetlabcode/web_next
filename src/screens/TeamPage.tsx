@@ -1,6 +1,6 @@
 "use client";
 import { Link } from "@/lib/router";
-import { ArrowRight, Linkedin, Twitter, Mail, MapPin, GraduationCap, BadgeCheck } from "lucide-react";
+import { ArrowRight, Linkedin, Instagram, Mail, MapPin, GraduationCap, BadgeCheck } from "lucide-react";
 import NavArrows from "@/components/ui/NavArrows";
 import { SiteNav, SiteFooter } from "@/components/landing/SiteChrome";
 import TeamAvatar from "@/components/landing/TeamAvatar";
@@ -82,11 +82,17 @@ function MemberProfile({ member: m, flip }: { member: TeamMember; flip: boolean 
       <div className={cn("grid items-start gap-8 md:gap-10", flip ? "md:grid-cols-[1fr_300px] lg:grid-cols-[1fr_340px]" : "md:grid-cols-[300px_1fr] lg:grid-cols-[340px_1fr]")}>
         {/* profile card */}
         <div className={cn("md:sticky md:top-24 lg:top-28", flip && "md:order-2")}>
-          <div className="card relative overflow-hidden p-6">
-            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-br from-brand-600 to-brand-800" />
-            <div className="absolute inset-x-0 top-0 h-24 grid-bg opacity-40" />
-            <div className="relative">
-              <TeamAvatar member={m} className="h-24 w-24 text-2xl ring-4 ring-surface" />
+          <div className="card overflow-hidden">
+            {/* cover — full-bleed banner; tall so the logo clears the DP */}
+            <div className="relative h-44">
+              <div className="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-800" />
+              <img src="/team/Cover.png" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover object-center" />
+            </div>
+            {/* body — square DP straddles the cover's bottom edge */}
+            <div className="px-6 pb-6">
+              <div className="relative z-10 -mt-12 w-max rounded-3xl bg-surface p-1.5 shadow-card">
+                <TeamAvatar member={m} className="h-24 w-24 rounded-2xl text-2xl" />
+              </div>
               <h3 className="mt-4 font-display text-xl font-extrabold text-ink-900">{m.name}</h3>
               <p className="text-sm font-semibold text-brand-700">{m.role}</p>
               <ul className="mt-5 space-y-2.5 text-sm text-ink-600">
@@ -95,7 +101,7 @@ function MemberProfile({ member: m, flip }: { member: TeamMember; flip: boolean 
               </ul>
               <div className="mt-5 flex gap-2 border-t border-ink-900/[.06] pt-4">
                 {m.socials.linkedin && <SocialButton href={m.socials.linkedin} label={`${m.name} on LinkedIn`} icon={Linkedin} />}
-                {m.socials.twitter && <SocialButton href={m.socials.twitter} label={`${m.name} on X (Twitter)`} icon={Twitter} />}
+                {m.socials.instagram && <SocialButton href={m.socials.instagram} label={`${m.name} on Instagram`} icon={Instagram} />}
                 {m.socials.email && <SocialButton href={`mailto:${m.socials.email}`} label={`Email ${m.name}`} icon={Mail} />}
               </div>
             </div>

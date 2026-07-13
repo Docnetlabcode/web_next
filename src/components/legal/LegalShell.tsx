@@ -110,7 +110,7 @@ export default function LegalShell({ eyebrow, title, updated, intro, sections, c
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600"><Mail size={20} /></span>
                 <div className="flex-1">
                   <p className="font-semibold text-ink-900">Questions about these terms?</p>
-                  <p className="text-sm text-ink-500">Reach our team at <a href="mailto:legal@docnet.health" className="font-semibold text-brand-700 hover:underline">legal@docnet.health</a> — we reply within 2 business days.</p>
+                  <p className="text-sm text-ink-500">Reach our team at <a href="mailto:support@orovion.com" className="font-semibold text-brand-700 hover:underline">support@orovion.com</a> — we reply within 2 business days.</p>
                 </div>
               </div>
             )}

@@ -189,9 +189,10 @@ export function SiteFooter() {
           <div>
             <h4 className="text-sm font-bold uppercase tracking-wide text-white/90">Contact</h4>
             <ul className="mt-4 space-y-3 text-sm text-white/70">
-              <li className="flex items-center gap-2.5"><Mail size={15} className="shrink-0 text-white/50" /> hello@orovion.com</li>
-              <li className="flex items-center gap-2.5"><Phone size={15} className="shrink-0 text-white/50" /> +91 80 4718 2200</li>
-              <li className="flex items-start gap-2.5"><MapPin size={15} className="mt-0.5 shrink-0 text-white/50" /> Bengaluru, Karnataka, India</li>
+              <li className="flex items-center gap-2.5"><Mail size={15} className="shrink-0 text-white/50" /> <a href="mailto:support@orovion.com" className="transition hover:text-white">support@orovion.com</a></li>
+              <li className="flex items-center gap-2.5"><Mail size={15} className="shrink-0 text-white/50" /> <a href="mailto:hello@orovion.com" className="transition hover:text-white">hello@orovion.com</a></li>
+              <li className="flex items-center gap-2.5"><Phone size={15} className="shrink-0 text-white/50" /> <a href="tel:+918004227370" className="transition hover:text-white">+91 80042 27370</a></li>
+              <li className="flex items-start gap-2.5"><MapPin size={15} className="mt-0.5 shrink-0 text-white/50" /> Varanasi, Uttar Pradesh 221010, India</li>
             </ul>
             <div className="mt-5 flex flex-col gap-2 text-sm">
               <Link to="/privacy" className="text-white/70 transition hover:text-white">Privacy Policy</Link>

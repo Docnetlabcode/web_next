@@ -4,7 +4,7 @@
   "private": true,
   "description": "Orovion — Next.js (App Router) web client for the healthcare social platform",
   "scripts": {
-    "dev": "next dev -p 5173",
+    "dev": "next dev -p 5179",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
