@@ -24,6 +24,13 @@ export default function VideoCallPage() {
   if (!call) return null;
   const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
+  // While the peer's video hasn't arrived (connecting, or their camera is
+  // off), the remote <video> is a black rectangle — show YOUR camera as the
+  // main picture instead, WhatsApp-style. Applies to both the full screen
+  // and the minimized tile.
+  const hasRemoteVideo = !!remoteStream && remoteStream.getVideoTracks().some((t) => t.readyState === "live");
+  const localIsMain = !hasRemoteVideo;
+
   // One container, two skins: full-screen call, or a WhatsApp-style floating
   // tile (drag to move, tap to restore). The <video> elements stay mounted
   // across the switch so the streams — and the remote AUDIO — never restart.
@@ -39,6 +46,22 @@ export default function VideoCallPage() {
       )}
     >
       <video ref={remoteRef} autoPlay playsInline className="h-full w-full object-cover" />
+      {/* Self-view is mirrored (-scale-x-100) like every mirror/selfie preview,
+          so your left appears on YOUR left. Only the preview flips — the
+          stream the peer receives is untouched, and the remote video above is
+          never mirrored. It fills the frame while there's no remote video
+          (localIsMain), floats as the corner PiP once the peer appears, and
+          hides in the minimized tile when the peer's video is showing. Kept
+          directly after the remote video so status overlays stack above it. */}
+      <video ref={localRef} autoPlay playsInline muted
+        className={cn(
+          "-scale-x-100 object-cover",
+          localIsMain
+            ? "absolute inset-0 h-full w-full"
+            : minimized
+              ? "hidden"
+              : "absolute right-4 top-4 h-40 w-28 rounded-xl border border-white/20",
+        )} />
       {phase === "connected" && (
         <div className={cn(
           "absolute left-1/2 -translate-x-1/2 rounded-full bg-black/50 tabular-nums",
@@ -53,12 +76,6 @@ export default function VideoCallPage() {
           </div>
         </div>
       )}
-      {/* Self-view is mirrored (-scale-x-100) like every mirror/selfie preview,
-          so your left appears on YOUR left. Only the preview flips — the
-          stream the peer receives is untouched, and the remote video above is
-          never mirrored. Hidden while minimized (tile shows the peer only). */}
-      <video ref={localRef} autoPlay playsInline muted
-        className={cn("absolute right-4 top-4 h-40 w-28 -scale-x-100 rounded-xl border border-white/20 object-cover", minimized && "hidden")} />
       {!minimized && (
         <>
           <button onClick={() => setMinimized(true)} aria-label="Minimize call"
