@@ -120,7 +120,7 @@ export default function LegalShell({ eyebrow, title, updated, intro, sections, c
 
       <footer className="border-t border-ink-900/[.06] py-8">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-5 text-sm text-ink-400 sm:flex-row sm:px-8">
-          <p>© 2026 Orovion. A trusted network for clinicians, students & patients.</p>
+          <p>© 2026 Orovion. All rights reserved. Built for the healthcare community.</p>
           <div className="flex gap-5">
             <Link to="/help" className="hover:text-brand-700">Help center</Link>
             <Link to="/privacy" className="hover:text-brand-700">Privacy</Link>

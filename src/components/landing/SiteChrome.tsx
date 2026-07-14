@@ -129,7 +129,7 @@ const SOCIALS = [
   { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/company/orovion/" },
   { icon: Twitter, label: "X (Twitter)", href: "https://x.com/orovion?s=20" },
   { icon: RedditIcon, label: "Reddit", href: "https://www.reddit.com/user/orovion/" },
-  { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/orovion.ap" },
+  { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/orovion.app" },
 ];
 
 function FooterCol({ title, links }: { title: string; links: { label: string; to?: string; href?: string }[] }) {
