@@ -63,15 +63,15 @@ function Hero() {
             Orovion, in <span className="text-gradient">your pocket.</span>
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink-500">
-            The full network — cases, Pulse reels, real-time chat and video consults —
-            built for the corridor, the ward and everywhere in between.
+            Your healthcare network — connections, knowledge, conversations and
+            private consultations — wherever you go.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <BadgeSlot store="apple" url={APP_STORE_URL} />
             <BadgeSlot store="google" url={PLAY_STORE_URL} />
           </div>
           {!APP_STORE_URL && !PLAY_STORE_URL && (
-            <p className="mt-3 text-xs text-ink-400">Store links go live here shortly — the apps are rolling out now.</p>
+            <p className="mt-3 text-xs text-ink-400">Download Orovion and carry your healthcare network with you.</p>
           )}
         </div>
         <div className="reveal in mx-auto">
@@ -90,16 +90,16 @@ function Screens() {
       <div className="container-x">
         <div className="reveal mx-auto max-w-2xl text-center">
           <h2 className="font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Every surface, made for one hand</h2>
-          <p className="mt-4 text-lg text-ink-500">The same verified network as the web, rebuilt around the moments between consults.</p>
+          <p className="mt-4 text-lg text-ink-500">The connected Orovion experience, designed around the way you discover, connect and interact on the go.</p>
         </div>
         <div className="mt-10 grid items-start justify-items-center gap-12 sm:mt-16 sm:grid-cols-2 lg:grid-cols-3">
-          <ScreenDemo caption="The feed" text="Cases, research and updates from clinicians you trust — filtered by specialty.">
+          <ScreenDemo caption="The feed" text="Cases, research and healthcare content from professionals and people you follow.">
             <FeedScreen />
           </ScreenDemo>
-          <ScreenDemo caption="Real-time chat" text="Read receipts, presence, and audio or video calls one tap away.">
+          <ScreenDemo caption="Real-time chat" text="Private conversations with presence, read states, files and real-time communication.">
             <ChatScreen />
           </ScreenDemo>
-          <ScreenDemo caption="Pulse reels" text="Sixty-second teaching videos for the minutes you actually have." className="sm:col-span-2 lg:col-span-1">
+          <ScreenDemo caption="Pulse reels" text="Short-form healthcare and professional content, designed for quick discovery on the go." className="sm:col-span-2 lg:col-span-1">
             <ReelScreen />
           </ScreenDemo>
         </div>
@@ -121,10 +121,10 @@ function ScreenDemo({ caption, text, children, className = "" }: { caption: stri
 }
 
 const CAPABILITIES = [
-  { icon: Bell, title: "Push notifications", text: "Mentions, consult requests and connection updates reach you the moment they happen." },
-  { icon: MessageSquare, title: "Full chat & calls", text: "The same private conversations as the web, with native audio and video calls." },
-  { icon: Clapperboard, title: "Pulse on the go", text: "Swipe through short clinical teaching videos wherever you have two minutes." },
-  { icon: Stethoscope, title: "Consults anywhere", text: "Accept, schedule and run paid video consultations straight from your phone." },
+  { icon: Bell, title: "Push notifications", text: "Stay updated on messages, consultation requests, connection activity and important interactions." },
+  { icon: MessageSquare, title: "Messages & communication", text: "Continue private conversations, share files and access communication features based on your role." },
+  { icon: Clapperboard, title: "Pulse on the go", text: "Discover short-form healthcare and professional content whenever you have a moment." },
+  { icon: Stethoscope, title: "Consults anywhere", text: "Request, manage and attend private consultations — or review and schedule requests as a healthcare professional." },
 ];
 
 function Capabilities() {
@@ -132,7 +132,7 @@ function Capabilities() {
     <section className="container-x py-16 sm:py-24">
       <div className="reveal mx-auto max-w-2xl text-center">
         <h2 className="font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Nothing left behind</h2>
-        <p className="mt-4 text-lg text-ink-500">If you can do it on Orovion, you can do it from the app.</p>
+        <p className="mt-4 text-lg text-ink-500">The core Orovion experience, built to move with you.</p>
       </div>
       <div className="mt-10 grid gap-5 sm:mt-14 sm:grid-cols-2">
         {CAPABILITIES.map((c, i) => (
@@ -155,8 +155,8 @@ function StoresCTA() {
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-6 py-12 text-center shadow-glow sm:px-16 sm:py-14">
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="relative">
-          <h2 className="font-display text-3xl font-extrabold tracking-tight text-white text-balance sm:text-4xl">We&rsquo;re on both stores</h2>
-          <p className="mx-auto mt-3 max-w-xl text-lg text-white/85">Download Orovion for iOS or Android and carry your network with you.</p>
+          <h2 className="font-display text-3xl font-extrabold tracking-tight text-white text-balance sm:text-4xl">Available on iOS and Android</h2>
+          <p className="mx-auto mt-3 max-w-xl text-lg text-white/85">Download Orovion and carry your network with you.</p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <BadgeSlot store="apple" url={APP_STORE_URL} />
             <BadgeSlot store="google" url={PLAY_STORE_URL} />

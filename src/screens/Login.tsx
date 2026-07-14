@@ -18,15 +18,15 @@ import {
 } from "@/lib/firebaseAuth";
 
 const ROLES = [
-  { key: "doctor", icon: Stethoscope, title: "Health professional", desc: "Verified doctors, specialists & clinicians" },
-  { key: "student", icon: GraduationCap, title: "Medical student", desc: "MBBS, MD, BDS & other medical degrees" },
-  { key: "general_user", icon: User, title: "General user", desc: "Patients, caregivers & health enthusiasts" },
+  { key: "doctor", icon: Stethoscope, title: "Health professional", desc: "Doctor, surgeon, dentist, nurse, or allied healthcare professional." },
+  { key: "student", icon: GraduationCap, title: "Medical student", desc: "Enrolled in a medical, or allied health program." },
+  { key: "general_user", icon: User, title: "General user", desc: "Patient, caregiver, family member, or anyone interested in healthcare." },
 ];
 
 const TRUST = [
-  { icon: ShieldCheck, text: "Checked against medical registries before the badge appears" },
-  { icon: Lock, text: "Private messaging and consults, end to end" },
-  { icon: BadgeCheck, text: "Specialty and credentials shown on every post" },
+  { icon: ShieldCheck, text: "Complete professional verification to earn a verified badge" },
+  { icon: Lock, text: "Connect, message and manage private consultations" },
+  { icon: BadgeCheck, text: "Build your identity through your professional profile and expertise" },
 ];
 
 const STEP_LABELS = ["Role", "Number", "Verify"];
@@ -117,10 +117,10 @@ export default function Login() {
 
         <div className="relative max-w-md">
           <h1 className="font-display text-[2.75rem] font-extrabold leading-[1.04] tracking-tight text-balance">
-            Verified by license. Always private.
+            Built on trust. <br /> Made for healthcare.
           </h1>
           <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/75">
-            Share cases, research and reels with clinicians you can trust, and consult in real time.
+            Connect, share knowledge and build your professional presence in a network designed around healthcare.
           </p>
           <ul className="mt-9 space-y-4">
             {TRUST.map(({ icon: Icon, text }, i) => (
@@ -135,7 +135,7 @@ export default function Login() {
         </div>
 
         {/* mb lifts the footer clear above the fixed bottom-left NavArrows pill (bottom-5, ~48px tall) */}
-        <p className="relative mb-16 text-xs text-white/55">© 2026 Orovion · A trusted network for clinicians, students &amp; patients.</p>
+        <p className="relative mb-16 text-xs text-white/55">© 2026 Orovion · Built for the healthcare community.</p>
       </aside>
 
       {/* Form panel */}
@@ -152,7 +152,7 @@ export default function Login() {
             {step === 0 && (
               <>
                 <h2 className="mt-7 font-display text-3xl font-extrabold tracking-tight text-ink-900 text-balance">Which best describes you?</h2>
-                <p className="mt-2 text-ink-500">We tailor your feed and verification flow to your role.</p>
+                <p className="mt-2 text-ink-500">This helps us personalize your experience and access within.</p>
                 <div className="mt-7 space-y-3">
                   {ROLES.map((r, i) => {
                     const active = role === r.key;
@@ -173,7 +173,7 @@ export default function Login() {
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block font-semibold text-ink-900">{r.title}</span>
-                          <span className="block truncate text-sm text-ink-500">{r.desc}</span>
+                          <span className="block text-sm leading-snug text-ink-500">{r.desc}</span>
                         </span>
                         <span className={cn("grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 transition-all", active ? "border-brand-600 bg-brand-600 text-white" : "border-ink-400/40 text-transparent")}>
                           <Check size={14} strokeWidth={3} className={active ? "anim-pop" : ""} />

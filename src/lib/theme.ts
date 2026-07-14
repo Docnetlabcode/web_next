@@ -17,13 +17,16 @@ export function resolveTheme(pref: ThemePreference, systemDark: boolean): Resolv
   return pref;
 }
 
-/** Stored preference, tolerating missing/garbage values and storage that throws. */
+/** Stored preference, tolerating missing/garbage values and storage that throws.
+    Defaults to "light" (not "system") so first-time visitors always get the light
+    theme; dark/system only apply once explicitly chosen. Mirrored by the no-flash
+    script in src/app/layout.tsx. */
 export function readStoredTheme(storage: Pick<Storage, "getItem"> | null | undefined): ThemePreference {
   try {
     const raw = storage?.getItem(THEME_STORAGE_KEY);
-    return isThemePreference(raw) ? raw : "system";
+    return isThemePreference(raw) ? raw : "light";
   } catch {
-    return "system";
+    return "light";
   }
 }
 

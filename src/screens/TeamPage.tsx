@@ -1,6 +1,6 @@
 "use client";
 import { Link } from "@/lib/router";
-import { ArrowRight, Linkedin, Instagram, Mail, MapPin, GraduationCap, BadgeCheck } from "lucide-react";
+import { ArrowRight, Linkedin, Instagram, Mail, MapPin, GraduationCap } from "lucide-react";
 import NavArrows from "@/components/ui/NavArrows";
 import { SiteNav, SiteFooter } from "@/components/landing/SiteChrome";
 import TeamAvatar from "@/components/landing/TeamAvatar";
@@ -15,7 +15,6 @@ export default function TeamPage() {
       <NavArrows variant="floating" />
       <SiteNav />
       <Hero />
-      <Principles />
       <Members />
       <JoinCTA />
       <SiteFooter />
@@ -38,31 +37,9 @@ function Hero() {
           The people building <span className="text-gradient">Orovion</span>
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-ink-500">
-          A small team of clinicians and engineers with one rule: if it wouldn&rsquo;t
-          earn a doctor&rsquo;s trust on a busy ward, it doesn&rsquo;t ship.
+          A small team bringing product, technology and healthcare perspectives
+          together to build a more connected healthcare community.
         </p>
-      </div>
-    </section>
-  );
-}
-
-const PRINCIPLES = [
-  { title: "Verification first", text: "Every health professional is checked against medical registries before the badge appears. Trust is the product." },
-  { title: "Clinician-led", text: "Our Chief Medical Officer practises medicine every week. Features are tested against real ward shifts, not personas." },
-  { title: "Private by architecture", text: "Consults and messages are engineered to stay between you and your colleague — privacy isn't a settings toggle." },
-];
-
-function Principles() {
-  return (
-    <section className="bg-ink-50 py-16">
-      <div className="container-x grid gap-10 md:grid-cols-3">
-        {PRINCIPLES.map((p) => (
-          <div key={p.title} className="reveal">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-600 text-white shadow-glow"><BadgeCheck size={18} /></span>
-            <h2 className="mt-4 font-display text-lg font-bold text-ink-900">{p.title}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-500">{p.text}</p>
-          </div>
-        ))}
       </div>
     </section>
   );
@@ -83,10 +60,13 @@ function MemberProfile({ member: m, flip }: { member: TeamMember; flip: boolean 
         {/* profile card */}
         <div className={cn("md:sticky md:top-24 lg:top-28", flip && "md:order-2")}>
           <div className="card overflow-hidden">
-            {/* cover — full-bleed banner; tall so the logo clears the DP */}
+            {/* cover — full-bleed banner; tall so the logo clears the DP.
+                object-contain shows the whole artwork; the backdrop is the literal
+                background color baked into Cover.png (NOT a theme var — it must
+                match the asset even if the accent is rethemed). */}
             <div className="relative h-44">
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-800" />
-              <img src="/team/Cover.png" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover object-center" />
+              <div className="absolute inset-0 bg-[#1e7b74]" />
+              <img src="/team/Cover.png" alt="" aria-hidden className="absolute inset-0 h-full w-full object-contain object-center" />
             </div>
             {/* body — square DP straddles the cover's bottom edge */}
             <div className="px-6 pb-6">
@@ -143,11 +123,11 @@ function JoinCTA() {
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="relative">
           <h2 className="font-display text-3xl font-extrabold tracking-tight text-white text-balance sm:text-4xl">Want to build this with us?</h2>
-          <p className="mx-auto mt-3 max-w-xl text-lg text-white/85">We&rsquo;re a small team and we hire slowly, but we always read every note.</p>
+          <p className="mx-auto mt-3 max-w-xl text-lg text-white/85">We&rsquo;re building thoughtfully and always open to hearing from people who believe in what Orovion is becoming.</p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <a href="mailto:hello@orovion.com" className="btn bg-surface px-6 py-3 text-base text-brand-700 hover:bg-surface/90">Email the team</a>
+            <a href="mailto:hello@orovion.com" className="btn bg-ink-950 px-6 py-3 text-base text-white hover:bg-ink-950/90">Email the team</a>
             <Link to="/login" className="btn border border-white/30 px-6 py-3 text-base text-white transition hover:bg-white/10">
-              Join the Orovion <ArrowRight size={17} />
+              Explore Orovion <ArrowRight size={17} />
             </Link>
           </div>
         </div>

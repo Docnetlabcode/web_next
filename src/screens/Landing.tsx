@@ -49,18 +49,19 @@ function Hero() {
               <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-full bg-brand-500" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-600" />
             </span>
-            Verified by license. Always private.
+            Verified Professionals. Trusted connections.
           </span>
           <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-ink-900 text-balance sm:text-5xl sm:leading-[1.05] md:text-6xl xl:text-7xl">
-            A trusted network <br className="hidden sm:block" /> of <span className="text-gradient">clinicians.</span>
+            Where healthcare <br className="hidden sm:block" /> <span className="text-gradient">comes together.</span>
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink-500">
-            Orovion brings cases, research, reels and real-time consults into one
-            professional home for doctors, medical students and patients.
+            Orovion brings healthcare professionals, medical students and people
+            into one trusted network to connect, share knowledge and access
+            private consultations.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link to="/login" className="btn-primary group px-6 py-3.5 text-base">
-              Join the Orovion <ArrowRight size={18} className="transition group-hover:translate-x-1" />
+              Join Orovion <ArrowRight size={18} className="transition group-hover:translate-x-1" />
             </Link>
             <Link to="/app" className="btn-outline px-6 py-3.5 text-base">Explore as guest</Link>
           </div>
@@ -74,7 +75,7 @@ function Hero() {
                 <StoreBadge store="google" />
               </Link>
             </div>
-            <p className="mt-2.5 text-xs text-ink-400">The full Orovion experience, on iOS and Android.</p>
+            <p className="mt-2.5 text-xs text-ink-400">Your healthcare network, wherever you go.</p>
           </div>
         </div>
         <HeroVisual />
@@ -132,12 +133,12 @@ function HeroVisual() {
 }
 
 const FEATURES = [
-  { icon: Stethoscope, title: "Clinical cases", text: "Share de-identified cases with structured snapshots — age, complaints, urgency — and crowdsource expertise." },
-  { icon: Clapperboard, title: "Medical Pulse reels", text: "Short-form teaching videos. Learn an ECG in 60 seconds or a suturing technique on the go." },
-  { icon: FileText, title: "Research & thesis", text: "Publish papers, theses and research with collaborators, DOCX & PDF attachments." },
-  { icon: Users, title: "Professional network", text: "LinkedIn-style connections plus follows. Build an audience and your reputation." },
-  { icon: MessageSquare, title: "Real-time consults", text: "WhatsApp-grade chat with read receipts, media, and paid video consultation requests." },
-  { icon: ShieldCheck, title: "License verification", text: "Every health professional is checked against medical registries before the badge appears." },
+  { icon: Stethoscope, title: "Clinical cases", text: "Share de-identified clinical cases, add relevant case details and discuss perspectives with the professional community." },
+  { icon: Clapperboard, title: "Medical Pulse reels", text: "Discover short-form healthcare content, clinical insights and educational videos shared by the community." },
+  { icon: FileText, title: "Research & thesis", text: "Share research, papers and thesis work, collaborate with peers and attach supporting documents." },
+  { icon: Users, title: "Professional network", text: "Connect with healthcare professionals, follow relevant people and build your professional presence." },
+  { icon: MessageSquare, title: "Real-time consults", text: "Message privately and send consultation requests to available healthcare professionals." },
+  { icon: ShieldCheck, title: "License verification", text: "Healthcare professionals complete a credential and identity verification process before receiving a verified badge." },
 ];
 
 function Features() {
@@ -148,9 +149,9 @@ function Features() {
         <div className="reveal mx-auto max-w-2xl text-center">
           <span className="chip bg-brand-50 text-brand-700"><Sparkles size={14} /> Everything in one place</span>
           <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">
-            Built for how clinicians actually work
+            Everything healthcare needs to connect.
           </h2>
-          <p className="mt-4 text-lg text-ink-500">From the first case discussion to your next consultation — one platform, zero noise.</p>
+          <p className="mt-4 text-lg text-ink-500">From professional discussions and research to discovery and private consultations — connected in one platform.</p>
         </div>
         <div className="mt-10 grid gap-5 sm:mt-14 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f, i) => (
@@ -169,9 +170,9 @@ function Features() {
 }
 
 const ROLES = [
-  { tag: "Health Professionals", title: "Build your clinical presence", points: ["Verified MD badge", "Run paid online consults", "Grow followers with reels & cases"], color: "from-brand-600 to-brand-800" },
-  { tag: "Medical Students", title: "Learn from the best", points: ["Follow mentors & specialties", "Share thesis & research", "Open-to-mentorship matching"], color: "from-amber-500 to-amber-700" },
-  { tag: "General Users", title: "Trusted health knowledge", points: ["Discover verified clinicians", "Follow, save & message", "Wellness & health-Q&A feeds"], color: "from-teal-600 to-emerald-700" },
+  { tag: "Health Professionals", title: "Build your clinical presence", points: ["Verified professional profile", "Accept consultation requests, when enabled", "Grow followers with reels & cases"], color: "from-brand-600 to-brand-800" },
+  { tag: "Medical Students", title: "Learn from the best", points: ["Follow mentors & specialties", "Share thesis & research", "Connect with professionals and peers"], color: "from-amber-500 to-amber-700" },
+  { tag: "General Users", title: "Trusted healthcare connections", points: ["Discover verified professionals", "Follow, save & message", "Access healthcare content"], color: "from-teal-600 to-emerald-700" },
 ];
 function Roles() {
   useScrollReveal();
@@ -179,7 +180,7 @@ function Roles() {
     <section id="roles" className="container-x py-16 sm:py-24">
       <div className="reveal mx-auto max-w-2xl text-center">
         <h2 className="font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">One network, three journeys</h2>
-        <p className="mt-4 text-lg text-ink-500">Whether you treat, study or seek care — Orovion meets you where you are.</p>
+        <p className="mt-4 text-lg text-ink-500">Whether you practise, study or seek healthcare guidance, Orovion creates an experience around your role.</p>
       </div>
       <div className="mt-10 grid gap-6 sm:mt-14 md:grid-cols-3">
         {ROLES.map((r, i) => (
@@ -208,11 +209,11 @@ function Showcase() {
     <section id="showcase" className="bg-ink-50 py-16 sm:py-24">
       <div className="container-x grid items-center gap-10 md:grid-cols-2 lg:gap-14">
         <div className="reveal">
-          <span className="chip bg-brand-50 text-brand-700"><Activity size={14} /> Real-time everything</span>
+          <span className="chip bg-brand-50 text-brand-700"><Activity size={14} />Connected in real time</span>
           <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Search, discover, and connect — instantly</h2>
-          <p className="mt-4 text-lg text-ink-500">Find specialists by name or specialty, follow trending discussions, and start a consult in two taps. Powered by a real-time engine with live presence and read receipts.</p>
+          <p className="mt-4 text-lg text-ink-500">Find healthcare professionals by name or specialty, follow relevant discussions and connect through one real-time platform.</p>
           <div className="mt-7 space-y-3">
-            {["Live trending in your specialty", "Smart search across people, posts & hashtags", "Online presence & typing indicators"].map((t) => (
+            {["Discover people, specialties and discussions", "Search across professionals and content", "Real-time messaging, presence and activity"].map((t) => (
               <div key={t} className="flex items-center gap-3 text-ink-700"><span className="grid h-7 w-7 place-items-center rounded-full bg-brand-600 text-white"><BadgeCheck size={15} /></span>{t}</div>
             ))}
           </div>
@@ -252,7 +253,7 @@ function Team() {
       <div className="reveal mx-auto max-w-2xl text-center">
         <span className="chip bg-brand-50 text-brand-700"><Users size={14} /> The people behind Orovion</span>
         <h2 className="mt-4 font-display text-4xl font-extrabold tracking-tight text-ink-900 text-balance sm:text-5xl">Meet the team</h2>
-        <p className="mt-4 text-lg text-ink-500">Clinicians and engineers building a network the medical community can trust.</p>
+        <p className="mt-4 text-lg text-ink-500">Built by a multidisciplinary team working across product, technology and healthcare collaboration.</p>
       </div>
       <div className="mt-10 grid gap-6 sm:mt-14 md:grid-cols-3">
         {TEAM.map((m, i) => (
@@ -279,11 +280,6 @@ function Team() {
           </Link>
         ))}
       </div>
-      <div className="reveal mt-10 text-center">
-        <Link to="/team" className="btn-outline px-6 py-3 text-sm">
-          Meet the whole team <ArrowRight size={16} />
-        </Link>
-      </div>
     </section>
   );
 }
@@ -295,9 +291,9 @@ function CTA() {
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="relative">
           <h2 className="font-display text-3xl font-extrabold tracking-tight text-white text-balance sm:text-4xl lg:text-5xl">Join the network built on trust</h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-white/85">Create your verified profile in minutes. Free for students and general users.</p>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-white/85">Create your profile and join a healthcare network built for professionals, students and people seeking trusted connections.</p>
           <div className="mt-8 flex justify-center">
-            <Link to="/login" className="btn px-7 py-3.5 text-base bg-surface text-brand-700 hover:bg-surface/90">Join the Orovion</Link>
+            <Link to="/login" className="btn px-7 py-3.5 text-base bg-white text-[rgb(var(--brand-700))] hover:bg-white/90">Join Orovion</Link>
           </div>
         </div>
       </div>

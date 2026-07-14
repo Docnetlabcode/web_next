@@ -40,14 +40,17 @@ describe("readStoredTheme", () => {
     expect(readStoredTheme(storageWith("dark"))).toBe("dark");
     expect(readStoredTheme(storageWith("light"))).toBe("light");
   });
-  it("defaults to system for missing or garbage values", () => {
-    expect(readStoredTheme(storageWith(null))).toBe("system");
-    expect(readStoredTheme(storageWith("purple"))).toBe("system");
-    expect(readStoredTheme(null)).toBe("system");
-    expect(readStoredTheme(undefined)).toBe("system");
+  it("defaults to light for missing or garbage values", () => {
+    expect(readStoredTheme(storageWith(null))).toBe("light");
+    expect(readStoredTheme(storageWith("purple"))).toBe("light");
+    expect(readStoredTheme(null)).toBe("light");
+    expect(readStoredTheme(undefined)).toBe("light");
   });
-  it("defaults to system when storage throws (private mode)", () => {
-    expect(readStoredTheme({ getItem: () => { throw new Error("denied"); } })).toBe("system");
+  it("defaults to light when storage throws (private mode)", () => {
+    expect(readStoredTheme({ getItem: () => { throw new Error("denied"); } })).toBe("light");
+  });
+  it("still returns a stored system preference", () => {
+    expect(readStoredTheme(storageWith("system"))).toBe("system");
   });
   it("uses the key the no-flash script reads", () => {
     expect(THEME_STORAGE_KEY).toBe("dl_theme");

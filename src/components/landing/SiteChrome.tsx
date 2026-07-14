@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@/lib/router";
 import {
-  ShieldCheck, FileText, ArrowRight, Linkedin, Twitter, Instagram, Mail, MapPin, Phone,
+  ShieldCheck, FileText, ArrowRight, Facebook, Linkedin, Twitter, Instagram, Mail, MapPin, Phone,
   ChevronDown, LifeBuoy, Menu, X, Smartphone,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Primitives";
@@ -16,8 +16,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_SECTIONS = [
   { label: "Features", href: "/#features" },
-  { label: "For clinicians", href: "/#roles" },
-  { label: "Showcase", href: "/#showcase" },
+  { label: "Healthcare Professionals", href: "/#roles" },
   { label: "Team", href: "/#team" },
 ];
 const NAV_RESOURCES = [
@@ -116,11 +115,21 @@ export function SiteNav() {
   );
 }
 
-// TODO: swap "#" social hrefs and the contact details for the real handles.
+// Reddit has no lucide icon; minimal inline SVG matching the 17px social buttons.
+function RedditIcon({ size = 17 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" />
+    </svg>
+  );
+}
+
 const SOCIALS = [
-  { icon: Twitter, label: "X (Twitter)", href: "#" },
-  { icon: Linkedin, label: "LinkedIn", href: "#" },
-  { icon: Instagram, label: "Instagram", href: "#" },
+  { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/people/Orovion/61591959148775/" },
+  { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/company/orovion/" },
+  { icon: Twitter, label: "X (Twitter)", href: "https://x.com/orovion?s=20" },
+  { icon: RedditIcon, label: "Reddit", href: "https://www.reddit.com/user/orovion/" },
+  { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/orovion.ap" },
 ];
 
 function FooterCol({ title, links }: { title: string; links: { label: string; to?: string; href?: string }[] }) {
@@ -150,61 +159,55 @@ export function SiteFooter() {
           <div className="lg:col-span-2">
             <Logo light />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/70">
-              A license-verified network for clinicians, medical students and patients — cases,
-              research, reels and real-time consults in one trusted home.
+              A connected healthcare network for professionals, medical students and general
+              users — bringing knowledge, professional connections and private consultations
+              into one platform.
             </p>
             <div className="mt-6 flex gap-2.5">
               {SOCIALS.map((s) => (
-                <a key={s.label} href={s.href} aria-label={s.label}
+                <a key={s.label} href={s.href} aria-label={s.label} target="_blank" rel="noopener noreferrer"
                   className="press grid h-10 w-10 place-items-center rounded-full bg-white/10 ring-1 ring-white/15 transition hover:bg-white/20">
                   <s.icon size={17} />
                 </a>
               ))}
             </div>
             <div className="mt-6 flex flex-wrap gap-2.5">
-              <Link to="/mobile-app" className="group" aria-label="Get Orovion on the App Store">
-                <StoreBadge store="apple" size="sm" />
-              </Link>
               <Link to="/mobile-app" className="group" aria-label="Get Orovion on Google Play">
                 <StoreBadge store="google" size="sm" />
+              </Link>
+              <Link to="/mobile-app" className="group" aria-label="Get Orovion on the App Store">
+                <StoreBadge store="apple" size="sm" />
               </Link>
             </div>
           </div>
 
-          <FooterCol title="Product" links={[
+          <FooterCol title="Explore" links={[
             { label: "Features", href: "/#features" },
-            { label: "For clinicians", href: "/#roles" },
-            { label: "Mobile app", to: "/mobile-app" },
-            { label: "Explore", to: "/app" },
+            { label: "For Healthcare Professionals", href: "/#roles" },
+            { label: "Get the App", to: "/mobile-app" },
+            { label: "Meet the Team", to: "/team" },
           ]} />
 
-          <FooterCol title="Company" links={[
-            { label: "About", href: "/#showcase" },
-            { label: "Meet the team", to: "/team" },
-            { label: "Careers", href: "#" },
-            { label: "Blog", href: "#" },
+          <FooterCol title="Legal" links={[
+            { label: "Privacy Policy", to: "/privacy" },
+            { label: "Terms & Conditions", to: "/terms" },
+            { label: "Help Center", to: "/help" },
           ]} />
 
           {/* contact */}
           <div>
             <h4 className="text-sm font-bold uppercase tracking-wide text-white/90">Contact</h4>
             <ul className="mt-4 space-y-3 text-sm text-white/70">
-              <li className="flex items-center gap-2.5"><Mail size={15} className="shrink-0 text-white/50" /> <a href="mailto:support@orovion.com" className="transition hover:text-white">support@orovion.com</a></li>
               <li className="flex items-center gap-2.5"><Mail size={15} className="shrink-0 text-white/50" /> <a href="mailto:hello@orovion.com" className="transition hover:text-white">hello@orovion.com</a></li>
               <li className="flex items-center gap-2.5"><Phone size={15} className="shrink-0 text-white/50" /> <a href="tel:+918004227370" className="transition hover:text-white">+91 80042 27370</a></li>
-              <li className="flex items-start gap-2.5"><MapPin size={15} className="mt-0.5 shrink-0 text-white/50" /> Varanasi, Uttar Pradesh 221010, India</li>
+              <li className="flex items-start gap-2.5"><MapPin size={15} className="mt-0.5 shrink-0 text-white/50" /> Bengaluru, Karnataka, India</li>
             </ul>
-            <div className="mt-5 flex flex-col gap-2 text-sm">
-              <Link to="/privacy" className="text-white/70 transition hover:text-white">Privacy Policy</Link>
-              <Link to="/terms" className="text-white/70 transition hover:text-white">Terms &amp; Conditions</Link>
-              <Link to="/help" className="text-white/70 transition hover:text-white">Help Center</Link>
-            </div>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 py-6 text-sm text-white/55 sm:flex-row">
           <p>© 2026 Orovion. All rights reserved.</p>
-          <p>Built for clinicians, students &amp; patients.</p>
+          <p>Built for the healthcare community.</p>
         </div>
       </div>
     </footer>
