@@ -240,7 +240,7 @@ const SECTIONS = [
     icon: Lock,
     title: "Privacy",
     body: (
-      <p>Your use of Orovion is governed by the <a href="/privacy" className="font-semibold text-brand-700 hover:underline">Orovion Privacy Policy</a>. The Privacy Policy explains how personal information is collected, used, stored, shared, and protected.</p>
+      <p>Your use of Orovion is governed by the <a href="/privacy" className="font-semibold text-brand-700 hover:underline">Orovion&rsquo;s Privacy Policy</a>. The Privacy Policy explains how personal information is collected, used, stored, shared, and protected.</p>
     ),
   },
   {
@@ -396,7 +396,7 @@ const SECTIONS = [
         <p>For questions regarding these Terms of Use, please contact:</p>
         <p>
           <strong className="font-semibold text-ink-900">Orovion Support</strong><br />
-          Email: <a href="mailto:support@orovion.com" className="font-semibold text-brand-700 hover:underline">support@orovion.com</a> · <a href="mailto:hello@orovion.com" className="font-semibold text-brand-700 hover:underline">hello@orovion.com</a><br />
+          Email: <a href="mailto:support@orovion.com" className="font-semibold text-brand-700 hover:underline">support@orovion.com</a><br />
           Phone: <a href="tel:+918004227370" className="font-semibold text-brand-700 hover:underline">+91 80042 27370</a><br />
           Address: Varanasi, Uttar Pradesh 221010, India
         </p>
@@ -409,7 +409,7 @@ export default function Terms() {
   return (
     <LegalShell
       eyebrow="Legal"
-      title="Orovion Terms of Use"
+      title="Orovion's Terms of Use"
       updated="Effective date: to be announced"
       sections={SECTIONS}
     />

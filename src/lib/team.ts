@@ -30,7 +30,7 @@ export const TEAM: TeamMember[] = [
       "Today, Pawan leads Orovion's vision while remaining deeply involved in its technical foundation and evolution. He believes meaningful products are built by continuously questioning, improving, and staying committed to the problem they set out to solve.",
     ],
     focus: ["Platform Vision","Backend Architecture", "Technology Strategy"],
-    education: "B.Tech ECE, MMMUT, Gorakhpur",
+    education: "B.Tech, ECE, MMMUT, Gorakhpur",
     location: "Varanasi, India",
     photo: "/team/member-1.png",
     socials: { linkedin: "https://www.linkedin.com/in/pawangupta800", instagram: "https://www.instagram.com/pawan._24_?igsh=c2tjeWlhbmw5b3hq", email: "pawan.gupta@orovion.com" },
@@ -49,7 +49,7 @@ export const TEAM: TeamMember[] = [
     education: "B.Tech, ECE, MMMUT, Gorakhpur",
     location: "Lucknow, India",
     photo: "/team/member2.jpeg",
-    socials: { linkedin: "linkedin.com/in/adarshuix",instagram: "https://www.instagram.com/ad__837?igsh=cGRqYWNocXJiaTZk", email: "singhadarsh1708@gmail.com" },
+    socials: { linkedin: "https://www.linkedin.com/in/adarshuix",instagram: "https://www.instagram.com/ad__837?igsh=cGRqYWNocXJiaTZk", email: "singhadarsh1708@gmail.com" },
   },
   {
     slug: "Sachan-Ayush",

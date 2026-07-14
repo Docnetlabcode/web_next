@@ -110,9 +110,8 @@ export default function Login() {
         <div className="absolute inset-0 grid-bg opacity-[.18]" />
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
 
-        <div className="relative flex items-center justify-between">
+        <div className="relative flex items-center">
           <Link to="/" className="press"><Logo light /></Link>
-          <span className="chip bg-white/10 text-white/90 ring-1 ring-white/20">For clinicians</span>
         </div>
 
         <div className="relative max-w-md">
@@ -124,8 +123,8 @@ export default function Login() {
           </p>
           <ul className="mt-9 space-y-4">
             {TRUST.map(({ icon: Icon, text }, i) => (
-              <li key={i} className="flex items-start gap-3.5 anim-pop" style={{ animationDelay: `${120 + i * 90}ms` }}>
-                <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/12 ring-1 ring-white/15">
+              <li key={i} className="flex items-center gap-3.5 anim-pop" style={{ animationDelay: `${120 + i * 90}ms` }}>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/12 ring-1 ring-white/15">
                   <Icon size={18} />
                 </span>
                 <span className="text-sm leading-snug text-white/85">{text}</span>
