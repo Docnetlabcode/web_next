@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "@/lib/router";
-import { Stethoscope, GraduationCap, User, ArrowRight, ArrowLeft, ShieldCheck, Lock, BadgeCheck, Check, QrCode, RefreshCw, Smartphone } from "lucide-react";
+import { Stethoscope, GraduationCap, User, ArrowRight, ArrowLeft, ShieldCheck, Lock, BadgeCheck, Check, QrCode, RefreshCw } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Logo } from "@/components/ui/Primitives";
 import NavArrows from "@/components/ui/NavArrows";
@@ -280,10 +280,9 @@ function QrLogin({ onAuthed, onBack }) {
   const [phase, setPhase] = useState<QrUiPhase>("loading");
   const [challengeId, setChallengeId] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [ttl, setTtl] = useState(60); // full window, for the countdown bar
   const [err, setErr] = useState("");
-  // Guards so React StrictMode's double-mount can't mint two challenges, and so
-  // an in-flight redeem can never fire twice.
-  const startedRef = useRef(false);
+  // An in-flight redeem must never fire twice.
   const redeemingRef = useRef(false);
 
   // 1) Create a challenge. `attempt` lets the "Refresh" button restart cleanly.
@@ -296,8 +295,10 @@ function QrLogin({ onAuthed, onBack }) {
       try {
         const res = await dok.auth.qrChallenge();
         if (cancelled) return;
+        const secs = normaliseTtl(res.expiresIn);
         setChallengeId(res.challengeId);
-        setSecondsLeft(normaliseTtl(res.expiresIn));
+        setSecondsLeft(secs);
+        setTtl(secs);
         setPhase("waiting");
       } catch {
         if (!cancelled) { setErr("Couldn't start QR login. Please try again."); setPhase("error"); }
@@ -353,66 +354,123 @@ function QrLogin({ onAuthed, onBack }) {
     if (phase === "waiting" && secondsLeft <= 0) setPhase("expired");
   }, [phase, secondsLeft]);
 
-  const regenerate = () => { startedRef.current = false; setAttempt((a) => a + 1); };
+  const regenerate = () => setAttempt((a) => a + 1);
+  const progress = ttl > 0 ? Math.max(0, Math.min(1, secondsLeft / ttl)) : 0;
+
+  const CORNERS = [
+    "-top-2 -left-2 border-t-2 border-l-2 rounded-tl-2xl",
+    "-top-2 -right-2 border-t-2 border-r-2 rounded-tr-2xl",
+    "-bottom-2 -left-2 border-b-2 border-l-2 rounded-bl-2xl",
+    "-bottom-2 -right-2 border-b-2 border-r-2 rounded-br-2xl",
+  ];
 
   return (
     <>
       <button onClick={onBack} className="press mt-7 -ml-1 flex items-center gap-1 rounded-lg px-1 py-1 text-sm text-ink-500 transition hover:text-brand-700"><ArrowLeft size={16} /> Back</button>
       <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-ink-900 text-balance">Log in with a QR code</h2>
-      <p className="mt-2 text-ink-500">Open Orovion on your phone → <span className="font-semibold text-ink-700">Settings → Authorized devices → Scan QR</span>, then point it here.</p>
+      <p className="mt-2 max-w-sm text-[15px] leading-relaxed text-ink-600">
+        Scan this with the Orovion app on your phone to sign in on this device.
+      </p>
 
-      <div className="mt-7 grid place-items-center">
-        {/* QR stays dark-on-light in every theme — scanners need the contrast. */}
-        <div className="relative grid h-[248px] w-[248px] place-items-center rounded-3xl bg-white p-5 shadow-glow ring-1 ring-ink-900/10">
-          {phase === "waiting" && challengeId ? (
-            <QRCodeSVG
-              value={qrDeepLink(challengeId)}
-              size={208}
-              // Level H (30% recovery) so the centre logo can cover part of the
-              // code and it still scans; `excavate` clears the modules behind it.
-              level="H"
-              marginSize={0}
-              imageSettings={{ src: "/brand/icon-secondary.svg", height: 44, width: 44, excavate: true }}
-              className="anim-pop"
+      {/* Scanner viewfinder framing the code */}
+      <div className="mt-8 grid place-items-center">
+        <div className="relative">
+          {CORNERS.map((c) => (
+            <span
+              key={c}
+              aria-hidden
+              className={cn(
+                "pointer-events-none absolute h-6 w-6 border-brand-500/75 transition-opacity duration-300",
+                c,
+                phase === "expired" && "opacity-25",
+              )}
             />
-          ) : phase === "loading" ? (
-            <span className="h-8 w-8 animate-spin rounded-full border-2 border-ink-900/15 border-t-brand-600" />
-          ) : phase === "redeeming" ? (
-            <div className="flex flex-col items-center gap-3 text-center">
-              <Check size={40} className="text-brand-600 anim-pop" strokeWidth={3} />
-              <span className="text-sm font-semibold text-ink-700">Approved — logging you in…</span>
-            </div>
-          ) : (
-            // expired / error: dim the surface and let the action below take over
-            <div className="flex flex-col items-center gap-2 text-center opacity-90">
-              <QrCode size={40} className="text-ink-300" />
-              <span className="max-w-[180px] text-xs font-medium text-ink-500">
-                {phase === "expired" ? "This code expired." : (err || "Something went wrong.")}
-              </span>
-            </div>
-          )}
+          ))}
+
+          {/* The code stays dark-on-white in every theme — scanners need the contrast. */}
+          <div className="relative grid h-[232px] w-[232px] place-items-center overflow-hidden rounded-2xl bg-white shadow-glow ring-1 ring-ink-900/10">
+            {phase === "loading" && (
+              <span className="h-8 w-8 animate-spin rounded-full border-2 border-ink-900/15 border-t-brand-600 motion-reduce:animate-none" />
+            )}
+
+            {phase === "waiting" && challengeId && (
+              <div className="relative anim-pop">
+                <QRCodeSVG value={qrDeepLink(challengeId)} size={196} level="H" marginSize={0} />
+                {/* Logo overlay as a real <img>: qrcode.react's embedded <image>
+                    silently dropped the SVG (it renders it as a separate document,
+                    so currentColor/sizing broke). An <img> renders reliably; level H
+                    recovers the covered modules and the white badge is the quiet zone. */}
+                <span className="pointer-events-none absolute inset-0 grid place-items-center">
+                  <span className="grid h-[52px] w-[52px] place-items-center rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,.16)] ring-1 ring-ink-900/10">
+                    <img src="/brand/icon-secondary.svg" alt="" aria-hidden width={28} height={28} className="h-7 w-7" />
+                  </span>
+                </span>
+              </div>
+            )}
+
+            {phase === "redeeming" && (
+              <div className="flex flex-col items-center gap-3 text-center anim-pop">
+                <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-50 ring-1 ring-brand-200">
+                  <Check size={30} className="text-brand-600" strokeWidth={3} />
+                </span>
+                <span className="text-sm font-semibold text-ink-800">Approved</span>
+              </div>
+            )}
+
+            {(phase === "expired" || phase === "error") && (
+              <div className="flex max-w-[180px] flex-col items-center gap-2 text-center">
+                <QrCode size={34} className="text-ink-300" />
+                <span className="text-xs font-medium text-ink-500">
+                  {phase === "expired" ? "This code has expired." : (err || "Something went wrong.")}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Status line under the card */}
-      <div className="mt-5 min-h-[44px]">
+      {/* Live status + countdown */}
+      <div className="mx-auto mt-6 min-h-[72px] w-full max-w-[232px]">
         {phase === "waiting" && (
-          <div className="flex items-center justify-center gap-2 text-sm text-ink-500">
-            <Smartphone size={16} className="text-brand-600" />
-            Waiting for your phone… <span className="tabular-nums font-semibold text-ink-700">{secondsLeft}s</span>
-          </div>
+          <>
+            <div className="flex items-center justify-between text-sm">
+              <span className="flex items-center gap-2 font-medium text-ink-600">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-500 opacity-70 motion-reduce:animate-none" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-600" />
+                </span>
+                Waiting for your phone
+              </span>
+              <span className="tabular-nums font-semibold text-ink-700">{secondsLeft}s</span>
+            </div>
+            <div className="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-ink-900/[.08]">
+              <div
+                className="h-full origin-left rounded-full bg-brand-600 transition-transform duration-1000 ease-linear motion-reduce:transition-none"
+                style={{ transform: `scaleX(${progress})` }}
+              />
+            </div>
+            <p className="mt-4 text-center text-xs leading-relaxed text-ink-500">
+              In the app, open <span className="font-semibold text-ink-700">Settings → Authorized devices → Scan QR</span>.
+            </p>
+          </>
         )}
+
         {(phase === "expired" || phase === "error") && (
           <button onClick={regenerate} className="btn-primary w-full py-3.5 text-base">
             <RefreshCw size={17} /> {phase === "error" ? "Try again" : "Show a new code"}
           </button>
         )}
+
         {phase === "redeeming" && (
-          <p className="text-center text-sm text-ink-400">One moment…</p>
+          <p className="text-center text-sm font-medium text-ink-500">Signing you in…</p>
+        )}
+
+        {phase === "loading" && (
+          <p className="text-center text-sm text-ink-400">Preparing your code…</p>
         )}
       </div>
 
-      <p className="mt-6 text-center text-xs leading-relaxed text-ink-400">
+      <p className="mt-5 text-center text-xs leading-relaxed text-ink-400">
         Your phone must already be signed in to Orovion to approve this. Nothing is entered here.
       </p>
     </>
