@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "@/lib/router";
-import { Stethoscope, GraduationCap, User, ArrowRight, ArrowLeft, ShieldCheck, Lock, BadgeCheck, Check } from "lucide-react";
+import { Stethoscope, GraduationCap, User, ArrowRight, ArrowLeft, ShieldCheck, Lock, BadgeCheck, Check, QrCode, RefreshCw, Smartphone } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { Logo } from "@/components/ui/Primitives";
 import NavArrows from "@/components/ui/NavArrows";
 import CountrySelect from "@/components/ui/CountrySelect";
@@ -9,6 +10,7 @@ import { COUNTRIES } from "@/data/countries";
 import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { qrDeepLink, nextPhase, normaliseTtl, QR_POLL_INTERVAL_MS, type QrUiPhase } from "@/lib/qrLogin";
 import {
   firebaseEnabled,
   startPhoneSignIn,
@@ -53,6 +55,7 @@ export default function Login() {
   const nav = useNavigate();
   const { setSession } = useAuth();
   const [step, setStep] = useState(0); // 0 role, 1 phone, 2 otp
+  const [mode, setMode] = useState<"form" | "qr">("form"); // "qr" = log in via a QR scanned by the phone
   const [role, setRole] = useState("doctor");
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState(COUNTRIES[0]);
@@ -145,6 +148,10 @@ export default function Login() {
             <span className="chip bg-brand-50 text-brand-700">Healthcare network</span>
           </div>
 
+          {mode === "qr" ? (
+            <QrLogin onAuthed={enter} onBack={() => setMode("form")} />
+          ) : (
+          <>
           <StepProgress step={step} />
 
           <div key={step} className="anim-pop">
@@ -205,6 +212,15 @@ export default function Login() {
 
                 <button onClick={googleSignIn} disabled={busy} className="btn-outline w-full py-3.5 text-base"><GoogleIcon /> {busy ? "Please wait…" : "Continue with Google"}</button>
 
+                {/* Already signed in on the phone? Skip the whole flow. */}
+                <button
+                  type="button"
+                  onClick={() => { setErr(""); setMode("qr"); }}
+                  className="press mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-ink-600 transition hover:text-brand-700"
+                >
+                  <QrCode size={17} /> Log in with a QR code
+                </button>
+
                 <p className="mt-7 text-center text-xs leading-relaxed text-ink-400">
                   By continuing you agree to our{" "}
                   <Link to="/terms" className="font-semibold text-ink-600 underline-offset-2 hover:text-brand-700 hover:underline">Terms</Link>{" "}and{" "}
@@ -227,6 +243,8 @@ export default function Login() {
               />
             )}
           </div>
+          </>
+          )}
 
           {/* Invisible reCAPTCHA mount point required by Firebase Phone Auth. */}
           <div id="recaptcha-container" />
@@ -247,6 +265,157 @@ function StepProgress({ step }) {
         </div>
       ))}
     </div>
+  );
+}
+
+/**
+ * QR login (the phone scans, the web displays). The web has no token yet, so it
+ * can only request a challenge, show it, and wait for the primary mobile app to
+ * approve — then it redeems for its own (secondary) session.
+ *
+ *   loading → waiting (QR + 60s countdown) → redeeming → into the app
+ *                                          ↘ expired → regenerate
+ */
+function QrLogin({ onAuthed, onBack }) {
+  const [phase, setPhase] = useState<QrUiPhase>("loading");
+  const [challengeId, setChallengeId] = useState("");
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [err, setErr] = useState("");
+  // Guards so React StrictMode's double-mount can't mint two challenges, and so
+  // an in-flight redeem can never fire twice.
+  const startedRef = useRef(false);
+  const redeemingRef = useRef(false);
+
+  // 1) Create a challenge. `attempt` lets the "Refresh" button restart cleanly.
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    redeemingRef.current = false;
+    setErr(""); setPhase("loading"); setChallengeId("");
+    (async () => {
+      try {
+        const res = await dok.auth.qrChallenge();
+        if (cancelled) return;
+        setChallengeId(res.challengeId);
+        setSecondsLeft(normaliseTtl(res.expiresIn));
+        setPhase("waiting");
+      } catch {
+        if (!cancelled) { setErr("Couldn't start QR login. Please try again."); setPhase("error"); }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [attempt]);
+
+  // 2) Countdown — the local clock is authoritative for expiry.
+  useEffect(() => {
+    if (phase !== "waiting" || secondsLeft <= 0) return undefined;
+    const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [phase, secondsLeft]);
+
+  // 3) Poll for approval while waiting, then redeem exactly once.
+  useEffect(() => {
+    if (phase !== "waiting" || !challengeId) return undefined;
+
+    let stopped = false;
+    const redeem = async (redemptionCode) => {
+      if (redeemingRef.current) return;
+      redeemingRef.current = true;
+      setPhase("redeeming");
+      try {
+        const res = await dok.auth.qrRedeem({ challengeId, redemptionCode, deviceInfo: deviceInfo() });
+        onAuthed(res); // hands off to the shared post-login navigation
+      } catch (e) {
+        redeemingRef.current = false;
+        setErr(authError(e));
+        setPhase("error");
+      }
+    };
+
+    const tick = async () => {
+      try {
+        const poll = await dok.auth.qrPoll(challengeId);
+        if (stopped) return;
+        const next = nextPhase(poll, secondsLeft);
+        if (next === "redeeming" && poll.redemptionCode) redeem(poll.redemptionCode);
+        else if (next === "expired") setPhase("expired");
+      } catch {
+        /* transient (e.g. 503/network) — keep polling until the countdown ends */
+      }
+    };
+
+    const id = setInterval(tick, QR_POLL_INTERVAL_MS);
+    return () => { stopped = true; clearInterval(id); };
+  }, [phase, challengeId, secondsLeft, onAuthed]);
+
+  // Fold a countdown that reaches zero into the expired phase.
+  useEffect(() => {
+    if (phase === "waiting" && secondsLeft <= 0) setPhase("expired");
+  }, [phase, secondsLeft]);
+
+  const regenerate = () => { startedRef.current = false; setAttempt((a) => a + 1); };
+
+  return (
+    <>
+      <button onClick={onBack} className="press mt-7 -ml-1 flex items-center gap-1 rounded-lg px-1 py-1 text-sm text-ink-500 transition hover:text-brand-700"><ArrowLeft size={16} /> Back</button>
+      <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-ink-900 text-balance">Log in with a QR code</h2>
+      <p className="mt-2 text-ink-500">Open Orovion on your phone → <span className="font-semibold text-ink-700">Settings → Authorized devices → Scan QR</span>, then point it here.</p>
+
+      <div className="mt-7 grid place-items-center">
+        {/* QR stays dark-on-light in every theme — scanners need the contrast. */}
+        <div className="relative grid h-[248px] w-[248px] place-items-center rounded-3xl bg-white p-5 shadow-glow ring-1 ring-ink-900/10">
+          {phase === "waiting" && challengeId ? (
+            <QRCodeSVG
+              value={qrDeepLink(challengeId)}
+              size={208}
+              // Level H (30% recovery) so the centre logo can cover part of the
+              // code and it still scans; `excavate` clears the modules behind it.
+              level="H"
+              marginSize={0}
+              imageSettings={{ src: "/brand/icon-secondary.svg", height: 44, width: 44, excavate: true }}
+              className="anim-pop"
+            />
+          ) : phase === "loading" ? (
+            <span className="h-8 w-8 animate-spin rounded-full border-2 border-ink-900/15 border-t-brand-600" />
+          ) : phase === "redeeming" ? (
+            <div className="flex flex-col items-center gap-3 text-center">
+              <Check size={40} className="text-brand-600 anim-pop" strokeWidth={3} />
+              <span className="text-sm font-semibold text-ink-700">Approved — logging you in…</span>
+            </div>
+          ) : (
+            // expired / error: dim the surface and let the action below take over
+            <div className="flex flex-col items-center gap-2 text-center opacity-90">
+              <QrCode size={40} className="text-ink-300" />
+              <span className="max-w-[180px] text-xs font-medium text-ink-500">
+                {phase === "expired" ? "This code expired." : (err || "Something went wrong.")}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Status line under the card */}
+      <div className="mt-5 min-h-[44px]">
+        {phase === "waiting" && (
+          <div className="flex items-center justify-center gap-2 text-sm text-ink-500">
+            <Smartphone size={16} className="text-brand-600" />
+            Waiting for your phone… <span className="tabular-nums font-semibold text-ink-700">{secondsLeft}s</span>
+          </div>
+        )}
+        {(phase === "expired" || phase === "error") && (
+          <button onClick={regenerate} className="btn-primary w-full py-3.5 text-base">
+            <RefreshCw size={17} /> {phase === "error" ? "Try again" : "Show a new code"}
+          </button>
+        )}
+        {phase === "redeeming" && (
+          <p className="text-center text-sm text-ink-400">One moment…</p>
+        )}
+      </div>
+
+      <p className="mt-6 text-center text-xs leading-relaxed text-ink-400">
+        Your phone must already be signed in to Orovion to approve this. Nothing is entered here.
+      </p>
+    </>
   );
 }
 

@@ -140,8 +140,11 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const isRefreshCall = url.includes("/auth/refresh-token");
-    if (response?.status === 401 && config && !config._retry && !isRefreshCall) {
+    // QR-login endpoints run on the logged-out login page and have their own
+    // handling, so a 401 there (e.g. "authorizing device no longer active") must
+    // NOT trigger the refresh loop — there's no session to refresh.
+    const skipRefresh = url.includes("/auth/refresh-token") || url.includes("/auth/qr/");
+    if (response?.status === 401 && config && !config._retry && !skipRefresh) {
       config._retry = true;
       try {
         refreshing = refreshing || doRefresh();
@@ -195,6 +198,11 @@ export const dok = {
     logoutAll: () => unwrap(api.post("/auth/logout-all")),
     sessions: () => unwrap(api.get("/auth/sessions")),
     revokeSession: (id) => unwrap(api.delete(`/auth/sessions/${id}`)),
+    // QR login (this device is logged in by a primary device scanning the QR).
+    // challenge → poll until approved → redeem for a real (secondary) session.
+    qrChallenge: () => unwrap(api.post("/auth/qr/challenge")),
+    qrPoll: (id) => unwrap(api.get(`/auth/qr/challenge/${id}`)),
+    qrRedeem: (b) => unwrap(api.post("/auth/qr/redeem", b)),
     meta: () => unwrap(api.get("/auth/meta/specializations")),
     metaCourses: () => unwrap(api.get("/auth/meta/courses")),
   },
