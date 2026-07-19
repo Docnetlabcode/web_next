@@ -364,7 +364,7 @@ Every 🔒 request needs `Authorization: Bearer <accessToken>` (get one from
 client set the boundary — don't set `Content-Type` by hand). All responses follow
 the envelope `{ statusCode, success, data, message }`; the `data` shapes below.
 
-Base URL: `http://localhost:5000` (dev) / `https://api.doklynk.app` (prod).
+Base URL: `http://localhost:5000` (dev) / `https://api.orovion.app` (prod).
 
 ### A. Unique username
 

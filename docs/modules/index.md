@@ -41,7 +41,7 @@ module call depends on (base URL, auth, the response envelope, pagination, error
 | Environment | URL |
 |---|---|
 | Local dev | `http://localhost:5000` |
-| Production | `https://api.doklynk.app` |
+| Production | `https://api.orovion.app` |
 
 All routes are under `/api/*`. Health check: `GET /health`.
 

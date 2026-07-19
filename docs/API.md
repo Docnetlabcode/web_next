@@ -1,7 +1,7 @@
 # API Service — REST API Reference
 
 **Base URL (dev):** `http://localhost:5000`  
-**Base URL (prod):** `https://api.doklynk.app`  
+**Base URL (prod):** `https://api.orovion.app`  
 **All responses:** `{ statusCode, success, data, message }`
 
 > 📦 **Per-module docs** (endpoints + request/response JSON + frontend wiring, one

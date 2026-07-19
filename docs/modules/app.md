@@ -18,7 +18,7 @@ writes are admin-only. See [index.md](index.md).
 ```jsonc
 // GET /version
 // → data: { latestVersion: "1.4.0", minSupportedVersion: "1.2.0",
-//           forceUpdate: false, downloadUrl: "https://.../doklynk.apk", releaseNotes: "..." }
+//           forceUpdate: false, downloadUrl: "https://.../orovion.apk", releaseNotes: "..." }
 
 // PUT /version (admin)
 { "latestVersion": "1.4.0", "minSupportedVersion": "1.2.0",

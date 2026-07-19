@@ -1,6 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import { dok, TOKENS } from "./api";
 import { chatSocketUrl, onBackendChange } from "./backend";
+import { planReauth } from "./socketReauth";
 
 // The calling signaling lives in chat-service (port 5001), NOT api-service.
 // Point NEXT_PUBLIC_CHAT_SOCKET_URL (or the *_RENDER/_AWS pair — see
@@ -8,6 +9,7 @@ import { chatSocketUrl, onBackendChange } from "./backend";
 // Falls back to the deployment's socket URL, then same-origin.
 let callSocket: Socket | null = null;
 let refreshing = false;
+let reauthAttempts = 0;
 
 function chatOrigin(): string | undefined {
   return chatSocketUrl();
@@ -21,7 +23,7 @@ function chatOrigin(): string | undefined {
 onBackendChange((d) => {
   if (!callSocket || typeof window === "undefined") return;
   const next = d.chatSocketUrl || d.socketUrl || window.location.origin;
-  (callSocket.io as { uri?: string }).uri = next;
+  (callSocket.io as unknown as { uri?: string }).uri = next;
   if (callSocket.connected) {
     callSocket.disconnect();
     callSocket.connect();
@@ -50,20 +52,41 @@ export function getCallSocket(): Socket {
     timeout: 10000,
   });
 
-  // Self-heal: if the handshake is rejected because the token expired, mint a
-  // fresh one and let socket.io's auto-reconnect retry (auth() reads the new
-  // token on the next attempt). Guarded so we never spam the refresh endpoint.
+  // A healthy connection restores the re-auth budget.
+  callSocket.on("connect", () => {
+    reauthAttempts = 0;
+  });
+
+  // Self-heal an expired access token, then RECONNECT.
+  //
+  // CRITICAL: a handshake rejected by server middleware is a DENIED connection,
+  // not a transport error — socket.io sets `socket.active = false` and stops
+  // reconnecting FOREVER. This used to only refresh the token and assume
+  // socket.io would retry; it doesn't, so the fresh token was never used and the
+  // user silently dropped out of presence (callers saw "unavailable") until a
+  // full page reload.
   callSocket.on("connect_error", async (err: any) => {
-    const msg = err?.message || "";
-    if (/auth|token|unauthor/i.test(msg) && !refreshing) {
-      refreshing = true;
-      try {
-        await dok.auth.refresh();
-      } catch {
-        /* not logged in — nothing to refresh */
-      } finally {
-        refreshing = false;
-      }
+    const s = callSocket;
+    if (!s) return;
+    const plan = planReauth(err?.message, { active: s.active, attempts: reauthAttempts });
+    if (!plan.refresh || refreshing) return;
+
+    reauthAttempts += 1;
+    refreshing = true;
+    let refreshed = false;
+    try {
+      await dok.auth.refresh();
+      refreshed = true;
+    } catch {
+      /* genuinely signed out — do NOT reconnect, or we'd hammer the server */
+    } finally {
+      refreshing = false;
+    }
+
+    if (refreshed && plan.reconnect) {
+      setTimeout(() => {
+        if (!s.connected && !s.active) s.connect();
+      }, plan.delayMs);
     }
   });
 

@@ -1,6 +1,6 @@
 # Orovion — Web (Next.js)
 
-Next.js 14 **App Router** port of the Orovion web client (migrated from the Vite SPA, which still lives in `../DokLynk Frontend`). Same UI, API layer, Firebase auth, and socket.io — re-homed onto Next file-based routing in **TypeScript**.
+Next.js 14 **App Router** port of the Orovion web client (migrated from the Vite SPA, which still lives in `../Orovion Frontend`). Same UI, API layer, Firebase auth, and socket.io — re-homed onto Next file-based routing in **TypeScript**.
 
 ## Quick start
 

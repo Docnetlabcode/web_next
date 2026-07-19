@@ -200,7 +200,7 @@ export function SiteFooter() {
             <ul className="mt-4 space-y-3 text-sm text-white/70">
               <li className="flex items-center gap-2.5"><Mail size={15} className="shrink-0 text-white/50" /> <a href="mailto:hello@orovion.com" className="transition hover:text-white">hello@orovion.com</a></li>
               <li className="flex items-center gap-2.5"><Phone size={15} className="shrink-0 text-white/50" /> <a href="tel:+918004227370" className="transition hover:text-white">+91 80042 27370</a></li>
-              <li className="flex items-start gap-2.5"><MapPin size={15} className="mt-0.5 shrink-0 text-white/50" /> Varanasi, Uttar Pradesh 221010, India</li>
+              <li className="flex items-start gap-2.5"><MapPin size={15} className="mt-0.5 shrink-0 text-white/50" /> Varanasi, Uttar Pradesh, India, 221010</li>
             </ul>
           </div>
         </div>

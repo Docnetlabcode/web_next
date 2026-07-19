@@ -1,6 +1,6 @@
 # Orovion Design System
 
-Captured from `tailwind.config.js`, `src/app/globals.css`, and the Figma board (`image/DokLynk.png`).
+Captured from `tailwind.config.js`, `src/app/globals.css`, and the Figma board (`image/Orovion.png`).
 
 ## Color
 

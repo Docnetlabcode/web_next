@@ -211,7 +211,7 @@ curl -X POST "$BASE/api/posts/$POST_ID/share/inapp" \
 
 # 2) Public copy-link (read-only web preview; no tokens/session leaked)
 curl "$BASE/api/posts/$POST_ID/share/link"
-# data: { "deepLink": "doklynk://post/...", "webFallback": "https://doklynk.app/post/..." }
+# data: { "deepLink": "orovion://post/...", "webFallback": "https://orovion.app/post/..." }
 ```
 WhatsApp / Instagram / Telegram are **client-side** deep-links built from the
 copy-link URL — no API needed.
