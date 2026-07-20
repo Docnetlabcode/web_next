@@ -334,32 +334,36 @@ function QrLogin({ onAuthed, onBack }) {
     return () => clearTimeout(t);
   }, [phase, secondsLeft]);
 
-  // 3) Poll for approval while waiting, then redeem exactly once.
-  // Best-effort WebSocket pairing connection for instant login.
+  // Stable redeem callback — shared between the polling effect and the socket
+  // effect without forcing either to re-mount when the other's deps change.
+  const redeemRef = useRef<(code: string) => void>(() => {});
   useEffect(() => {
-    if (phase !== "waiting" || !challengeId) return undefined;
-
-    let stopped = false;
-    const redeem = async (redemptionCode) => {
+    redeemRef.current = async (redemptionCode: string) => {
       if (redeemingRef.current) return;
       redeemingRef.current = true;
       setPhase("redeeming");
       try {
         const res = await dok.auth.qrRedeem({ challengeId, redemptionCode, deviceInfo: deviceInfo() });
-        onAuthed(res); // hands off to the shared post-login navigation
+        onAuthed(res);
       } catch (e) {
         redeemingRef.current = false;
         setErr(authError(e));
         setPhase("error");
       }
     };
+  }, [challengeId, onAuthed]);
 
+  // 3a) Poll for approval while waiting.
+  useEffect(() => {
+    if (phase !== "waiting" || !challengeId) return undefined;
+
+    let stopped = false;
     const tick = async () => {
       try {
         const poll = await dok.auth.qrPoll(challengeId);
         if (stopped) return;
         const next = nextPhase(poll, secondsLeft);
-        if (next === "redeeming" && poll.redemptionCode) redeem(poll.redemptionCode);
+        if (next === "redeeming" && poll.redemptionCode) redeemRef.current(poll.redemptionCode);
         else if (next === "expired") setPhase("expired");
       } catch {
         /* transient (e.g. 503/network) — keep polling until the countdown ends */
@@ -367,27 +371,30 @@ function QrLogin({ onAuthed, onBack }) {
     };
 
     const id = setInterval(tick, QR_POLL_INTERVAL_MS);
+    return () => { stopped = true; clearInterval(id); };
+  }, [phase, challengeId, secondsLeft]);
 
-    // Set up realtime pairing socket
+  // 3b) Realtime pairing socket — lives for the entire waiting phase.
+  // Separate from polling so the countdown tick (secondsLeft) doesn't tear
+  // down and recreate the WebSocket every second.
+  useEffect(() => {
+    if (phase !== "waiting" || !challengeId) return undefined;
+
     const url = socketUrl() || window.location.origin;
     const s = io(`${url}/pairing`, {
       auth: { challengeId },
       transports: ["polling", "websocket"],
+      reconnection: false,        // challenge is single-use; no point retrying
     });
 
     s.on("qr_approved", (payload) => {
-      if (stopped) return;
       if (payload?.redemptionCode) {
-        redeem(payload.redemptionCode);
+        redeemRef.current(payload.redemptionCode);
       }
     });
 
-    return () => { 
-      stopped = true; 
-      clearInterval(id);
-      s.disconnect();
-    };
-  }, [phase, challengeId, secondsLeft, onAuthed]);
+    return () => { s.disconnect(); };
+  }, [phase, challengeId]);
 
   // Fold a countdown that reaches zero into the expired phase.
   useEffect(() => {
