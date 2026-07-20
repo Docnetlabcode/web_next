@@ -354,6 +354,11 @@ function QrLogin({ onAuthed, onBack }) {
   }, [challengeId, onAuthed]);
 
   // 3a) Poll for approval while waiting.
+  // secondsLeft is read via a ref so the countdown tick doesn't tear down
+  // and recreate the 2s interval every 1s (which prevented it from ever firing).
+  const secondsLeftRef = useRef(secondsLeft);
+  secondsLeftRef.current = secondsLeft;
+
   useEffect(() => {
     if (phase !== "waiting" || !challengeId) return undefined;
 
@@ -362,7 +367,7 @@ function QrLogin({ onAuthed, onBack }) {
       try {
         const poll = await dok.auth.qrPoll(challengeId);
         if (stopped) return;
-        const next = nextPhase(poll, secondsLeft);
+        const next = nextPhase(poll, secondsLeftRef.current);
         if (next === "redeeming" && poll.redemptionCode) redeemRef.current(poll.redemptionCode);
         else if (next === "expired") setPhase("expired");
       } catch {
@@ -370,9 +375,10 @@ function QrLogin({ onAuthed, onBack }) {
       }
     };
 
+    tick(); // fire immediately so a fast scan doesn't wait a full interval
     const id = setInterval(tick, QR_POLL_INTERVAL_MS);
     return () => { stopped = true; clearInterval(id); };
-  }, [phase, challengeId, secondsLeft]);
+  }, [phase, challengeId]);
 
   // 3b) Realtime pairing socket — lives for the entire waiting phase.
   // Separate from polling so the countdown tick (secondsLeft) doesn't tear
@@ -383,8 +389,9 @@ function QrLogin({ onAuthed, onBack }) {
     const url = socketUrl() || window.location.origin;
     const s = io(`${url}/pairing`, {
       auth: { challengeId },
-      transports: ["polling", "websocket"],
-      reconnection: false,        // challenge is single-use; no point retrying
+      transports: ["polling"],    // polling-only: avoids the polling→WS upgrade
+      upgrade: false,             // race on Render's edge that fires "WebSocket
+      reconnection: false,        // closed before established" on cleanup.
     });
 
     s.on("qr_approved", (payload) => {
