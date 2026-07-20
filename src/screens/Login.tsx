@@ -512,13 +512,14 @@ function GoogleIcon() {
   );
 }
 
-// Apple's mark is a single glyph; `currentColor` makes it flip with the theme
-// (near-black in light mode, near-white in dark) so it stays legible on the
-// outline button in both.
+// Apple's mark, drawn with `currentColor` so it flips with the theme (near-black
+// in light mode, near-white in dark) and stays legible on the outline button.
+// viewBox is portrait (the logo is taller than wide); sized to sit optically
+// even with the Google "G" beside it.
 function AppleIcon() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden focusable="false" className="text-ink-900">
-      <path fill="currentColor" d="M16.365 1.43c0 1.14-.417 2.2-1.11 2.98-.84.94-2.21 1.66-3.35 1.57-.14-1.12.42-2.29 1.06-3.01.79-.9 2.19-1.58 3.4-1.54zM20.5 17.14c-.6 1.38-.89 1.99-1.66 3.21-1.08 1.7-2.6 3.82-4.49 3.83-1.67.02-2.1-1.09-4.37-1.08-2.27.01-2.74 1.1-4.42 1.08-1.88-.02-3.32-1.93-4.4-3.63-3.02-4.76-3.34-10.35-1.47-13.32C.91 5.32 2.86 4.06 4.7 4.06c1.87 0 3.05 1.03 4.6 1.03 1.5 0 2.42-1.03 4.6-1.03 1.65 0 3.4.9 4.65 2.45-4.09 2.24-3.42 8.08 1.95 8.63-.53 1.03-.09.86-.4-.03z" />
+    <svg width="15" height="18" viewBox="0 0 384 512" aria-hidden focusable="false" className="-mt-0.5 text-ink-900">
+      <path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
     </svg>
   );
 }
