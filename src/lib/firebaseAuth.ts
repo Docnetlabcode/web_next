@@ -3,6 +3,8 @@ import {
   signInWithPhoneNumber,
   signInWithPopup,
   GoogleAuthProvider,
+  OAuthProvider,
+  type ConfirmationResult,
 } from "firebase/auth";
 import { auth, firebaseEnabled } from "./firebase";
 
@@ -29,7 +31,7 @@ export function deviceInfo() {
 
 // --- invisible reCAPTCHA (required by Firebase Phone Auth) ---
 // Needs a DOM element with id="recaptcha-container" to be present (rendered by Login).
-let recaptcha = null;
+let recaptcha: RecaptchaVerifier | null = null;
 function getRecaptcha() {
   if (!auth) throw new Error("Firebase is not configured.");
   if (recaptcha) return recaptcha;
@@ -47,7 +49,7 @@ export function resetRecaptcha() {
 }
 
 // --- phone OTP: client-side SMS via Firebase, then ID token is posted to the backend ---
-let confirmation = null;
+let confirmation: ConfirmationResult | null = null;
 
 /** Sends the OTP SMS via Firebase. `e164Phone` must be full international form, e.g. "+919876543210". */
 export async function startPhoneSignIn(e164Phone) {
@@ -78,4 +80,19 @@ export async function signInWithGoogle() {
   provider.setCustomParameters({ prompt: "select_account" });
   const result = await signInWithPopup(auth, provider);
   return result.user.getIdToken();
+}
+
+// --- Apple: popup sign-in, returns the Firebase ID token + name for /auth/apple.
+// Apple only sends the display name on the VERY FIRST sign-in (Firebase fills
+// user.displayName then), and may send no email at all, so the backend keys on
+// firebaseUid and treats email/name as optional. We forward the name when we
+// have it. (Web Apple sign-in needs the domain registered with Apple; it won't
+// work on localhost.) ---
+export async function signInWithApple() {
+  if (!auth) throw new Error("Firebase is not configured.");
+  const provider = new OAuthProvider("apple.com");
+  provider.addScope("email");
+  provider.addScope("name");
+  const result = await signInWithPopup(auth, provider);
+  return { idToken: await result.user.getIdToken(), fullName: result.user.displayName || null };
 }

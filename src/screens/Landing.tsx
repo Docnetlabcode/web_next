@@ -1,16 +1,18 @@
 "use client";
-import { Link } from "@/lib/router";
+import { useState, useEffect } from "react";
+import { Link, Navigate } from "@/lib/router";
 import {
   ShieldCheck, Stethoscope, Clapperboard, Users, MessageSquare, FileText,
   ArrowRight, Heart, MessageCircle, BadgeCheck, Activity, Search, Sparkles,
 } from "lucide-react";
-import { Avatar, Verified } from "@/components/ui/Primitives";
+import { Avatar, Verified, Spinner } from "@/components/ui/Primitives";
 import NavArrows from "@/components/ui/NavArrows";
 import StoreBadge from "@/components/ui/StoreBadge";
 import { SiteNav, SiteFooter } from "@/components/landing/SiteChrome";
 import TeamAvatar from "@/components/landing/TeamAvatar";
 import { TEAM } from "@/lib/team";
 import { useScrollReveal } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 // Illustrative people for the marketing page only (pre-login showcase — not live data).
 const SAMPLE = [
@@ -21,7 +23,25 @@ const SAMPLE = [
 ];
 
 export default function Landing() {
+  const { user, loading, isProfileComplete } = useAuth();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   useScrollReveal();
+
+  // A returning, already-signed-in visitor should open their account, not the
+  // marketing page. Once the silent refresh resolves, redirect. Until then, if a
+  // session probably exists (the readable dl_csrf hint), show a neutral splash
+  // instead of flashing the landing. Gated on `mounted` so the server-rendered
+  // and first client render both show the landing — no hydration mismatch.
+  if (!loading && user) return <Navigate to={isProfileComplete ? "/app" : "/onboarding"} replace />;
+  const sessionHint = mounted && typeof window !== "undefined" && !!localStorage.getItem("dl_csrf");
+  if (loading && sessionHint) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-ink-50">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
   return (
     <div className="overflow-x-clip bg-surface">
       <NavArrows variant="floating" />

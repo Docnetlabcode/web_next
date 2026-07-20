@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "@/lib/router";
+import { useNavigate, Link, Navigate } from "@/lib/router";
 import { Stethoscope, GraduationCap, User, ArrowRight, ArrowLeft, ShieldCheck, Lock, BadgeCheck, Check, QrCode, RefreshCw } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Logo } from "@/components/ui/Primitives";
@@ -16,6 +16,7 @@ import {
   startPhoneSignIn,
   confirmPhoneCode,
   signInWithGoogle,
+  signInWithApple,
   deviceInfo,
 } from "@/lib/firebaseAuth";
 
@@ -53,7 +54,7 @@ function authError(e) {
 
 export default function Login() {
   const nav = useNavigate();
-  const { setSession } = useAuth();
+  const { setSession, user, loading, isProfileComplete } = useAuth();
   const [step, setStep] = useState(0); // 0 role, 1 phone, 2 otp
   const [mode, setMode] = useState<"form" | "qr">("form"); // "qr" = log in via a QR scanned by the phone
   const [role, setRole] = useState("doctor");
@@ -101,6 +102,27 @@ export default function Login() {
       setBusy(false);
     }
   };
+
+  const appleSignIn = async () => {
+    setErr(""); setBusy(true);
+    try {
+      if (!firebaseEnabled) throw new Error("FIREBASE_OFF");
+      // Apple only returns the name on the first sign-in; forward it so the
+      // backend can seed the profile (email may be absent — that's expected).
+      const { idToken, fullName } = await signInWithApple();
+      const res = await dok.auth.apple({ firebaseIdToken: idToken, role, fullName, deviceInfo: deviceInfo() });
+      enter(res);
+    } catch (e) {
+      setErr(authError(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Already signed in (e.g. reached /login by hand or a stale link) → go to the
+  // account instead of showing the login form. Waits for the silent refresh to
+  // resolve so it doesn't bounce a genuinely logged-out visitor.
+  if (!loading && user) return <Navigate to={isProfileComplete ? "/app" : "/onboarding"} replace />;
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
@@ -211,6 +233,8 @@ export default function Login() {
                 <div className="my-5 flex items-center gap-3 text-xs font-medium text-ink-400"><span className="h-px flex-1 bg-ink-900/10" /> or <span className="h-px flex-1 bg-ink-900/10" /></div>
 
                 <button onClick={googleSignIn} disabled={busy} className="btn-outline w-full py-3.5 text-base"><GoogleIcon /> {busy ? "Please wait…" : "Continue with Google"}</button>
+
+                <button onClick={appleSignIn} disabled={busy} className="btn-outline mt-3 w-full py-3.5 text-base"><AppleIcon /> {busy ? "Please wait…" : "Continue with Apple"}</button>
 
                 {/* Already signed in on the phone? Skip the whole flow. */}
                 <button
@@ -484,6 +508,17 @@ function GoogleIcon() {
       <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z" />
       <path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z" />
       <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
+    </svg>
+  );
+}
+
+// Apple's mark is a single glyph; `currentColor` makes it flip with the theme
+// (near-black in light mode, near-white in dark) so it stays legible on the
+// outline button in both.
+function AppleIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden focusable="false" className="text-ink-900">
+      <path fill="currentColor" d="M16.365 1.43c0 1.14-.417 2.2-1.11 2.98-.84.94-2.21 1.66-3.35 1.57-.14-1.12.42-2.29 1.06-3.01.79-.9 2.19-1.58 3.4-1.54zM20.5 17.14c-.6 1.38-.89 1.99-1.66 3.21-1.08 1.7-2.6 3.82-4.49 3.83-1.67.02-2.1-1.09-4.37-1.08-2.27.01-2.74 1.1-4.42 1.08-1.88-.02-3.32-1.93-4.4-3.63-3.02-4.76-3.34-10.35-1.47-13.32C.91 5.32 2.86 4.06 4.7 4.06c1.87 0 3.05 1.03 4.6 1.03 1.5 0 2.42-1.03 4.6-1.03 1.65 0 3.4.9 4.65 2.45-4.09 2.24-3.42 8.08 1.95 8.63-.53 1.03-.09.86-.4-.03z" />
     </svg>
   );
 }

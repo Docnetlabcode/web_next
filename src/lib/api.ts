@@ -187,6 +187,7 @@ const profileList = (base) => ({
 export const dok = {
   auth: {
     google: (b) => unwrap(api.post("/auth/google", b)),
+    apple: (b) => unwrap(api.post("/auth/apple", b)),
     sendOtp: (b) => unwrap(api.post("/auth/send-otp", b)),
     verifyOtp: (b) => unwrap(api.post("/auth/verify-otp", b)),
     // Web: no body — refresh token comes from the httpOnly cookie; CSRF header added by interceptor.
