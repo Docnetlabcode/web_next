@@ -23,7 +23,7 @@ export const QR_LOGIN_SCHEME = "orovion";
  * login code apart from any other QR it might see.
  */
 export function qrDeepLink(challengeId: string): string {
-  return `${QR_LOGIN_SCHEME}://qr-login?challengeId=${encodeURIComponent(challengeId)}`;
+  return `${QR_LOGIN_SCHEME}://qr-login?challengeId=${encodeURIComponent(challengeId)}&platform=web`;
 }
 
 /** The backend challenge lifecycle, as the poll endpoint reports it. */
