@@ -11,6 +11,8 @@ import { useAuth } from "@/context/AuthContext";
 import { dok } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { qrDeepLink, nextPhase, normaliseTtl, QR_POLL_INTERVAL_MS, type QrUiPhase } from "@/lib/qrLogin";
+import { socketUrl } from "@/lib/backend";
+import { io } from "socket.io-client";
 import {
   firebaseEnabled,
   startPhoneSignIn,
@@ -333,6 +335,7 @@ function QrLogin({ onAuthed, onBack }) {
   }, [phase, secondsLeft]);
 
   // 3) Poll for approval while waiting, then redeem exactly once.
+  // Best-effort WebSocket pairing connection for instant login.
   useEffect(() => {
     if (phase !== "waiting" || !challengeId) return undefined;
 
@@ -364,7 +367,26 @@ function QrLogin({ onAuthed, onBack }) {
     };
 
     const id = setInterval(tick, QR_POLL_INTERVAL_MS);
-    return () => { stopped = true; clearInterval(id); };
+
+    // Set up realtime pairing socket
+    const url = socketUrl() || window.location.origin;
+    const s = io(`${url}/pairing`, {
+      auth: { challengeId },
+      transports: ["polling", "websocket"],
+    });
+
+    s.on("qr_approved", (payload) => {
+      if (stopped) return;
+      if (payload?.redemptionCode) {
+        redeem(payload.redemptionCode);
+      }
+    });
+
+    return () => { 
+      stopped = true; 
+      clearInterval(id);
+      s.disconnect();
+    };
   }, [phase, challengeId, secondsLeft, onAuthed]);
 
   // Fold a countdown that reaches zero into the expired phase.
