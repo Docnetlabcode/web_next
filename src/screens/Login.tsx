@@ -383,8 +383,9 @@ function QrLogin({ onAuthed, onBack }) {
     const url = socketUrl() || window.location.origin;
     const s = io(`${url}/pairing`, {
       auth: { challengeId },
-      transports: ["polling", "websocket"],
-      reconnection: false,        // challenge is single-use; no point retrying
+      transports: ["polling"],    // polling-only: avoids the polling→WS upgrade
+      upgrade: false,             // race on Render's edge that fires "WebSocket
+      reconnection: false,        // closed before established" on cleanup.
     });
 
     s.on("qr_approved", (payload) => {
